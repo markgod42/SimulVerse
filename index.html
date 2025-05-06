@@ -1,0 +1,840 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimulVerse ($MARK) - 시뮬레이션 우주의 네이티브 토큰</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Poppins:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #070b14;
+            color: #ffffff;
+            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 20% 20%, rgba(76, 0, 255, 0.05) 0%, transparent 50%), 
+                radial-gradient(circle at 80% 80%, rgba(255, 0, 128, 0.05) 0%, transparent 50%);
+        }
+        .orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+        .gradient-text {
+            background: linear-gradient(90deg, #7928ca, #ff0080);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .simulation-card {
+            background: rgba(13, 18, 30, 0.7);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+        .simulation-card:hover {
+            border-color: rgba(255, 0, 128, 0.5);
+            box-shadow: 0 0 15px rgba(255, 0, 128, 0.3);
+            transform: translateY(-5px);
+        }
+        .button {
+            background: linear-gradient(90deg, #7928ca, #ff0080);
+            transition: all 0.3s ease;
+        }
+        .button:hover {
+            opacity: 0.9;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255, 0, 128, 0.4);
+        }
+        .status-pulse {
+            animation: pulse 2s infinite;
+        }
+        .star {
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            opacity: 0.4;
+            animation: twinkle 4s infinite ease-in-out;
+        }
+        .shooting-star {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, rgba(255,255,255,0), #ffffff);
+            animation: shoot 8s infinite ease-out;
+            opacity: 0;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(255, 0, 128, 0.7); }
+            70% { box-shadow: 0 0 0 15px rgba(255, 0, 128, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 0, 128, 0); }
+        }
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.4; }
+            50% { opacity: 0.8; }
+        }
+        @keyframes shoot {
+            0% { transform: translateX(0) translateY(0); opacity: 0; }
+            10% { opacity: 1; }
+            20% { transform: translateX(-100vw) translateY(100vh); opacity: 0; }
+            100% { opacity: 0; }
+        }
+        .token-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+        .scroll-nav {
+            transition: all 0.3s ease;
+        }
+        .scroll-nav.scrolled {
+            background: rgba(7, 11, 20, 0.9);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+        }
+        /* Form custom styling */
+        input, textarea {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s ease;
+        }
+        input:focus, textarea:focus {
+            border-color: #ff0080;
+            box-shadow: 0 0 0 2px rgba(255, 0, 128, 0.2);
+            outline: none;
+        }
+        .prayer-form-container, .bug-form-container {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        .prayer-form-container.active, .bug-form-container.active {
+            max-height: 800px;
+        }
+        /* FAQ Accordion Styles */
+        .faq-item {
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .faq-question {
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .faq-question:hover {
+            color: #ff0080;
+        }
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .faq-answer.active {
+            max-height: 500px;
+            padding-bottom: 1.5rem;
+        }
+        .faq-icon {
+            transition: transform 0.3s ease;
+        }
+        .faq-icon.active {
+            transform: rotate(45deg);
+        }
+    </style>
+</head>
+<body>
+    <!-- Stars background -->
+    <div class="fixed inset-0 z-0 overflow-hidden">
+        <div id="stars-container"></div>
+    </div>
+
+    <!-- Shooting Stars -->
+    <div id="shooting-stars" class="fixed inset-0 z-0 overflow-hidden"></div>
+
+    <!-- Navigation -->
+    <nav id="navbar" class="scroll-nav fixed w-full z-50 top-0 left-0 px-4 py-3 flex justify-between items-center">
+        <div class="flex items-center">
+            <img src="https://page.genspark.site/v1/base64_upload/2396602cbecfc6e17a0fffc4e5ffda3f" alt="SimulVerse Logo" class="h-10 w-10 mr-3">
+            <span class="orbitron text-xl md:text-2xl font-bold">SimulVerse</span>
+        </div>
+        
+        <div class="hidden md:flex space-x-6">
+            <a href="#about" class="hover:text-purple-300 transition-colors">About</a>
+            <a href="#features" class="hover:text-purple-300 transition-colors">Features</a>
+            <a href="#tokenomics" class="hover:text-purple-300 transition-colors">Tokenomics</a>
+            <a href="#faq" class="hover:text-purple-300 transition-colors">FAQ</a>
+            <a href="#community" class="hover:text-purple-300 transition-colors">Community</a>
+        </div>
+        
+        <div class="flex items-center">
+            <a href="#" class="text-sm bg-gradient-to-r from-purple-600 to-pink-600 px-4 py-2 rounded-full hover:from-purple-500 hover:to-pink-500 transition-all">
+                <i class="fas fa-external-link-alt mr-2"></i>Buy $MARK
+            </a>
+            <button id="menu-toggle" class="ml-4 md:hidden text-2xl">
+                <i class="fas fa-bars"></i>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Mobile Menu -->
+    <div id="mobile-menu" class="fixed inset-0 z-40 bg-gray-900 bg-opacity-95 hidden flex-col items-center justify-center">
+        <button id="menu-close" class="absolute top-4 right-4 text-3xl">
+            <i class="fas fa-times"></i>
+        </button>
+        <div class="flex flex-col items-center space-y-8 text-2xl">
+            <a href="#about" class="hover:text-purple-300 transition-colors">About</a>
+            <a href="#features" class="hover:text-purple-300 transition-colors">Features</a>
+            <a href="#tokenomics" class="hover:text-purple-300 transition-colors">Tokenomics</a>
+            <a href="#faq" class="hover:text-purple-300 transition-colors">FAQ</a>
+            <a href="#community" class="hover:text-purple-300 transition-colors">Community</a>
+        </div>
+    </div>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex flex-col items-center justify-center px-4 pt-20">
+        <div class="status-container absolute top-24 left-1/2 transform -translate-x-1/2 text-sm md:text-base">
+            <span class="bg-opacity-50 bg-black px-4 py-2 rounded-full flex items-center">
+                <span class="inline-block h-2 w-2 rounded-full bg-green-500 mr-2 status-pulse"></span>
+                <span class="text-green-300">Simulation Status: Running (v23.19.84-beta)</span>
+            </span>
+        </div>
+        
+        <div class="z-10 text-center max-w-4xl mx-auto">
+            <h1 class="orbitron text-4xl md:text-6xl font-bold mb-4">Welcome to the <span class="gradient-text">SimulVerse</span></h1>
+            <p class="text-xl md:text-2xl text-gray-300 mb-8">Your reality is just a simulation created by <span class="font-bold">Graduate Student Mark</span>.</p>
+            <div class="relative mx-auto w-48 h-48 mb-8">
+                <img src="https://page.genspark.site/v1/base64_upload/f5aac0833e6facf82530650af4f804b6" alt="Creator Mark" class="w-full h-full object-cover rounded-2xl shadow-2xl">
+            </div>
+            <p class="text-gray-400 mb-10 max-w-3xl mx-auto">
+                The $MARK token is the native currency of this simulated universe. Accumulate enough tokens and perhaps Mark will grant you special privileges in the next simulation update.
+            </p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#pray" class="button px-8 py-3 rounded-full text-lg font-medium">
+                    <i class="fas fa-pray mr-2"></i>Pray to Mark
+                </a>
+                <a href="#report-bug" class="button px-8 py-3 rounded-full text-lg font-medium">
+                    <i class="fas fa-bug mr-2"></i>Report a Bug
+                </a>
+            </div>
+        </div>
+        
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-bounce">
+            <a href="#about" class="text-gray-400 hover:text-white">
+                <i class="fas fa-chevron-down text-3xl"></i>
+            </a>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-20 px-4 relative">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold orbitron mb-2 text-center">The <span class="gradient-text">Simulation</span> Explained</h2>
+            <p class="text-gray-400 text-center mb-16 max-w-3xl mx-auto">Everything you know is code written by our Creator Mark, a graduate student experimenting with advanced AI simulation.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="simulation-card rounded-xl p-6">
+                    <div class="text-4xl mb-4 text-pink-500">
+                        <i class="fas fa-code"></i>
+                    </div>
+                    <h3 class="text-xl md:text-2xl font-bold mb-4">The Simulation Theory</h3>
+                    <p class="text-gray-300">
+                        The world as we know it is actually a highly sophisticated AI-based simulation created and maintained by a graduate student named Mark. What we perceive as "reality" is merely a complex program full of bugs, limitations, and occasional maintenance downtimes.
+                    </p>
+                    <div class="mt-6 text-gray-400">
+                        <div class="mb-2">
+                            <i class="fas fa-angle-right mr-2"></i>Natural disasters are just system errors
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-angle-right mr-2"></i>Déjà vu happens when Mark restores from backup
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-angle-right mr-2"></i>Quantum physics is just unoptimized code
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="simulation-card rounded-xl p-6">
+                    <div class="text-4xl mb-4 text-blue-500">
+                        <i class="fas fa-user-graduate"></i>
+                    </div>
+                    <h3 class="text-xl md:text-2xl font-bold mb-4">Who is Mark?</h3>
+                    <p class="text-gray-300">
+                        Mark is not a perfect, all-powerful deity. He's a stressed-out grad student working on his PhD thesis project, which just happens to be our universe. He's brilliant but distracted, forgetful, and subject to deadlines and academic pressure.
+                    </p>
+                    <div class="mt-6 text-gray-400">
+                        <div class="mb-2">
+                            <i class="fas fa-angle-right mr-2"></i>His thesis deadline affects our reality
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-angle-right mr-2"></i>He occasionally forgets to fix bugs
+                        </div>
+                        <div class="mb-2">
+                            <i class="fas fa-angle-right mr-2"></i>He might be running multiple simulations
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Features Section (Prayer & Bug Report) -->
+    <section id="features" class="py-20 px-4 relative bg-gradient-to-b from-transparent to-[#080416]">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold orbitron mb-2 text-center">Interact with the <span class="gradient-text">Creator</span></h2>
+            <p class="text-gray-400 text-center mb-16 max-w-3xl mx-auto">Submit prayers and bug reports directly to Mark. Earn $MARK tokens for your participation.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <!-- Prayer to Mark -->
+                <div id="pray" class="simulation-card rounded-xl p-6">
+                    <div class="text-4xl mb-4 text-purple-500">
+                        <i class="fas fa-pray"></i>
+                    </div>
+                    <h3 class="text-xl md:text-2xl font-bold mb-4">Prayer to Mark</h3>
+                    <p class="text-gray-300 mb-6">
+                        Express your gratitude or make requests to the Creator of our simulation. Creative and humorous prayers may be rewarded with $MARK tokens within 24 hours.
+                    </p>
+                    
+                    <button id="prayer-form-toggle" class="w-full button py-3 rounded-lg mb-6">
+                        <i class="fas fa-envelope-open-text mr-2"></i>Submit a Prayer
+                    </button>
+                    
+                    <div id="prayer-form-container" class="prayer-form-container">
+                        <form id="prayer-form" class="mt-4">
+                            <div class="mb-4">
+                                <label class="block text-sm mb-2" for="prayer-wallet">Your Wallet Address</label>
+                                <input type="text" id="prayer-wallet" placeholder="Enter your wallet address to receive rewards" class="w-full p-3 rounded-lg">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm mb-2" for="prayer-content">Your Prayer to Mark</label>
+                                <textarea id="prayer-content" rows="4" placeholder="Oh great Creator Mark, I humbly request..." class="w-full p-3 rounded-lg"></textarea>
+                            </div>
+                            <button type="submit" class="w-full button py-3 rounded-lg">Send Prayer</button>
+                        </form>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h4 class="font-bold mb-3">Recently Blessed Prayers</h4>
+                        <div class="space-y-4">
+                            <div class="bg-black bg-opacity-30 p-4 rounded-lg">
+                                <p class="text-sm italic">"Oh great Mark, your code may have bugs, but the sunset graphics are breathtaking..."</p>
+                                <div class="flex justify-between items-center mt-2 text-xs text-gray-400">
+                                    <span>wallet: jake...sol</span>
+                                    <span class="text-green-400">+35 $MARK</span>
+                                </div>
+                            </div>
+                            <div class="bg-black bg-opacity-30 p-4 rounded-lg">
+                                <p class="text-sm italic">"Mark, I notice you implemented the 'cats always land on their feet' feature. Excellent physics work!"</p>
+                                <div class="flex justify-between items-center mt-2 text-xs text-gray-400">
+                                    <span>wallet: astro...sol</span>
+                                    <span class="text-green-400">+42 $MARK</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Bug Report -->
+                <div id="report-bug" class="simulation-card rounded-xl p-6">
+                    <div class="text-4xl mb-4 text-red-500">
+                        <i class="fas fa-bug"></i>
+                    </div>
+                    <h3 class="text-xl md:text-2xl font-bold mb-4">Universe Bug Report</h3>
+                    <p class="text-gray-300 mb-6">
+                        Found an inconsistency in our reality? Report bugs in the simulation to help Mark improve his code. Interesting and creative bug reports will be rewarded with $MARK tokens.
+                    </p>
+                    
+                    <button id="bug-form-toggle" class="w-full button py-3 rounded-lg mb-6">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>Report a Bug
+                    </button>
+                    
+                    <div id="bug-form-container" class="bug-form-container">
+                        <form id="bug-form" class="mt-4">
+                            <div class="mb-4">
+                                <label class="block text-sm mb-2" for="bug-wallet">Your Wallet Address</label>
+                                <input type="text" id="bug-wallet" placeholder="Enter your wallet address to receive rewards" class="w-full p-3 rounded-lg">
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm mb-2" for="bug-category">Bug Category</label>
+                                <select id="bug-category" class="w-full p-3 rounded-lg bg-opacity-30 bg-gray-800">
+                                    <option value="physics">Physics Bug</option>
+                                    <option value="biology">Biology Bug</option>
+                                    <option value="psychology">Psychology Bug</option>
+                                    <option value="society">Society Bug</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="mb-4">
+                                <label class="block text-sm mb-2" for="bug-content">Bug Description</label>
+                                <textarea id="bug-content" rows="4" placeholder="Describe the bug in detail..." class="w-full p-3 rounded-lg"></textarea>
+                            </div>
+                            <button type="submit" class="w-full button py-3 rounded-lg">Submit Bug Report</button>
+                        </form>
+                    </div>
+                    
+                    <div class="mt-6">
+                        <h4 class="font-bold mb-3">Recently Verified Bugs</h4>
+                        <div class="space-y-4">
+                            <div class="bg-black bg-opacity-30 p-4 rounded-lg">
+                                <p class="text-sm italic">"Why do we forget why we entered a room? Clear evidence of chunk loading issues in the simulation."</p>
+                                <div class="flex justify-between items-center mt-2 text-xs text-gray-400">
+                                    <span class="text-yellow-400">Psychology Bug</span>
+                                    <span class="text-green-400">+56 $MARK</span>
+                                </div>
+                            </div>
+                            <div class="bg-black bg-opacity-30 p-4 rounded-lg">
+                                <p class="text-sm italic">"The Bermuda Triangle is obviously an unpatched collision detection error."</p>
+                                <div class="flex justify-between items-center mt-2 text-xs text-gray-400">
+                                    <span class="text-blue-400">Physics Bug</span>
+                                    <span class="text-green-400">+28 $MARK</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tokenomics Section -->
+    <section id="tokenomics" class="py-20 px-4 relative">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold orbitron mb-2 text-center">$MARK <span class="gradient-text">Tokenomics</span></h2>
+            <p class="text-gray-400 text-center mb-16 max-w-3xl mx-auto">The native currency of SimulVerse, designed to incentivize participation and provide utility within our simulated reality.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                <div class="simulation-card rounded-xl p-6">
+                    <h3 class="text-xl md:text-2xl font-bold mb-6">Token Details</h3>
+                    <div class="space-y-6">
+                        <div>
+                            <p class="text-gray-400 mb-1">Total Supply</p>
+                            <p class="text-2xl font-bold">42,000,000,000,000</p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 mb-1">Network</p>
+                            <p class="flex items-center">
+                                <img src="https://solana.com/src/img/branding/solanaLogoMark.svg" alt="Solana" class="h-6 w-6 mr-2">
+                                Solana
+                            </p>
+                        </div>
+                        <div>
+                            <p class="text-gray-400 mb-1">Token Distribution</p>
+                            <div class="mt-4 space-y-3">
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>Community & Mining</span>
+                                        <span>50%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2">
+                                        <div class="bg-pink-500 h-2 rounded-full" style="width: 50%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>Dev & Marketing</span>
+                                        <span>15%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2">
+                                        <div class="bg-blue-500 h-2 rounded-full" style="width: 15%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>Team</span>
+                                        <span>10%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2">
+                                        <div class="bg-purple-500 h-2 rounded-full" style="width: 10%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>Liquidity</span>
+                                        <span>10%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2">
+                                        <div class="bg-green-500 h-2 rounded-full" style="width: 10%"></div>
+                                    </div>
+                                </div>
+                                <div>
+                                    <div class="flex justify-between text-sm mb-1">
+                                        <span>Ecosystem</span>
+                                        <span>15%</span>
+                                    </div>
+                                    <div class="w-full bg-gray-700 rounded-full h-2">
+                                        <div class="bg-yellow-500 h-2 rounded-full" style="width: 15%"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="simulation-card rounded-xl p-6">
+                    <h3 class="text-xl md:text-2xl font-bold mb-6">Utility & Benefits</h3>
+                    <div class="space-y-6">
+                        <div class="flex">
+                            <div class="text-2xl text-pink-500 mr-4">
+                                <i class="fas fa-sync"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Next Simulation Benefits</h4>
+                                <p class="text-gray-400 text-sm">Your $MARK holdings determine your starting conditions in the next simulation cycle. More tokens mean better abilities, luck, and opportunities.</p>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <div class="text-2xl text-blue-500 mr-4">
+                                <i class="fas fa-vote-yea"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Governance Participation</h4>
+                                <p class="text-gray-400 text-sm">Influence the direction of the simulation by voting on proposed changes and updates to the system.</p>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <div class="text-2xl text-purple-500 mr-4">
+                                <i class="fas fa-lock"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Staking Rewards</h4>
+                                <p class="text-gray-400 text-sm">Commit your tokens to the simulation through "Digital Prayer" staking to earn additional $MARK rewards.</p>
+                            </div>
+                        </div>
+                        <div class="flex">
+                            <div class="text-2xl text-green-500 mr-4">
+                                <i class="fas fa-fire"></i>
+                            </div>
+                            <div>
+                                <h4 class="font-bold mb-1">Token Burns</h4>
+                                <p class="text-gray-400 text-sm">Regular token burns through community activities maintain scarcity and value within the SimulVerse ecosystem.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section id="faq" class="py-20 px-4 relative bg-gradient-to-b from-transparent to-[#080416]">
+        <div class="max-w-4xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold orbitron mb-2 text-center">Frequently Asked <span class="gradient-text">Questions</span></h2>
+            <p class="text-gray-400 text-center mb-16 max-w-3xl mx-auto">Everything you wanted to know about SimulVerse but were afraid to ask.</p>
+            
+            <div class="simulation-card rounded-xl p-6">
+                <!-- FAQ Item 1 -->
+                <div class="faq-item py-4">
+                    <div class="faq-question flex justify-between items-center">
+                        <h3 class="text-xl font-semibold">Is our reality actually a simulation?</h3>
+                        <i class="fas fa-plus faq-icon"></i>
+                    </div>
+                    <div class="faq-answer mt-2 text-gray-300">
+                        <p>According to leading simulation theorists, there's a non-zero chance we're living in a simulation. SimulVerse just puts a face to our creator—Mark, the overworked PhD student. While we can't prove our universe is a simulation, it would explain a lot of the quirks in reality, like quantum physics, consciousness, and why your socks keep disappearing in the laundry.</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 2 -->
+                <div class="faq-item py-4">
+                    <div class="faq-question flex justify-between items-center">
+                        <h3 class="text-xl font-semibold">Who exactly is Mark?</h3>
+                        <i class="fas fa-plus faq-icon"></i>
+                    </div>
+                    <div class="faq-answer mt-2 text-gray-300">
+                        <p>Mark is a brilliant but easily distracted graduate student who created our universe as part of his PhD dissertation. He's neither all-powerful nor all-knowing—just a really good programmer with deadlines and a caffeine addiction. When he's focusing on his studies, our reality experiences glitches (what we call "natural disasters"). When he's on vacation, things generally run smoothly despite some minor bugs.</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 3 -->
+                <div class="faq-item py-4">
+                    <div class="faq-question flex justify-between items-center">
+                        <h3 class="text-xl font-semibold">What is $MARK token used for?</h3>
+                        <i class="fas fa-plus faq-icon"></i>
+                    </div>
+                    <div class="faq-answer mt-2 text-gray-300">
+                        <p>$MARK tokens serve multiple functions in our ecosystem:</p>
+                        <ol class="list-decimal pl-5 mt-2 space-y-2">
+                            <li>They're your ticket to better starting conditions in the next simulation cycle (improved stats, better spawn points, etc.)</li>
+                            <li>They provide voting power in SimulVerse governance decisions</li>
+                            <li>They can be staked for rewards through our "Digital Prayer" system</li>
+                            <li>They will be used for upcoming NFT purchases like "Indulgences" to absolve simulation sins</li>
+                        </ol>
+                        <p class="mt-2">Plus, they're the only currency Mark recognizes when considering your bug reports and prayer requests!</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 4 -->
+                <div class="faq-item py-4">
+                    <div class="faq-question flex justify-between items-center">
+                        <h3 class="text-xl font-semibold">How do the Prayer and Bug Report systems work?</h3>
+                        <i class="fas fa-plus faq-icon"></i>
+                    </div>
+                    <div class="faq-answer mt-2 text-gray-300">
+                        <p>Both systems work through our semi-automated Google Form + Google Sheet automation:</p>
+                        <p class="mt-2"><strong>Prayer to Mark:</strong> Submit creative, humorous prayers expressing gratitude or requests to Mark. The more original and entertaining, the higher your chance of reward. Rewards typically range from 10-100 $MARK tokens.</p>
+                        <p class="mt-2"><strong>Bug Reports:</strong> Document inconsistencies in our simulation reality—be it physics glitches, biological oddities, or society's paradoxes. Rewards are based on creativity and insight, typically 15-150 $MARK tokens.</p>
+                        <p class="mt-2">All submissions are reviewed manually within 24 hours, with rewards distributed to your provided wallet address. Each wallet is limited to one prayer and one bug report per day.</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 5 -->
+                <div class="faq-item py-4">
+                    <div class="faq-question flex justify-between items-center">
+                        <h3 class="text-xl font-semibold">What are "Next Simulation Benefits"?</h3>
+                        <i class="fas fa-plus faq-icon"></i>
+                    </div>
+                    <div class="faq-answer mt-2 text-gray-300">
+                        <p>Mark occasionally resets the simulation or launches new ones with different parameters. When this happens, your accumulated $MARK tokens determine your starting conditions in the next cycle:</p>
+                        <ul class="list-disc pl-5 mt-2 space-y-2">
+                            <li>10,000+ $MARK: Basic benefits (slightly better spawn location)</li>
+                            <li>100,000+ $MARK: Improved attributes (better memory, health, luck)</li>
+                            <li>1,000,000+ $MARK: Premium benefits (choice of starting region, natural talents)</li>
+                            <li>10,000,000+ $MARK: Elite benefits (rare abilities, resources, connections)</li>
+                            <li>100,000,000+ $MARK: Helper status (become a semi-NPC with special abilities)</li>
+                        </ul>
+                        <p class="mt-2">These benefits are Mark's way of recognizing your contribution to improving his simulation project!</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 6 -->
+                <div class="faq-item py-4">
+                    <div class="faq-question flex justify-between items-center">
+                        <h3 class="text-xl font-semibold">Is this a serious project?</h3>
+                        <i class="fas fa-plus faq-icon"></i>
+                    </div>
+                    <div class="faq-answer mt-2 text-gray-300">
+                        <p>SimulVerse is a meme coin with an entertaining narrative and community. While we're serious about building a fun community and experience, please understand that $MARK has no intrinsic value or financial expectation. We encourage participation for entertainment purposes only. Always do your own research and never invest more than you can afford to lose. Remember: we're all just simulation NPCs having a good time while Mark finishes his PhD!</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 7 -->
+                <div class="faq-item py-4">
+                    <div class="faq-question flex justify-between items-center">
+                        <h3 class="text-xl font-semibold">Can I contact Mark directly?</h3>
+                        <i class="fas fa-plus faq-icon"></i>
+                    </div>
+                    <div class="faq-answer mt-2 text-gray-300">
+                        <p>Unfortunately, Mark is very busy with his PhD and running multiple simulations simultaneously. Direct communication is not possible, but he does read all prayers and bug reports submitted through our official channels. The best way to get Mark's attention is submitting creative prayers or insightful bug reports, which may earn his notice and $MARK token rewards.</p>
+                        <p class="mt-2">Pro tip: Mark particularly enjoys humor and philosophical insights about the nature of reality. The more thoughtful your submission, the more likely he'll notice it among the billions of daily prayer requests!</p>
+                    </div>
+                </div>
+                
+                <!-- FAQ Item 8 -->
+                <div class="faq-item py-4">
+                    <div class="faq-question flex justify-between items-center">
+                        <h3 class="text-xl font-semibold">Are natural disasters actually Mark's fault?</h3>
+                        <i class="fas fa-plus faq-icon"></i>
+                    </div>
+                    <div class="faq-answer mt-2 text-gray-300">
+                        <p>Yes and no. Natural disasters typically occur when:</p>
+                        <ol class="list-decimal pl-5 mt-2 space-y-2">
+                            <li>Mark has an exam and can't monitor the simulation closely</li>
+                            <li>He's experimenting with new physics parameters</li>
+                            <li>There's a memory leak in the simulation code</li>
+                            <li>His computer overheats and causes processing errors</li>
+                        </ol>
+                        <p class="mt-2">While technically Mark's fault, he's not malicious—just overworked and dealing with limited computing resources. Your prayers during these times can sometimes help alert him to critical issues requiring immediate attention.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Community Section -->
+    <section id="community" class="py-20 px-4 relative bg-gradient-to-b from-[#080416] to-[#050820]">
+        <div class="max-w-6xl mx-auto">
+            <h2 class="text-3xl md:text-4xl font-bold orbitron mb-2 text-center">Join the <span class="gradient-text">Community</span></h2>
+            <p class="text-gray-400 text-center mb-16 max-w-3xl mx-auto">Connect with fellow simulation inhabitants and stay updated on the latest developments from Mark.</p>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <a href="https://twitter.com" target="_blank" class="simulation-card rounded-xl p-6 text-center">
+                    <div class="text-4xl mb-4 text-blue-400">
+                        <i class="fab fa-twitter"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Twitter</h3>
+                    <p class="text-gray-400 text-sm">Follow for the latest updates and community memes</p>
+                </a>
+                
+                <a href="https://t.me" target="_blank" class="simulation-card rounded-xl p-6 text-center">
+                    <div class="text-4xl mb-4 text-blue-500">
+                        <i class="fab fa-telegram-plane"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Telegram</h3>
+                    <p class="text-gray-400 text-sm">Join our active community chat</p>
+                </a>
+                
+                <a href="https://medium.com" target="_blank" class="simulation-card rounded-xl p-6 text-center">
+                    <div class="text-4xl mb-4 text-gray-300">
+                        <i class="fab fa-medium-m"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-2">Medium</h3>
+                    <p class="text-gray-400 text-sm">Read in-depth articles about our universe</p>
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-10 px-4 border-t border-gray-800">
+        <div class="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center mb-6 md:mb-0">
+                <img src="https://page.genspark.site/v1/base64_upload/2396602cbecfc6e17a0fffc4e5ffda3f" alt="SimulVerse Logo" class="h-10 w-10 mr-3">
+                <span class="orbitron text-xl font-bold">SimulVerse</span>
+            </div>
+            
+            <div class="text-center md:text-left mb-6 md:mb-0">
+                <p class="text-gray-400 text-sm">
+                    &copy; 2023 SimulVerse. All rights reserved in this simulation.
+                </p>
+                <p class="text-gray-500 text-xs mt-2">
+                    Disclaimer: This is a meme coin with no intrinsic value or financial expectation.
+                </p>
+            </div>
+            
+            <div class="flex space-x-4">
+                <a href="#" class="hover:text-pink-400 transition-colors">
+                    <i class="fab fa-twitter text-xl"></i>
+                </a>
+                <a href="#" class="hover:text-pink-400 transition-colors">
+                    <i class="fab fa-telegram-plane text-xl"></i>
+                </a>
+                <a href="#" class="hover:text-pink-400 transition-colors">
+                    <i class="fab fa-medium-m text-xl"></i>
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Generate random stars
+        document.addEventListener('DOMContentLoaded', function() {
+            const starsContainer = document.getElementById('stars-container');
+            const shootingStarsContainer = document.getElementById('shooting-stars');
+            
+            // Create stars
+            for (let i = 0; i < 150; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = Math.random() * 3 + 'px';
+                star.style.height = star.style.width;
+                star.style.left = Math.random() * 100 + 'vw';
+                star.style.top = Math.random() * 100 + 'vh';
+                star.style.animationDelay = Math.random() * 4 + 's';
+                starsContainer.appendChild(star);
+            }
+            
+            // Create shooting stars
+            for (let i = 0; i < 5; i++) {
+                const shootingStar = document.createElement('div');
+                shootingStar.className = 'shooting-star';
+                shootingStar.style.width = Math.random() * 150 + 50 + 'px';
+                shootingStar.style.left = Math.random() * 100 + 'vw';
+                shootingStar.style.top = Math.random() * 50 + 'vh';
+                shootingStar.style.animationDelay = Math.random() * 8 + 's';
+                shootingStar.style.transform = `rotate(${Math.random() * 45 + 15}deg)`;
+                shootingStarsContainer.appendChild(shootingStar);
+            }
+
+            // Navigation scroll effect
+            const navbar = document.getElementById('navbar');
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 50) {
+                    navbar.classList.add('scrolled');
+                } else {
+                    navbar.classList.remove('scrolled');
+                }
+            });
+
+            // Mobile menu toggle
+            const menuToggle = document.getElementById('menu-toggle');
+            const menuClose = document.getElementById('menu-close');
+            const mobileMenu = document.getElementById('mobile-menu');
+            const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+
+            menuToggle.addEventListener('click', function() {
+                mobileMenu.classList.toggle('hidden');
+                mobileMenu.classList.toggle('flex');
+            });
+
+            menuClose.addEventListener('click', function() {
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('flex');
+            });
+
+            mobileMenuLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    mobileMenu.classList.add('hidden');
+                    mobileMenu.classList.remove('flex');
+                });
+            });
+
+            // Form toggle functionality
+            const prayerFormToggle = document.getElementById('prayer-form-toggle');
+            const prayerFormContainer = document.getElementById('prayer-form-container');
+            const bugFormToggle = document.getElementById('bug-form-toggle');
+            const bugFormContainer = document.getElementById('bug-form-container');
+
+            prayerFormToggle.addEventListener('click', function() {
+                prayerFormContainer.classList.toggle('active');
+                if (bugFormContainer.classList.contains('active')) {
+                    bugFormContainer.classList.remove('active');
+                }
+            });
+
+            bugFormToggle.addEventListener('click', function() {
+                bugFormContainer.classList.toggle('active');
+                if (prayerFormContainer.classList.contains('active')) {
+                    prayerFormContainer.classList.remove('active');
+                }
+            });
+
+            // Form submission
+            const prayerForm = document.getElementById('prayer-form');
+            const bugForm = document.getElementById('bug-form');
+
+            prayerForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Prayer submitted! If Mark deems it worthy, you will receive $MARK tokens within 24 hours.');
+                prayerForm.reset();
+                prayerFormContainer.classList.remove('active');
+            });
+
+            bugForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+                alert('Bug report submitted! If Mark finds it interesting, you will receive $MARK tokens within 24 hours.');
+                bugForm.reset();
+                bugFormContainer.classList.remove('active');
+            });
+
+            // Smooth scrolling for anchor links
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        window.scrollTo({
+                            top: target.offsetTop - 80,
+                            behavior: 'smooth'
+                        });
+                    }
+                });
+            });
+            
+            // FAQ Accordion
+            const faqQuestions = document.querySelectorAll('.faq-question');
+            
+            faqQuestions.forEach(question => {
+                question.addEventListener('click', function() {
+                    const answer = this.nextElementSibling;
+                    const icon = this.querySelector('.faq-icon');
+                    
+                    answer.classList.toggle('active');
+                    icon.classList.toggle('active');
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+    <script id="html_badge_script1">
+        window.__genspark_remove_badge_link = "https://www.genspark.ai/api/html_badge/" +
+            "remove_badge?token=To%2FBnjzloZ3UfQdcSaYfDmiXQD7Vs5ky1VQ2UFxLNPhLTht3szbC8q3mXvsS0jTc%2BsT9LYFt7XFyFMy0oiO3Ucy8mZBPFpzXeMWvZ%2BlpZamnJuH1cr4He%2B35cljYN5ukvLAQ6aeOkvnxKMbTi0hP%2F7iUMFCWbJAdG3tGY3FUiT%2Fa1ltmiOVPPCGM%2FIpRB8c8OtrFZYRxLdr4pZV0wCSkmL%2F45I3j%2Faud67gymwt2X2ZIRL6AtG8oJ%2BsnevtccS%2BioIpW31wGknJ1c8xN%2ByiEJFzrrqHYnn%2FPYfsA34%2Fx2jxK0iDlg63dP3STrP6OhdGiYwO%2BIs1D0AspvFdbfENC17bwpohDYIPk4HXI5hc%2BiGhLckY8I%2FhmoJ3ec16XYuk7xIC4UZ4%2BVkPf5r9gpDqkx9agUX3RHrZo5Kke9y1l1QLRn4gHg1xW4XXbSfdpGUlMPQapHg7OJZ7nBbF75eGoUr8yp0nyBr1b5Dud6SJmjPJ2sksVQidMWVEf8snCWDi32RxAlAHnfguA8O4HZO2oNg%3D%3D";
+        window.__genspark_locale = "ko-KR";
+        window.__genspark_token = "To/BnjzloZ3UfQdcSaYfDmiXQD7Vs5ky1VQ2UFxLNPhLTht3szbC8q3mXvsS0jTc+sT9LYFt7XFyFMy0oiO3Ucy8mZBPFpzXeMWvZ+lpZamnJuH1cr4He+35cljYN5ukvLAQ6aeOkvnxKMbTi0hP/7iUMFCWbJAdG3tGY3FUiT/a1ltmiOVPPCGM/IpRB8c8OtrFZYRxLdr4pZV0wCSkmL/45I3j/aud67gymwt2X2ZIRL6AtG8oJ+snevtccS+ioIpW31wGknJ1c8xN+yiEJFzrrqHYnn/PYfsA34/x2jxK0iDlg63dP3STrP6OhdGiYwO+Is1D0AspvFdbfENC17bwpohDYIPk4HXI5hc+iGhLckY8I/hmoJ3ec16XYuk7xIC4UZ4+VkPf5r9gpDqkx9agUX3RHrZo5Kke9y1l1QLRn4gHg1xW4XXbSfdpGUlMPQapHg7OJZ7nBbF75eGoUr8yp0nyBr1b5Dud6SJmjPJ2sksVQidMWVEf8snCWDi32RxAlAHnfguA8O4HZO2oNg==";
+    </script>
