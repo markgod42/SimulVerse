@@ -2959,8 +2959,11 @@
             if (connectBtn) {
                 connectBtn.addEventListener('click', () => {
                     const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-                    // 모바일: 딥링크용 모달
-                    if (isMobile) {
+                    const isPhantom = window.solana && window.solana.isPhantom;
+                    const isBackpack = window.solana && window.solana.isBackpack;
+                    const isSolflare = (window.solflare || (window.solana && window.solana.isSolflare));
+                    // 모바일 일반 브라우저에서만 딥링크 모달
+                    if (isMobile && !isPhantom && !isBackpack && !isSolflare) {
                         while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
                         let hasAny = false;
                         // Phantom
@@ -2972,7 +2975,7 @@
                             window.location.href = `phantom://app/ul/browse/${siteUrl}`;
                         };
                         const phantomLogo = document.createElement('img');
-                        phantomLogo.src = 'https://www.phantom.app/img/logo.png';
+                        phantomLogo.src = 'https://cdn.jsdelivr.net/gh/solana-labs/token-list/assets/mainnet/phantom.png';
                         phantomLogo.alt = 'Phantom Logo';
                         phantomLogo.className = 'wallet-logo';
                         phantomBtn.appendChild(phantomLogo);
@@ -3008,7 +3011,7 @@
                             window.location.href = `solflare://open?url=${siteUrl}`;
                         };
                         const solflareLogo = document.createElement('img');
-                        solflareLogo.src = 'https://solflare.com/static/solflare-wallet-icon.svg';
+                        solflareLogo.src = 'https://cdn.jsdelivr.net/gh/solana-labs/token-list/assets/mainnet/solflare.png';
                         solflareLogo.alt = 'Solflare Logo';
                         solflareLogo.className = 'wallet-logo';
                         solflareBtn.appendChild(solflareLogo);
@@ -3027,7 +3030,7 @@
                         modal.style.display = 'flex';
                         return;
                     }
-                    // PC: 기존 방식
+                    // PC 또는 지갑앱 내 브라우저: 기존 방식
                     while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
                     // 설치된 지갑만 버튼으로 표시
                     let hasAny = false;
@@ -3038,7 +3041,7 @@
                         btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
                         btn.onclick = async () => { await connectWallet('phantom'); };
                         const logo = document.createElement('img');
-                        logo.src = 'https://www.phantom.app/img/logo.png';
+                        logo.src = 'https://cdn.jsdelivr.net/gh/solana-labs/token-list/assets/mainnet/phantom.png';
                         logo.alt = 'Phantom Logo';
                         logo.className = 'wallet-logo';
                         btn.appendChild(logo);
@@ -3070,7 +3073,7 @@
                         btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
                         btn.onclick = async () => { await connectWallet('solflare'); };
                         const logo = document.createElement('img');
-                        logo.src = 'https://solflare.com/static/solflare-wallet-icon.svg';
+                        logo.src = 'https://cdn.jsdelivr.net/gh/solana-labs/token-list/assets/mainnet/solflare.png';
                         logo.alt = 'Solflare Logo';
                         logo.className = 'wallet-logo';
                         btn.appendChild(logo);
