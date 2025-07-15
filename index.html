@@ -1428,7 +1428,9 @@
                     <div class="simulation-status">
                         <span class="status-text">Simulation Status: <span class="status-running animated-status">Running (v23.19.84-beta)</span></span>
                     </div>
-                    <div id="wallet-btn-container"></div>
+                    <div id="wallet-btn-container">
+                        <button id="connect-wallet-btn" class="btn btn-secondary" style="white-space: nowrap; min-width: 120px;">Connect Wallet</button>
+                    </div>
                     <div class="nav-toggle" id="nav-toggle">
                         <span></span>
                         <span></span>
@@ -3148,26 +3150,15 @@
                     const prayerWalletInput = document.getElementById('prayer-wallet-address');
                     const bugWalletInput = document.getElementById('bug-wallet-address');
                     const walletBtnDiv = document.getElementById('wallet-btn-container');
+                    const connectBtn = document.getElementById('connect-wallet-btn');
                     
-                    if (!walletBtnDiv) {
-                        console.error('Wallet button container not found');
+                    if (!walletBtnDiv || !connectBtn) {
+                        console.error('Wallet button container or button not found');
                         return;
                     }
                     
                     let connectedWallet = null;
                     window.solanaWallet = null; 
-
-                    // Connect Wallet 버튼 생성
-                    const walletButtonContainer = document.createElement('div');
-                    walletButtonContainer.style.cssText = 'display: flex; align-items: center;';
-                    
-                    const connectBtn = document.createElement('button');
-                    connectBtn.textContent = 'Connect Wallet';
-                    connectBtn.className = 'btn btn-secondary';
-                    connectBtn.style.cssText = 'white-space: nowrap; min-width: 120px;';
-                    walletButtonContainer.appendChild(connectBtn);
-                    
-                    walletBtnDiv.appendChild(walletButtonContainer);
 
                     // 모달 생성
                     const modal = document.createElement('div');
@@ -3295,14 +3286,7 @@
                 } catch (e) {
                     console.error("Wallet adapter initialization failed:", e);
                     // 에러가 발생해도 버튼은 보이도록 유지
-                    const walletBtnDiv = document.getElementById('wallet-btn-container');
-                    if (walletBtnDiv && !walletBtnDiv.hasChildNodes()) {
-                        const fallbackBtn = document.createElement('button');
-                        fallbackBtn.textContent = 'Connect Wallet (Error)';
-                        fallbackBtn.className = 'btn btn-secondary';
-                        fallbackBtn.onclick = () => alert('Wallet connection is currently unavailable. Please try refreshing the page.');
-                        walletBtnDiv.appendChild(fallbackBtn);
-                    }
+                    // 이미 HTML에 버튼이 있으므로 별도 처리 불필요
                 }
             }
 
