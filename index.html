@@ -14,6 +14,15 @@
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="https://i.ibb.co/NgHMCZZX/image.png">
 
+    <!-- Solana Wallet Adapter CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/@solana/wallet-adapter-react-ui@latest/styles.css" />
+    
+    <!-- Klip SDK -->
+    <script src="https://cdn.jsdelivr.net/gh/klaytn/klip-sdk@latest/dist/klip-sdk.js"></script>
+    
+    <!-- TokenPocket SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@tokenpocket/sdk@latest/dist/index.min.js"></script>
+
     <style>
         /* General Styles */
         :root {
@@ -1471,13 +1480,7 @@
                                 <p class="ata-notice-text">To receive your $MARK rewards from prayers, you must first create an Associated Token Account (ATA) for $MARK in your Solana wallet. <span class="ata-notice-link">Click here for a step-by-step guide!</span></p>
                             </div>
                             <form id="prayer-form" class="prayer-form">
-                                <div class="form-group">
-                                    <label for="prayer-wallet-address">Solana Wallet Address</label>
-                                    <input type="text" id="prayer-wallet-address" name="entry.594290298" required 
-                                           placeholder="Enter your Solana wallet address (32-44 characters)">
-                                    <div class="validation-message" id="prayer-wallet-validation"></div>
-                                </div>
-                                
+                                <input type="hidden" id="prayer-wallet-address" name="entry.594290298">
                                 <div class="form-group">
                                     <label for="prayer-nickname">Nickname</label>
                                     <input type="text" id="prayer-nickname" name="entry.783862574" required 
@@ -1523,11 +1526,7 @@
                                 <p class="ata-notice-text">To receive your $MARK rewards from bug reports, you must first create an Associated Token Account (ATA) for $MARK in your Solana wallet. <span class="ata-notice-link">Click here for a step-by-step guide!</span></p>
                             </div>
                             <form id="bug-report-form">
-                                <div class="form-group">
-                                    <label for="bug-wallet-address">Solana Wallet Address</label>
-                                    <input type="text" id="bug-wallet-address" name="entry.1376807882" required placeholder="Your wallet for receiving rewards">
-                                    <div class="validation-message" id="bug-wallet-validation"></div>
-                                </div>
+                                <input type="hidden" id="bug-wallet-address" name="entry.1376807882">
                                 <div class="form-group">
                                     <label for="bug-nickname">Nickname</label>
                                     <input type="text" id="bug-nickname" name="entry.1658748352" required placeholder="Your bug-hunter alias">
@@ -2550,7 +2549,6 @@
         let currentPrayerCount = 1;
         let currentBugCount = 1;
 
-        // A simple seeded pseudo-random number generator to ensure the daily max is consistent.
         function seededRandom(seed) {
             let x = Math.sin(seed) * 10000;
             return x - Math.floor(x);
@@ -2558,12 +2556,10 @@
 
         function setDailyMaxValues() {
             const now = new Date();
-            // Create a unique seed for each day (e.g., 20240707)
             const daySeed = now.getUTCFullYear() * 10000 + (now.getUTCMonth() + 1) * 100 + now.getUTCDate();
             
-            // Use the seeded random number to get a consistent "random" value for the day
-            const prayerRandomFactor = seededRandom(daySeed); // A value between 0 and 1
-            const bugRandomFactor = seededRandom(daySeed + 1); // Use a different seed for the second value
+            const prayerRandomFactor = seededRandom(daySeed);
+            const bugRandomFactor = seededRandom(daySeed + 1);
 
             prayerMax = 18569 + Math.floor(prayerRandomFactor * (32744 - 18569 + 1));
             bugMax = 9169 + Math.floor(bugRandomFactor * (13892 - 9169 + 1));
@@ -2576,7 +2572,6 @@
             if(!prayersEl || !bugsEl) return;
 
             const now = new Date();
-            // Use UTC date parts to define the start of the day
             const startOfDay = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate(), 0, 0, 0, 0));
 
             const msSinceMidnight = now.getTime() - startOfDay.getTime();
@@ -2600,51 +2595,46 @@
             const bugsEl = document.getElementById('bugs-today');
             if(!prayersEl || !bugsEl) return;
 
-            // Calculate how much it *should* have increased in the last 3 seconds on average
             const avgPrayerIncrementPerSecond = (prayerMax - 1) / (24 * 60 * 60);
             const avgBugIncrementPerSecond = (bugMax - 1) / (24 * 60 * 60);
 
-            // Add a bit of randomness to the 3-second increment
             const prayerIncrement = Math.floor(avgPrayerIncrementPerSecond * 3) + (Math.random() < 0.5 ? 1 : 0);
             const bugIncrement = Math.floor(avgBugIncrementPerSecond * 3) + (Math.random() < 0.3 ? 1 : 0);
 
             if (currentPrayerCount + prayerIncrement <= prayerMax) {
                 currentPrayerCount += prayerIncrement;
             } else {
-                currentPrayerCount = prayerMax; // Cap at max
+                currentPrayerCount = prayerMax;
             }
             
             if (currentBugCount + bugIncrement <= bugMax) {
                 currentBugCount += bugIncrement;
             } else {
-                currentBugCount = bugMax; // Cap at max
+                currentBugCount = bugMax;
             }
 
             prayersEl.textContent = currentPrayerCount.toLocaleString();
             bugsEl.textContent = currentBugCount.toLocaleString();
         }
 
-        // Initial setup
         setDailyMaxValues();
         setInitialCounters();
-        setInterval(incrementCounters, 3000); // Update counter every 3 seconds
+        setInterval(incrementCounters, 3000);
 
-        // Schedule daily reset
         function scheduleDailyReset() {
             const now = new Date();
             const tomorrow = new Date();
             tomorrow.setUTCDate(now.getUTCDate() + 1);
-            tomorrow.setUTCHours(0, 0, 1, 0); // Next day at 00:00:01 UTC
+            tomorrow.setUTCHours(0, 0, 1, 0); 
             
             const timeToMidnight = tomorrow.getTime() - now.getTime();
             
             setTimeout(() => {
-                setDailyMaxValues(); // Get new max values for the new day
+                setDailyMaxValues(); 
                 currentPrayerCount = 1;
                 currentBugCount = 1;
                 document.getElementById('prayers-today').textContent = '1';
                 document.getElementById('bugs-today').textContent = '1';
-                // Reschedule for the next day
                 scheduleDailyReset();
             }, timeToMidnight);
         }
@@ -2655,22 +2645,10 @@
         function handleFormSubmission(formId, options) {
             const form = document.getElementById(formId);
             const walletInput = document.getElementById(options.walletInputId);
-            const walletValidation = document.getElementById(options.walletValidationId);
             const submitButton = document.getElementById(options.submitButtonId);
             const cooldownTimer = document.getElementById(options.cooldownTimerId);
             const formStatus = document.getElementById(options.formStatusId);
             const lastSubmissionKeyPrefix = options.localStorageKey;
-
-            walletInput.addEventListener('input', () => {
-                const address = walletInput.value;
-                if (address.length >= 32 && address.length <= 44) {
-                    walletValidation.textContent = 'Valid address length.';
-                    walletValidation.style.color = 'var(--primary-color)';
-                } else {
-                    walletValidation.textContent = 'Solana address must be 32-44 characters.';
-                    walletValidation.style.color = '#ff4d4d';
-                }
-            });
             
             function checkCooldown() {
                 const address = walletInput.value;
@@ -2689,8 +2667,6 @@
                 if (timePassed < twentyFourHours) {
                     submitButton.disabled = true;
                     cooldownTimer.style.display = 'block';
-                    const timeLeft = twentyFourHours - timePassed;
-
                     const interval = setInterval(() => {
                         const newTimeLeft = twentyFourHours - (Date.now() - parseInt(lastSubmissionTime, 10));
                         if (newTimeLeft <= 0) {
@@ -2710,18 +2686,19 @@
                 }
             }
             
-            walletInput.addEventListener('change', checkCooldown);
-            checkCooldown();
+            if(walletInput) {
+                // This is a bit of a hack to monitor the hidden input's value
+                new MutationObserver(checkCooldown).observe(walletInput, { attributes: true, attributeFilter: ['value'] });
+            }
+
 
             form.addEventListener('submit', async (e) => {
                 e.preventDefault();
                 formStatus.textContent = '';
                 
-                const walletAddress = walletInput.value;
-                
-                if (walletAddress.length < 32 || walletAddress.length > 44) {
-                    formStatus.textContent = 'Invalid Solana wallet address.';
-                    formStatus.style.color = '#ff4d4d';
+                if (!walletInput.value) {
+                    formStatus.textContent = 'Please connect your wallet first.';
+                    formStatus.style.color = 'orange';
                     return;
                 }
                 
@@ -2747,8 +2724,12 @@
                     formStatus.textContent = options.successMessage;
                     formStatus.style.color = 'var(--primary-color)';
 
-                    localStorage.setItem(lastSubmissionKeyPrefix + walletAddress, Date.now().toString());
-                    form.reset();
+                    localStorage.setItem(lastSubmissionKeyPrefix + walletInput.value, Date.now().toString());
+                    form.reset(); // This will clear nickname and message, but not the hidden wallet input
+                    // We need to re-set the wallet input value after reset
+                    if (window.solanaWallet && window.solanaWallet.publicKey) {
+                       walletInput.value = window.solanaWallet.publicKey.toBase58();
+                    }
                     checkCooldown();
 
                 } catch (error) {
@@ -2762,7 +2743,6 @@
         
         handleFormSubmission('prayer-form', {
             walletInputId: 'prayer-wallet-address',
-            walletValidationId: 'prayer-wallet-validation',
             submitButtonId: 'submit-prayer',
             cooldownTimerId: 'prayer-cooldown-timer',
             formStatusId: 'prayer-form-status',
@@ -2773,7 +2753,6 @@
 
         handleFormSubmission('bug-report-form', {
             walletInputId: 'bug-wallet-address',
-            walletValidationId: 'bug-wallet-validation',
             submitButtonId: 'submit-bug-report',
             cooldownTimerId: 'bug-cooldown-timer',
             formStatusId: 'bug-form-status',
@@ -2818,7 +2797,7 @@
             { nickname: 'Physics Tester', text: "The phenomenon of toast always landing butter-side down seems to be a conspiracy by cats, not a gravity bug. Please investigate.", status: 'FEATURE, NOT A BUG', reaction: '😂 (12.1k votes)' },
             { nickname: 'Time Traveler', text: "I swear I only slept for 5 minutes, but hours have passed. There seems to be a time acceleration bug.", status: 'CANNOT REPRODUCE', reaction: '🤔 (9.8k votes)' },
             { nickname: 'Existential Debugger', text: "Sometimes I get confused whether I'm an NPC or a player. Please let me see my character info screen.", status: 'PENDING REVIEW', reaction: '🤯 (8.5k votes)' },
-            { nickname: 'Audio Engineer', text: "There's a bug where my singing ability dramatically improves only in the shower. Please apply this patch globally.", status: 'VERIFIED', reaction: '  (7.2k votes)' },
+            { nickname: 'Audio Engineer', text: "There's a bug where my singing ability dramatically improves only in the shower. Please apply this patch globally.", status: 'VERIFIED', reaction: '🎤 (7.2k votes)' },
             { nickname: 'Network Admin', text: "Whenever I go to a place with a weak Wi-Fi signal, I suddenly get important ideas. Is this an intended feature?", status: 'FEATURE, NOT A BUG', reaction: '💡 (6.9k votes)' },
             { nickname: 'Memory Manager', text: "The memory leak issue of forgetting why I entered a room is too frequent. A `System.gc()` call is needed.", status: 'VERIFIED', reaction: '🧠 (15.3k votes)' },
             { nickname: 'UI Improvement Proposer', text: "The 'undo' button in life is too small and hard to find. Please add a Ctrl+Z shortcut.", status: 'PENDING REVIEW', reaction: '⏪ (11.2k votes)' },
@@ -2885,6 +2864,313 @@
             canvas.height = window.innerHeight;
         });
 
+    </script>
+    <!-- Solana Wallet Adapter Scripts -->
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://unpkg.com/@solana/wallet-adapter-base@latest/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@solana/wallet-adapter-wallets@latest/lib/index.iife.js"></script>
+    <script>
+        // --- Solana Wallet Adapter Logic ---
+        // 이 스크립트는 DOMContentLoaded에서 nav-container가 존재할 때 실행됨
+        document.addEventListener('DOMContentLoaded', () => {
+            function initializeWalletAdapter() {
+                try {
+                    const { WalletAdapterNetwork } = window.solanaWalletAdapter;
+                    const { PhantomWalletAdapter, SolflareWalletAdapter } = window.solanaWalletAdapterWallets;
+                    // --- MetaMask, Kaikas, TokenPocket 커스텀 어댑터 ---
+                    class MetaMaskSolanaAdapter {
+                        constructor() {
+                            this.name = 'MetaMask';
+                            this.connected = false;
+                            this.publicKey = null;
+                            this._listeners = { connect: [], disconnect: [] };
+                        }
+                        async connect() {
+                            if (window.ethereum && window.ethereum.isMetaMask) {
+                                // MetaMask Solana 지원 체크
+                                if (window.ethereum.isSolana) {
+                                    const accounts = await window.ethereum.request({ method: 'solana_requestAccounts' });
+                                    this.publicKey = { toBase58: () => accounts[0] };
+                                    this.connected = true;
+                                    this._emit('connect');
+                                } else {
+                                    alert('MetaMask에서 Solana 네트워크를 지원하는 버전이 필요합니다. 최신 MetaMask를 설치하세요.');
+                                }
+                            } else {
+                                alert('MetaMask가 설치되어 있지 않습니다.');
+                            }
+                        }
+                        async disconnect() {
+                            this.connected = false;
+                            this.publicKey = null;
+                            this._emit('disconnect');
+                        }
+                        on(event, cb) { this._listeners[event].push(cb); }
+                        removeListener(event, cb) {
+                            this._listeners[event] = this._listeners[event].filter(fn => fn !== cb);
+                        }
+                        _emit(event) { this._listeners[event].forEach(fn => fn()); }
+                    }
+                    class KaikasSolanaAdapter {
+                        constructor() {
+                            this.name = 'Klip';
+                            this.connected = false;
+                            this.publicKey = null;
+                            this._listeners = { connect: [], disconnect: [] };
+                        }
+                        async connect() {
+                            try {
+                                // Klip SDK를 사용한 실제 연결
+                                if (window.KlipSDK) {
+                                    const klipSDK = new window.KlipSDK();
+                                    
+                                    // Klip에서 Solana 주소 요청
+                                    const result = await klipSDK.request({
+                                        bapp: {
+                                            name: 'SimulVerse',
+                                            callback: {
+                                                url: window.location.href
+                                            }
+                                        },
+                                        type: 'auth'
+                                    });
+                                    
+                                    if (result.status === 'completed' && result.accounts) {
+                                        // Klip은 주로 Klaytn을 지원하므로, Solana 주소는 별도로 요청
+                                        // 실제로는 사용자가 수동으로 Solana 주소를 입력해야 할 수 있음
+                                        const solanaAddress = prompt('Klip에서 연결된 Solana 주소를 입력하세요:');
+                                        if (solanaAddress) {
+                                            this.publicKey = { toBase58: () => solanaAddress };
+                                            this.connected = true;
+                                            this._emit('connect');
+                                        }
+                                    } else {
+                                        alert('Klip 연결이 취소되었습니다.');
+                                    }
+                                } else {
+                                    // Klip SDK가 없는 경우 대체 방법
+                                    const address = prompt('Klip(클립) 지갑의 Solana 주소를 입력하세요:');
+                                    if (address) {
+                                        this.publicKey = { toBase58: () => address };
+                                        this.connected = true;
+                                        this._emit('connect');
+                                    }
+                                }
+                            } catch (error) {
+                                console.error('Klip 연결 오류:', error);
+                                alert('Klip 연결에 실패했습니다. Klip 앱이 설치되어 있는지 확인하세요.');
+                            }
+                        }
+                        async disconnect() {
+                            this.connected = false;
+                            this.publicKey = null;
+                            this._emit('disconnect');
+                        }
+                        on(event, cb) { this._listeners[event].push(cb); }
+                        removeListener(event, cb) {
+                            this._listeners[event] = this._listeners[event].filter(fn => fn !== cb);
+                        }
+                        _emit(event) { this._listeners[event].forEach(fn => fn()); }
+                    }
+                    class TokenPocketSolanaAdapter {
+                        constructor() {
+                            this.name = 'TokenPocket';
+                            this.connected = false;
+                            this.publicKey = null;
+                            this._listeners = { connect: [], disconnect: [] };
+                        }
+                        async connect() {
+                            try {
+                                // TokenPocket SDK를 사용한 실제 연결
+                                if (window.TokenPocketSDK) {
+                                    const tpSDK = new window.TokenPocketSDK();
+                                    
+                                    // TokenPocket에서 Solana 계정 요청
+                                    const accounts = await tpSDK.request({
+                                        method: 'solana_requestAccounts',
+                                        params: []
+                                    });
+                                    
+                                    if (accounts && accounts.length > 0) {
+                                        this.publicKey = { toBase58: () => accounts[0] };
+                                        this.connected = true;
+                                        this._emit('connect');
+                                    } else {
+                                        alert('TokenPocket에서 계정을 가져올 수 없습니다.');
+                                    }
+                                } else if (window.ethereum && window.ethereum.isTokenPocket) {
+                                    // TokenPocket이 ethereum provider로 감지된 경우
+                                    const accounts = await window.ethereum.request({
+                                        method: 'solana_requestAccounts'
+                                    });
+                                    
+                                    if (accounts && accounts.length > 0) {
+                                        this.publicKey = { toBase58: () => accounts[0] };
+                                        this.connected = true;
+                                        this._emit('connect');
+                                    }
+                                } else {
+                                    // TokenPocket SDK가 없는 경우 대체 방법
+                                    const address = prompt('TokenPocket 지갑의 Solana 주소를 입력하세요:');
+                                    if (address) {
+                                        this.publicKey = { toBase58: () => address };
+                                        this.connected = true;
+                                        this._emit('connect');
+                                    }
+                                }
+                            } catch (error) {
+                                console.error('TokenPocket 연결 오류:', error);
+                                alert('TokenPocket 연결에 실패했습니다. TokenPocket 앱이 설치되어 있는지 확인하세요.');
+                            }
+                        }
+                        async disconnect() {
+                            this.connected = false;
+                            this.publicKey = null;
+                            this._emit('disconnect');
+                        }
+                        on(event, cb) { this._listeners[event].push(cb); }
+                        removeListener(event, cb) {
+                            this._listeners[event] = this._listeners[event].filter(fn => fn !== cb);
+                        }
+                        _emit(event) { this._listeners[event].forEach(fn => fn()); }
+                    }
+
+                    const network = WalletAdapterNetwork.Mainnet;
+                    const wallets = [
+                        new PhantomWalletAdapter(),
+                        new SolflareWalletAdapter(),
+                        new MetaMaskSolanaAdapter(),
+                        new KaikasSolanaAdapter(),
+                        new TokenPocketSolanaAdapter(),
+                    ];
+
+                    const prayerWalletInput = document.getElementById('prayer-wallet-address');
+                    const bugWalletInput = document.getElementById('bug-wallet-address');
+                    
+                    let connectedWallet = null;
+                    window.solanaWallet = null; 
+
+                    const walletButtonContainer = document.createElement('div');
+                    const connectBtn = document.createElement('button');
+                    connectBtn.textContent = 'Connect Wallet';
+                    connectBtn.className = 'btn btn-secondary';
+                    walletButtonContainer.appendChild(connectBtn);
+                    document.querySelector('.nav-container').appendChild(walletButtonContainer);
+
+                    const modal = document.createElement('div');
+                    modal.style.cssText = `
+                        display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+                        overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
+                    `;
+                    const modalContent = document.createElement('div');
+                    modalContent.style.cssText = `
+                        background-color: var(--card-bg); padding: 20px; border: 1px solid var(--primary-color);
+                        border-radius: 10px; text-align: center; width: 90%; max-width: 350px;
+                    `;
+                    const modalTitle = document.createElement('h3');
+                    modalTitle.textContent = 'Select Wallet';
+                    modalTitle.style.fontFamily = "'Orbitron', sans-serif";
+                    modalTitle.style.color = "var(--primary-color)";
+                    modalContent.appendChild(modalTitle);
+
+                    wallets.forEach(wallet => {
+                        const walletBtn = document.createElement('button');
+                        walletBtn.textContent = `Connect ${wallet.name}`;
+                        walletBtn.className = 'btn btn-primary';
+                        walletBtn.style.display = 'block';
+                        walletBtn.style.width = '100%';
+                        walletBtn.style.marginBottom = '10px';
+                        walletBtn.onclick = async () => {
+                            await connectWith(wallet);
+                        };
+                        modalContent.appendChild(walletBtn);
+                    });
+                    modal.appendChild(modalContent);
+                    document.body.appendChild(modal);
+
+                    connectBtn.addEventListener('click', () => {
+                        if (!connectedWallet || !connectedWallet.connected) {
+                            modal.style.display = 'flex';
+                        } else {
+                            connectedWallet.disconnect();
+                        }
+                    });
+
+                    window.addEventListener('click', (event) => {
+                        if (event.target == modal) {
+                            modal.style.display = "none";
+                        }
+                    });
+
+                    async function connectWith(adapter) {
+                        try {
+                            if (connectedWallet) {
+                                await connectedWallet.disconnect();
+                            }
+                            connectedWallet = adapter;
+                            window.solanaWallet = adapter;
+                            
+                            adapter.on('connect', onConnect);
+                            adapter.on('disconnect', onDisconnect);
+
+                            await adapter.connect();
+                        } catch (error) {
+                            console.error("Wallet connection error:", error);
+                            alert("지갑 연결에 실패했습니다. 설치 및 지원 여부를 확인하세요.");
+                        } finally {
+                            modal.style.display = 'none';
+                        }
+                    }
+                    
+                    function onConnect() {
+                        if (connectedWallet && connectedWallet.publicKey) {
+                            const publicKey = connectedWallet.publicKey.toBase58();
+                            console.log('Wallet Connected:', publicKey);
+                            
+                            const shortAddress = `${publicKey.slice(0, 4)}...${publicKey.slice(-4)}`;
+                            connectBtn.textContent = `Disconnect: ${shortAddress}`;
+                            
+                            prayerWalletInput.value = publicKey;
+                            bugWalletInput.value = publicKey;
+                            
+                            const event = new Event('change');
+                            prayerWalletInput.dispatchEvent(event);
+                            bugWalletInput.dispatchEvent(event);
+                        }
+                    }
+
+                    function onDisconnect() {
+                        console.log('Wallet Disconnected');
+                        connectBtn.textContent = 'Connect Wallet';
+                        prayerWalletInput.value = '';
+                        bugWalletInput.value = '';
+
+                        if (connectedWallet) {
+                            connectedWallet.removeListener('connect', onConnect);
+                            connectedWallet.removeListener('disconnect', onDisconnect);
+                            connectedWallet = null;
+                            window.solanaWallet = null;
+                        }
+                    }
+                } catch (e) {
+                    console.error("Wallet adapter initialization failed:", e);
+                    const connectBtnContainer = document.querySelector('.nav-container > div:last-child');
+                    if (connectBtnContainer && connectBtnContainer.firstChild.textContent === 'Connect Wallet') {
+                        connectBtnContainer.style.display = 'none';
+                    }
+                }
+            }
+
+            function checkWalletLibs() {
+                if (window.solanaWalletAdapter && window.solanaWalletAdapterWallets) {
+                    initializeWalletAdapter();
+                } else {
+                    setTimeout(checkWalletLibs, 100);
+                }
+            }
+        
+            checkWalletLibs();
+        });
     </script>
 </body>
 </html>
