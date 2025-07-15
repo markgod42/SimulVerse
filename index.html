@@ -2892,12 +2892,10 @@
         });
 
     </script>
-    <!-- Solana Wallet Adapter Scripts -->
-    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.min.js"></script>
-    <script src="https://unpkg.com/@solana/wallet-adapter-base@latest/lib/index.iife.js"></script>
-    <script src="https://unpkg.com/@solana/wallet-adapter-wallets@latest/lib/index.iife.js"></script>
+    <!-- Solana Wallet Adapter Scripts (REMOVE wallet-adapter, KEEP web3.js local) -->
+    <script src="libs/solana/web3.iife.min.js"></script>
     <script>
-        // --- Solana Wallet Adapter Logic ---
+        // --- Custom Solana Wallet Connect Logic (Phantom & Solflare) ---
         document.addEventListener('DOMContentLoaded', () => {
             // 모달 생성 (항상 생성)
             const modal = document.createElement('div');
@@ -2923,6 +2921,35 @@
             const connectBtn = document.getElementById('connect-wallet-btn');
             if (connectBtn) {
                 connectBtn.addEventListener('click', () => {
+                    // 모달 내용 초기화
+                    while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
+                    // 설치된 지갑만 버튼으로 표시
+                    let hasAny = false;
+                    if (window.solana && window.solana.isPhantom) {
+                        hasAny = true;
+                        const btn = document.createElement('button');
+                        btn.textContent = 'Connect Phantom';
+                        btn.className = 'btn btn-primary';
+                        btn.style.cssText = 'display: block; width: 100%; margin-bottom: 10px;';
+                        btn.onclick = async () => { await connectWallet('phantom'); };
+                        modalContent.appendChild(btn);
+                    }
+                    if (window.solflare || (window.solana && window.solana.isSolflare)) {
+                        hasAny = true;
+                        const btn = document.createElement('button');
+                        btn.textContent = 'Connect Solflare';
+                        btn.className = 'btn btn-primary';
+                        btn.style.cssText = 'display: block; width: 100%; margin-bottom: 10px;';
+                        btn.onclick = async () => { await connectWallet('solflare'); };
+                        modalContent.appendChild(btn);
+                    }
+                    if (!hasAny) {
+                        const msg = document.createElement('div');
+                        msg.style.color = 'orange';
+                        msg.style.marginTop = '20px';
+                        msg.textContent = 'No supported wallet found. Please install Phantom or Solflare.';
+                        modalContent.appendChild(msg);
+                    }
                     modal.style.display = 'flex';
                 });
             }
@@ -2933,394 +2960,74 @@
                 }
             });
 
-            // 라이브러리 로드 확인
-            function walletLibsLoaded() {
-                return window.solanaWalletAdapter && window.solanaWalletAdapterWallets;
-            }
+            // 연결된 상태 관리
+            let connectedWalletType = null;
+            let connectedAddress = null;
 
-            // 실제 wallet adapter 초기화 함수 (라이브러리 있을 때만)
-            function initializeWalletAdapter() {
+            // 실제 연결 함수
+            async function connectWallet(type) {
                 try {
-                    // 라이브러리 존재 여부 확인
-                    if (!window.solanaWalletAdapter || !window.solanaWalletAdapterWallets) {
-                        console.error('Solana wallet adapter libraries not loaded');
+                    let provider = null;
+                    if (type === 'phantom' && window.solana && window.solana.isPhantom) {
+                        provider = window.solana;
+                    } else if (type === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
+                        provider = window.solflare || window.solana;
+                    }
+                    if (!provider) {
+                        alert('Wallet provider not found.');
                         return;
                     }
-
-                    const { WalletAdapterNetwork } = window.solanaWalletAdapter;
-                    const { PhantomWalletAdapter, SolflareWalletAdapter } = window.solanaWalletAdapterWallets;
-                    
-                    // --- MetaMask 커스텀 어댑터 ---
-                    class MetaMaskSolanaAdapter {
-                        constructor() {
-                            this.name = 'MetaMask';
-                            this.connected = false;
-                            this.publicKey = null;
-                            this._listeners = { connect: [], disconnect: [] };
-                        }
-                        async connect() {
-                            try {
-                                if (window.ethereum && window.ethereum.isMetaMask) {
-                                    // MetaMask Solana 지원 체크
-                                    if (window.ethereum.isSolana) {
-                                        const accounts = await window.ethereum.request({ method: 'solana_requestAccounts' });
-                                        if (accounts && accounts.length > 0) {
-                                            this.publicKey = { toBase58: () => accounts[0] };
-                                            this.connected = true;
-                                            this._emit('connect');
-                                        } else {
-                                            throw new Error('No accounts returned from MetaMask');
-                                        }
-                                    } else {
-                                        // Solana 지원이 없는 경우 수동 입력
-                                        const address = prompt('Please enter your Solana address from MetaMask:');
-                                        if (address && address.trim()) {
-                                            this.publicKey = { toBase58: () => address.trim() };
-                                            this.connected = true;
-                                            this._emit('connect');
-                                        } else {
-                                            throw new Error('No address provided');
-                                        }
-                                    }
-                                } else {
-                                    throw new Error('MetaMask is not installed');
-                                }
-                            } catch (error) {
-                                console.error('MetaMask connection error:', error);
-                                alert('MetaMask connection failed: ' + error.message);
-                                throw error;
-                            }
-                        }
-                        async disconnect() {
-                            this.connected = false;
-                            this.publicKey = null;
-                            this._emit('disconnect');
-                        }
-                        on(event, cb) { 
-                            if (this._listeners[event]) {
-                                this._listeners[event].push(cb); 
-                            }
-                        }
-                        removeListener(event, cb) {
-                            if (this._listeners[event]) {
-                                this._listeners[event] = this._listeners[event].filter(fn => fn !== cb);
-                            }
-                        }
-                        _emit(event) { 
-                            if (this._listeners[event]) {
-                                this._listeners[event].forEach(fn => fn()); 
-                            }
-                        }
+                    // 연결
+                    await provider.connect();
+                    connectedWalletType = type;
+                    connectedAddress = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
+                    // UI 업데이트
+                    const shortAddr = connectedAddress.slice(0, 4) + '...' + connectedAddress.slice(-4);
+                    connectBtn.textContent = `Disconnect: ${shortAddr}`;
+                    // 폼에 주소 입력
+                    const prayerWalletInput = document.getElementById('prayer-wallet-address');
+                    const bugWalletInput = document.getElementById('bug-wallet-address');
+                    if (prayerWalletInput) prayerWalletInput.value = connectedAddress;
+                    if (bugWalletInput) bugWalletInput.value = connectedAddress;
+                    // 모달 닫기
+                    modal.style.display = 'none';
+                    // disconnect 이벤트 등록
+                    if (provider.on) {
+                        provider.on('disconnect', onDisconnect);
                     }
-
-                    // --- Klip 커스텀 어댑터 ---
-                    class KaikasSolanaAdapter {
-                        constructor() {
-                            this.name = 'Klip';
-                            this.connected = false;
-                            this.publicKey = null;
-                            this._listeners = { connect: [], disconnect: [] };
-                        }
-                        async connect() {
-                            try {
-                                // Klip SDK를 사용한 실제 연결
-                                if (window.KlipSDK) {
-                                    const klipSDK = new window.KlipSDK();
-                                    
-                                    const result = await klipSDK.request({
-                                        bapp: {
-                                            name: 'SimulVerse',
-                                            callback: {
-                                                url: window.location.href
-                                            }
-                                        },
-                                        type: 'auth'
-                                    });
-                                    
-                                    if (result.status === 'completed' && result.accounts) {
-                                        const solanaAddress = prompt('Please enter the Solana address connected in Klip:');
-                                        if (solanaAddress && solanaAddress.trim()) {
-                                            this.publicKey = { toBase58: () => solanaAddress.trim() };
-                                            this.connected = true;
-                                            this._emit('connect');
-                                        } else {
-                                            throw new Error('No Solana address provided');
-                                        }
-                                    } else {
-                                        throw new Error('Klip connection was cancelled');
-                                    }
-                                } else {
-                                    // Klip SDK가 없는 경우 대체 방법
-                                    const address = prompt('Please enter your Solana address from Klip wallet:');
-                                    if (address && address.trim()) {
-                                        this.publicKey = { toBase58: () => address.trim() };
-                                        this.connected = true;
-                                        this._emit('connect');
-                                    } else {
-                                        throw new Error('No address provided');
-                                    }
-                                }
-                            } catch (error) {
-                                console.error('Klip connection error:', error);
-                                alert('Failed to connect to Klip: ' + error.message);
-                                throw error;
-                            }
-                        }
-                        async disconnect() {
-                            this.connected = false;
-                            this.publicKey = null;
-                            this._emit('disconnect');
-                        }
-                        on(event, cb) { 
-                            if (this._listeners[event]) {
-                                this._listeners[event].push(cb); 
-                            }
-                        }
-                        removeListener(event, cb) {
-                            if (this._listeners[event]) {
-                                this._listeners[event] = this._listeners[event].filter(fn => fn !== cb);
-                            }
-                        }
-                        _emit(event) { 
-                            if (this._listeners[event]) {
-                                this._listeners[event].forEach(fn => fn()); 
-                            }
-                        }
-                    }
-
-                    // --- TokenPocket 커스텀 어댑터 ---
-                    class TokenPocketSolanaAdapter {
-                        constructor() {
-                            this.name = 'TokenPocket';
-                            this.connected = false;
-                            this.publicKey = null;
-                            this._listeners = { connect: [], disconnect: [] };
-                        }
-                        async connect() {
-                            try {
-                                // TokenPocket SDK를 사용한 실제 연결
-                                if (window.TokenPocketSDK) {
-                                    const tpSDK = new window.TokenPocketSDK();
-                                    
-                                    const accounts = await tpSDK.request({
-                                        method: 'solana_requestAccounts',
-                                        params: []
-                                    });
-                                    
-                                    if (accounts && accounts.length > 0) {
-                                        this.publicKey = { toBase58: () => accounts[0] };
-                                        this.connected = true;
-                                        this._emit('connect');
-                                    } else {
-                                        throw new Error('Could not retrieve account from TokenPocket');
-                                    }
-                                } else if (window.ethereum && window.ethereum.isTokenPocket) {
-                                    // TokenPocket이 ethereum provider로 감지된 경우
-                                    const accounts = await window.ethereum.request({
-                                        method: 'solana_requestAccounts'
-                                    });
-                                    
-                                    if (accounts && accounts.length > 0) {
-                                        this.publicKey = { toBase58: () => accounts[0] };
-                                        this.connected = true;
-                                        this._emit('connect');
-                                    } else {
-                                        throw new Error('Could not retrieve account from TokenPocket');
-                                    }
-                                } else {
-                                    // TokenPocket SDK가 없는 경우 대체 방법
-                                    const address = prompt('Please enter your Solana address from TokenPocket wallet:');
-                                    if (address && address.trim()) {
-                                        this.publicKey = { toBase58: () => address.trim() };
-                                        this.connected = true;
-                                        this._emit('connect');
-                                    } else {
-                                        throw new Error('No address provided');
-                                    }
-                                }
-                            } catch (error) {
-                                console.error('TokenPocket connection error:', error);
-                                alert('Failed to connect to TokenPocket: ' + error.message);
-                                throw error;
-                            }
-                        }
-                        async disconnect() {
-                            this.connected = false;
-                            this.publicKey = null;
-                            this._emit('disconnect');
-                        }
-                        on(event, cb) { 
-                            if (this._listeners[event]) {
-                                this._listeners[event].push(cb); 
-                            }
-                        }
-                        removeListener(event, cb) {
-                            if (this._listeners[event]) {
-                                this._listeners[event] = this._listeners[event].filter(fn => fn !== cb);
-                            }
-                        }
-                        _emit(event) { 
-                            if (this._listeners[event]) {
-                                this._listeners[event].forEach(fn => fn()); 
-                            }
-                        }
-                    }
-
-                    // 지갑 어댑터 배열 생성
-                    const wallets = [];
-                    
-                    // Phantom과 Solflare는 라이브러리가 로드된 경우에만 추가
-                    try {
-                        if (PhantomWalletAdapter) {
-                            wallets.push(new PhantomWalletAdapter());
-                        }
-                        if (SolflareWalletAdapter) {
-                            wallets.push(new SolflareWalletAdapter());
-                        }
-                    } catch (error) {
-                        console.warn('Some wallet adapters could not be loaded:', error);
-                    }
-                    
-                    // 커스텀 어댑터들 추가
-                    wallets.push(new MetaMaskSolanaAdapter());
-                    wallets.push(new KaikasSolanaAdapter());
-                    wallets.push(new TokenPocketSolanaAdapter());
-
-                    // 모달 내용 초기화
-                    while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
-                    wallets.forEach(wallet => {
-                        const walletBtn = document.createElement('button');
-                        walletBtn.textContent = `Connect ${wallet.name}`;
-                        walletBtn.className = 'btn btn-primary';
-                        walletBtn.style.cssText = 'display: block; width: 100%; margin-bottom: 10px;';
-                        walletBtn.onclick = async () => {
-                            try {
-                                await connectWith(wallet);
-                            } catch (error) {
-                                console.error(`Failed to connect ${wallet.name}:`, error);
-                            }
-                        };
-                        modalContent.appendChild(walletBtn);
-                    });
-                    
-                    modal.appendChild(modalContent);
-                    document.body.appendChild(modal);
-
-                    // Connect 버튼 클릭 이벤트
-                    connectBtn.addEventListener('click', () => {
-                        if (!connectedWallet || !connectedWallet.connected) {
-                            modal.style.display = 'flex';
-                        } else {
-                            connectedWallet.disconnect();
-                        }
-                    });
-
-                    // 모달 외부 클릭 시 닫기
-                    window.addEventListener('click', (event) => {
-                        if (event.target === modal) {
-                            modal.style.display = "none";
-                        }
-                    });
-
-                    // 지갑 연결 함수
-                    async function connectWith(adapter) {
-                        try {
-                            if (connectedWallet) {
-                                await connectedWallet.disconnect();
-                            }
-                            connectedWallet = adapter;
-                            window.solanaWallet = adapter;
-                            
-                            adapter.on('connect', onConnect);
-                            adapter.on('disconnect', onDisconnect);
-
-                            await adapter.connect();
-                        } catch (error) {
-                            console.error("Wallet connection error:", error);
-                            alert("Failed to connect wallet: " + error.message);
-                            // 연결 실패 시 상태 초기화
-                            connectedWallet = null;
-                            window.solanaWallet = null;
-                        } finally {
-                            modal.style.display = 'none';
-                        }
-                    }
-                    
-                    // 연결 성공 시 호출되는 함수
-                    function onConnect() {
-                        if (connectedWallet && connectedWallet.publicKey) {
-                            const publicKey = connectedWallet.publicKey.toBase58();
-                            console.log('Wallet Connected:', publicKey);
-                            
-                            const shortAddress = `${publicKey.slice(0, 4)}...${publicKey.slice(-4)}`;
-                            connectBtn.textContent = `Disconnect: ${shortAddress}`;
-                            
-                            // 폼 입력 필드에 주소 설정
-                            if (prayerWalletInput) prayerWalletInput.value = publicKey;
-                            if (bugWalletInput) bugWalletInput.value = publicKey;
-                            
-                            // change 이벤트 발생
-                            if (prayerWalletInput) {
-                                const event = new Event('change');
-                                prayerWalletInput.dispatchEvent(event);
-                            }
-                            if (bugWalletInput) {
-                                const event = new Event('change');
-                                bugWalletInput.dispatchEvent(event);
-                            }
-                        }
-                    }
-
-                    // 연결 해제 시 호출되는 함수
-                    function onDisconnect() {
-                        console.log('Wallet Disconnected');
-                        connectBtn.textContent = 'Connect Wallet';
-                        
-                        // 폼 입력 필드 초기화
-                        if (prayerWalletInput) prayerWalletInput.value = '';
-                        if (bugWalletInput) bugWalletInput.value = '';
-
-                        if (connectedWallet) {
-                            connectedWallet.removeListener('connect', onConnect);
-                            connectedWallet.removeListener('disconnect', onDisconnect);
-                            connectedWallet = null;
-                            window.solanaWallet = null;
-                        }
-                    }
-
-                    console.log('Wallet adapter initialized successfully');
-                    
                 } catch (e) {
-                    console.error("Wallet adapter initialization failed:", e);
-                    // 실패 시 안내 메시지 표시
-                    while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
-                    const msg = document.createElement('div');
-                    msg.style.color = 'orange';
-                    msg.style.marginTop = '20px';
-                    msg.textContent = 'Failed to load wallet libraries. Please check your network or try refreshing the page.';
-                    modalContent.appendChild(msg);
+                    alert('Failed to connect wallet: ' + (e && e.message ? e.message : e));
                 }
             }
-
-            // 라이브러리 로드 상태에 따라 모달 내용 동적 변경
-            function setupWalletModal() {
-                if (walletLibsLoaded()) {
-                    initializeWalletAdapter();
-                } else {
-                    // 라이브러리 없을 때 안내 메시지 표시
-                    while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
-                    const msg = document.createElement('div');
-                    msg.style.color = 'orange';
-                    msg.style.marginTop = '20px';
-                    msg.textContent = 'Failed to load wallet libraries. Please check your network or try refreshing the page.';
-                    modalContent.appendChild(msg);
-                }
+            // Disconnect 처리
+            function onDisconnect() {
+                connectedWalletType = null;
+                connectedAddress = null;
+                connectBtn.textContent = 'Connect Wallet';
+                const prayerWalletInput = document.getElementById('prayer-wallet-address');
+                const bugWalletInput = document.getElementById('bug-wallet-address');
+                if (prayerWalletInput) prayerWalletInput.value = '';
+                if (bugWalletInput) bugWalletInput.value = '';
             }
-
-            // 최초 1회 실행
-            setupWalletModal();
-            // 2초마다 라이브러리 로드 상태 체크해서 동적 반영 (CDN 느릴 때 대비)
-            setInterval(setupWalletModal, 2000);
+            // Disconnect 버튼 동작
+            if (connectBtn) {
+                connectBtn.addEventListener('click', () => {
+                    if (connectedWalletType) {
+                        // disconnect
+                        let provider = null;
+                        if (connectedWalletType === 'phantom' && window.solana && window.solana.isPhantom) {
+                            provider = window.solana;
+                        } else if (connectedWalletType === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
+                            provider = window.solflare || window.solana;
+                        }
+                        if (provider && provider.disconnect) {
+                            provider.disconnect();
+                        } else {
+                            onDisconnect();
+                        }
+                    }
+                });
+            }
         });
     </script>
 </body>
