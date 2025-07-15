@@ -119,15 +119,42 @@
         /* Live Data Ticker */
         #live-data-ticker {
             position: fixed;
-            top: 75px; /* Position below header */
+            top: 75px;
             width: 100%;
-            background-color: #1a1a2e;
+            background: rgba(26,26,46,0.98);
             color: var(--primary-color);
-            z-index: 999;
-            padding: 5px 0;
+            z-index: 1200;
+            padding: 8px 0 8px 0;
             border-bottom: 1px solid var(--primary-color);
             font-family: 'Orbitron', sans-serif;
-            font-size: 0.9em;
+            font-size: 1em;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        #live-data-ticker marquee, #live-data-ticker .ticker-content {
+            background: transparent;
+            padding: 0;
+        }
+        @media (max-width: 576px) {
+            #live-data-ticker {
+                top: 65px;
+                font-size: 0.9em;
+            }
+        }
+        /* 모달 내 지갑 로고 버튼 */
+        .wallet-select-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+        .wallet-logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: #fff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
         }
 
         .ticker-content {
@@ -158,19 +185,27 @@
         }
 
         .nav-container {
-            display: flex;
-            justify-content: space-between;
+            display: grid;
+            grid-template-columns: 1fr auto auto;
             align-items: center;
             max-width: 1400px;
             margin: 0 auto;
             padding: 0 20px;
             gap: 10px;
         }
-
         #wallet-btn-container {
             display: flex;
             align-items: center;
-            margin-left: 20px;
+            margin-left: 0;
+            justify-content: flex-end;
+        }
+        @media (max-width: 992px) {
+            .nav-container {
+                grid-template-columns: 1fr auto;
+            }
+            #wallet-btn-container {
+                justify-content: flex-start;
+            }
         }
 
         .nav-logo {
@@ -1413,7 +1448,6 @@
                         <img src="https://i.ibb.co/NgHMCZZX/image.png" alt="SimulVerse Logo" class="logo-img">
                         <span class="logo-text">SimulVerse</span>
                     </div>
-                    
                     <div class="nav-menu" id="nav-menu">
                         <a href="#home" class="nav-link">Home</a>
                         <a href="#prayer" class="nav-link">Prayer Mining</a>
@@ -1424,7 +1458,6 @@
                         <a href="#faq" class="nav-link">FAQ</a>
                         <a href="#community" class="nav-link">Community</a>
                     </div>
-                    
                     <div class="simulation-status">
                         <span class="status-text">Simulation Status: <span class="status-running animated-status">Running (v23.19.84-beta)</span></span>
                     </div>
@@ -2928,19 +2961,33 @@
                     if (window.solana && window.solana.isPhantom) {
                         hasAny = true;
                         const btn = document.createElement('button');
-                        btn.textContent = 'Connect Phantom';
-                        btn.className = 'btn btn-primary';
-                        btn.style.cssText = 'display: block; width: 100%; margin-bottom: 10px;';
+                        btn.className = 'btn btn-primary wallet-select-btn';
+                        btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
                         btn.onclick = async () => { await connectWallet('phantom'); };
+                        const logo = document.createElement('img');
+                        logo.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Phantom.png';
+                        logo.alt = 'Phantom Logo';
+                        logo.className = 'wallet-logo';
+                        btn.appendChild(logo);
+                        const span = document.createElement('span');
+                        span.textContent = 'Connect Phantom';
+                        btn.appendChild(span);
                         modalContent.appendChild(btn);
                     }
                     if (window.solflare || (window.solana && window.solana.isSolflare)) {
                         hasAny = true;
                         const btn = document.createElement('button');
-                        btn.textContent = 'Connect Solflare';
-                        btn.className = 'btn btn-primary';
-                        btn.style.cssText = 'display: block; width: 100%; margin-bottom: 10px;';
+                        btn.className = 'btn btn-primary wallet-select-btn';
+                        btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
                         btn.onclick = async () => { await connectWallet('solflare'); };
+                        const logo = document.createElement('img');
+                        logo.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Solflare.png';
+                        logo.alt = 'Solflare Logo';
+                        logo.className = 'wallet-logo';
+                        btn.appendChild(logo);
+                        const span = document.createElement('span');
+                        span.textContent = 'Connect Solflare';
+                        btn.appendChild(span);
                         modalContent.appendChild(btn);
                     }
                     if (!hasAny) {
