@@ -2958,13 +2958,76 @@
             const connectBtn = document.getElementById('connect-wallet-btn');
             if (connectBtn) {
                 connectBtn.addEventListener('click', () => {
-                    // 모바일 환경 감지
                     const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+                    // 모바일: 딥링크용 모달
                     if (isMobile) {
-                        alert("For best experience, please open this site inside your wallet app's built-in browser (Phantom, Backpack, or Solflare).");
+                        while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
+                        let hasAny = false;
+                        // Phantom
+                        const phantomBtn = document.createElement('button');
+                        phantomBtn.className = 'btn btn-primary wallet-select-btn';
+                        phantomBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
+                        phantomBtn.onclick = () => {
+                            const siteUrl = encodeURIComponent(window.location.href);
+                            window.location.href = `phantom://app/ul/browse/${siteUrl}`;
+                        };
+                        const phantomLogo = document.createElement('img');
+                        phantomLogo.src = 'https://www.phantom.app/img/logo.png';
+                        phantomLogo.alt = 'Phantom Logo';
+                        phantomLogo.className = 'wallet-logo';
+                        phantomBtn.appendChild(phantomLogo);
+                        const phantomSpan = document.createElement('span');
+                        phantomSpan.textContent = 'Open in Phantom';
+                        phantomBtn.appendChild(phantomSpan);
+                        modalContent.appendChild(phantomBtn);
+                        hasAny = true;
+                        // Backpack
+                        const backpackBtn = document.createElement('button');
+                        backpackBtn.className = 'btn btn-primary wallet-select-btn';
+                        backpackBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
+                        backpackBtn.onclick = () => {
+                            const siteUrl = encodeURIComponent(window.location.href);
+                            window.location.href = `backpack://app/open?url=${siteUrl}`;
+                        };
+                        const backpackLogo = document.createElement('img');
+                        backpackLogo.src = 'https://backpack.app/favicon.ico';
+                        backpackLogo.alt = 'Backpack Logo';
+                        backpackLogo.className = 'wallet-logo';
+                        backpackBtn.appendChild(backpackLogo);
+                        const backpackSpan = document.createElement('span');
+                        backpackSpan.textContent = 'Open in Backpack';
+                        backpackBtn.appendChild(backpackSpan);
+                        modalContent.appendChild(backpackBtn);
+                        hasAny = true;
+                        // Solflare
+                        const solflareBtn = document.createElement('button');
+                        solflareBtn.className = 'btn btn-primary wallet-select-btn';
+                        solflareBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
+                        solflareBtn.onclick = () => {
+                            const siteUrl = encodeURIComponent(window.location.href);
+                            window.location.href = `solflare://open?url=${siteUrl}`;
+                        };
+                        const solflareLogo = document.createElement('img');
+                        solflareLogo.src = 'https://solflare.com/static/solflare-wallet-icon.svg';
+                        solflareLogo.alt = 'Solflare Logo';
+                        solflareLogo.className = 'wallet-logo';
+                        solflareBtn.appendChild(solflareLogo);
+                        const solflareSpan = document.createElement('span');
+                        solflareSpan.textContent = 'Open in Solflare';
+                        solflareBtn.appendChild(solflareSpan);
+                        modalContent.appendChild(solflareBtn);
+                        hasAny = true;
+                        if (!hasAny) {
+                            const msg = document.createElement('div');
+                            msg.style.color = 'orange';
+                            msg.style.marginTop = '20px';
+                            msg.textContent = 'No supported wallet found. Please install Phantom, Backpack, or Solflare.';
+                            modalContent.appendChild(msg);
+                        }
+                        modal.style.display = 'flex';
                         return;
                     }
-                    // 모달 내용 초기화
+                    // PC: 기존 방식
                     while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
                     // 설치된 지갑만 버튼으로 표시
                     let hasAny = false;
