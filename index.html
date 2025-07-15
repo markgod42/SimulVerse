@@ -2899,6 +2899,46 @@
     <script>
         // --- Solana Wallet Adapter Logic ---
         document.addEventListener('DOMContentLoaded', () => {
+            // 모달 생성 (항상 생성)
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+                overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
+            `;
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background-color: var(--card-bg); padding: 20px; border: 1px solid var(--primary-color);
+                border-radius: 10px; text-align: center; width: 90%; max-width: 350px;
+            `;
+            const modalTitle = document.createElement('h3');
+            modalTitle.textContent = 'Select Wallet';
+            modalTitle.style.fontFamily = "'Orbitron', sans-serif";
+            modalTitle.style.color = "var(--primary-color)";
+            modalTitle.style.marginBottom = "20px";
+            modalContent.appendChild(modalTitle);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            // Connect Wallet 버튼 클릭 시 모달 표시 (항상 동작)
+            const connectBtn = document.getElementById('connect-wallet-btn');
+            if (connectBtn) {
+                connectBtn.addEventListener('click', () => {
+                    modal.style.display = 'flex';
+                });
+            }
+            // 모달 외부 클릭 시 닫기
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.style.display = "none";
+                }
+            });
+
+            // 라이브러리 로드 확인
+            function walletLibsLoaded() {
+                return window.solanaWalletAdapter && window.solanaWalletAdapterWallets;
+            }
+
+            // 실제 wallet adapter 초기화 함수 (라이브러리 있을 때만)
             function initializeWalletAdapter() {
                 try {
                     // 라이브러리 존재 여부 확인
@@ -3146,41 +3186,8 @@
                     wallets.push(new KaikasSolanaAdapter());
                     wallets.push(new TokenPocketSolanaAdapter());
 
-                    // DOM 요소들 가져오기
-                    const prayerWalletInput = document.getElementById('prayer-wallet-address');
-                    const bugWalletInput = document.getElementById('bug-wallet-address');
-                    const walletBtnDiv = document.getElementById('wallet-btn-container');
-                    const connectBtn = document.getElementById('connect-wallet-btn');
-                    
-                    if (!walletBtnDiv || !connectBtn) {
-                        console.error('Wallet button container or button not found');
-                        return;
-                    }
-                    
-                    let connectedWallet = null;
-                    window.solanaWallet = null; 
-
-                    // 모달 생성
-                    const modal = document.createElement('div');
-                    modal.style.cssText = `
-                        display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
-                        overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
-                    `;
-                    
-                    const modalContent = document.createElement('div');
-                    modalContent.style.cssText = `
-                        background-color: var(--card-bg); padding: 20px; border: 1px solid var(--primary-color);
-                        border-radius: 10px; text-align: center; width: 90%; max-width: 350px;
-                    `;
-                    
-                    const modalTitle = document.createElement('h3');
-                    modalTitle.textContent = 'Select Wallet';
-                    modalTitle.style.fontFamily = "'Orbitron', sans-serif";
-                    modalTitle.style.color = "var(--primary-color)";
-                    modalTitle.style.marginBottom = "20px";
-                    modalContent.appendChild(modalTitle);
-
-                    // 지갑 버튼들 생성
+                    // 모달 내용 초기화
+                    while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
                     wallets.forEach(wallet => {
                         const walletBtn = document.createElement('button');
                         walletBtn.textContent = `Connect ${wallet.name}`;
@@ -3285,29 +3292,35 @@
                     
                 } catch (e) {
                     console.error("Wallet adapter initialization failed:", e);
-                    // 에러가 발생해도 버튼은 보이도록 유지
-                    // 이미 HTML에 버튼이 있으므로 별도 처리 불필요
+                    // 실패 시 안내 메시지 표시
+                    while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
+                    const msg = document.createElement('div');
+                    msg.style.color = 'orange';
+                    msg.style.marginTop = '20px';
+                    msg.textContent = 'Failed to load wallet libraries. Please check your network or try refreshing the page.';
+                    modalContent.appendChild(msg);
                 }
             }
 
-            // 라이브러리 로드 확인 및 초기화
-            function checkWalletLibs() {
-                if (window.solanaWalletAdapter && window.solanaWalletAdapterWallets) {
+            // 라이브러리 로드 상태에 따라 모달 내용 동적 변경
+            function setupWalletModal() {
+                if (walletLibsLoaded()) {
                     initializeWalletAdapter();
                 } else {
-                    // 5초 후에도 로드되지 않으면 기본 버튼만 표시
-                    setTimeout(() => {
-                        if (!window.solanaWalletAdapter || !window.solanaWalletAdapterWallets) {
-                            console.warn('Wallet libraries not loaded, using fallback');
-                            initializeWalletAdapter(); // 에러 처리된 버전으로 실행
-                        } else {
-                            initializeWalletAdapter();
-                        }
-                    }, 100);
+                    // 라이브러리 없을 때 안내 메시지 표시
+                    while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
+                    const msg = document.createElement('div');
+                    msg.style.color = 'orange';
+                    msg.style.marginTop = '20px';
+                    msg.textContent = 'Failed to load wallet libraries. Please check your network or try refreshing the page.';
+                    modalContent.appendChild(msg);
                 }
             }
-        
-            checkWalletLibs();
+
+            // 최초 1회 실행
+            setupWalletModal();
+            // 2초마다 라이브러리 로드 상태 체크해서 동적 반영 (CDN 느릴 때 대비)
+            setInterval(setupWalletModal, 2000);
         });
     </script>
 </body>
