@@ -1461,9 +1461,6 @@
                     <div class="simulation-status">
                         <span class="status-text">Simulation Status: <span class="status-running animated-status">Running (v23.19.84-beta)</span></span>
                     </div>
-                    <div id="wallet-btn-container">
-                        <button id="connect-wallet-btn" class="btn btn-secondary" style="white-space: nowrap; min-width: 120px;">Connect Wallet</button>
-                    </div>
                     <div class="nav-toggle" id="nav-toggle">
                         <span></span>
                         <span></span>
@@ -1486,6 +1483,11 @@
             <div class="container">
                 <section id="home" class="hero">
                     <div class="hero-container">
+                        <div style="width:100%;text-align:left;margin-bottom:30px;">
+                            <div id="wallet-btn-container" style="display:inline-block;">
+                                <button id="connect-wallet-btn" class="btn btn-secondary" style="white-space: nowrap; min-width: 120px;">Connect Wallet</button>
+                            </div>
+                        </div>
                         <div class="hero-content">
                             <h1 class="hero-title glitch" data-text="Welcome to SimulVerse">Welcome to SimulVerse</h1>
                             <h2 class="hero-subtitle">Reality is Just Mark's Grad School Project</h2>
@@ -2965,7 +2967,7 @@
                         btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
                         btn.onclick = async () => { await connectWallet('phantom'); };
                         const logo = document.createElement('img');
-                        logo.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Phantom.png';
+                        logo.src = 'https://cdn.jsdelivr.net/gh/trustwallet/assets/blockchains/solana/info/logo.png';
                         logo.alt = 'Phantom Logo';
                         logo.className = 'wallet-logo';
                         btn.appendChild(logo);
@@ -2981,7 +2983,7 @@
                         btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
                         btn.onclick = async () => { await connectWallet('solflare'); };
                         const logo = document.createElement('img');
-                        logo.src = 'https://raw.githubusercontent.com/solana-labs/token-list/main/assets/mainnet/Solflare.png';
+                        logo.src = 'https://solflare.com/static/solflare-icon.png';
                         logo.alt = 'Solflare Logo';
                         logo.className = 'wallet-logo';
                         btn.appendChild(logo);
