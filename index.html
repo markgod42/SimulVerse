@@ -1374,6 +1374,24 @@
             justify-content: center;
             gap: 10px;
         }
+
+        .animated-status {
+            animation: status-glow 1.2s infinite alternate, status-move 3s infinite linear;
+            color: #00ffc3;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 8px #00ffc3, 0 0 16px #00ffc3, 0 0 2px #fff;
+            position: relative;
+        }
+        @keyframes status-glow {
+            0% { text-shadow: 0 0 8px #00ffc3, 0 0 16px #00ffc3, 0 0 2px #fff; }
+            100% { text-shadow: 0 0 20px #00ffc3, 0 0 40px #00ffc3, 0 0 8px #fff; }
+        }
+        @keyframes status-move {
+            0% { left: 0px; }
+            50% { left: 2px; }
+            100% { left: 0px; }
+        }
     </style>
 </head>
 <body>
@@ -1401,7 +1419,7 @@
                     </div>
                     
                     <div class="simulation-status">
-                        <span class="status-text">Simulation Status: <span class="status-running">Running (v23.19.84-beta)</span></span>
+                        <span class="status-text">Simulation Status: <span class="status-running animated-status">Running (v23.19.84-beta)</span></span>
                     </div>
                     <div id="wallet-btn-container"></div>
                     <div class="nav-toggle" id="nav-toggle">
