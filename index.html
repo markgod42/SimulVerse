@@ -2958,6 +2958,12 @@
             const connectBtn = document.getElementById('connect-wallet-btn');
             if (connectBtn) {
                 connectBtn.addEventListener('click', () => {
+                    // 모바일 환경 감지
+                    const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+                    if (isMobile) {
+                        alert("For best experience, please open this site inside your wallet app's built-in browser (Phantom, Backpack, or Solflare).");
+                        return;
+                    }
                     // 모달 내용 초기화
                     while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
                     // 설치된 지갑만 버튼으로 표시
