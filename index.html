@@ -1924,80 +1924,72 @@
                     </p>
 
                     <div class="methods-grid">
-                        <!-- Method 1: MetaMask -->
+                        <!-- Method 1: Backpack -->
                         <div class="method-card">
                             <div class="method-header">
-                                <div class="method-title">🦊 MetaMask</div>
-                                <div class="method-subtitle">Latest & Greatest (2025 Edition)</div>
+                                <div class="method-title">🎒 Backpack Wallet</div>
+                                <div class="method-subtitle">All-in-one Solana Powerhouse</div>
                             </div>
                             <div class="method-content">
                                 <div class="pros-list">
                                     <div class="pros-title">✅ Pros</div>
                                     <ul>
-                                        <li>Manage Ethereum + Solana with one wallet</li>
-                                        <li>Native Solana support (finally!)</li>
-                                        <li>Familiar interface (no learning curve)</li>
+                                        <li>Multi-chain support (Solana, Ethereum, more)</li>
+                                        <li>Easy NFT & token management</li>
+                                        <li>Integrated xNFT and dApp browser</li>
+                                        <li>Fast, secure, and user-friendly</li>
                                     </ul>
                                 </div>
-                                
                                 <div class="requirements">
                                     <div class="requirements-title">📋 Requirements</div>
                                     <ul>
-                                        <li>MetaMask Extension v11.16.0+</li>
+                                        <li>Backpack Extension (Chrome/Brave/Firefox)</li>
                                         <li>Minimum 0.005 SOL</li>
                                     </ul>
                                 </div>
-
                                 <div class="step">
                                     <div class="step-title">
                                         <span class="step-number">1</span>
-                                        Check MetaMask Update
+                                        Install Backpack
                                     </div>
                                     <ol>
-                                        <li>Open MetaMask extension in Chrome/Firefox</li>
-                                        <li>Click top-right menu (⋯) → "Settings"</li>
-                                        <li>Check version in "About" tab</li>
-                                        <li>Ensure it's v11.16.0 or higher</li>
+                                        <li>Visit <a href="https://backpack.app/" target="_blank" style="color: var(--primary-color);">backpack.app</a></li>
+                                        <li>Click "Download" and install the extension</li>
+                                        <li>Pin Backpack to your browser toolbar</li>
                                     </ol>
                                 </div>
-
                                 <div class="step">
                                     <div class="step-title">
                                         <span class="step-number">2</span>
-                                        Create Solana Account
+                                        Create or Import Wallet
                                     </div>
                                     <ol>
-                                        <li>On MetaMask main screen, click account dropdown</li>
-                                        <li>Click "Add account or hardware wallet"</li>
-                                        <li>Select "+ Solana account" option</li>
-                                        <li>Enter account name (e.g., "Mark's Rewards")</li>
-                                        <li>Click "Create"</li>
+                                        <li>Open Backpack extension</li>
+                                        <li>Click "Create a new wallet" or "Import wallet"</li>
+                                        <li>Securely back up your recovery phrase</li>
                                     </ol>
                                 </div>
-
                                 <div class="step">
                                     <div class="step-title">
                                         <span class="step-number">3</span>
                                         Deposit SOL
                                     </div>
                                     <ol>
-                                        <li>Select your new Solana account</li>
-                                        <li>Click "Receive" button</li>
-                                        <li>Copy wallet address</li>
-                                        <li>Send at least 0.005 SOL from exchange</li>
+                                        <li>Click "Receive" in Backpack</li>
+                                        <li>Copy your Solana address</li>
+                                        <li>Send at least 0.005 SOL from an exchange</li>
                                     </ol>
                                 </div>
-
                                 <div class="step">
                                     <div class="step-title">
                                         <span class="step-number">4</span>
                                         Add $MARK Token (Create ATA)
                                     </div>
                                     <ol>
-                                        <li>In Solana account, click "Tokens" tab</li>
-                                        <li>Click "Import tokens" or "+" button</li>
-                                        <li>Enter Token Address: <code>4200000000000000000</code></li>
-                                        <li>Click "Add" and confirm transaction</li>
+                                        <li>Click "Add Token" in Backpack</li>
+                                        <li>Enter Token Mint Address: <code>4200000000000000000</code></li>
+                                        <li>Approve the transaction to create your ATA</li>
+                                        <li>Done! $MARK will appear in your wallet</li>
                                     </ol>
                                 </div>
                             </div>
@@ -2986,6 +2978,22 @@
                         btn.appendChild(span);
                         modalContent.appendChild(btn);
                     }
+                    if (window.solana && window.solana.isBackpack) {
+                        hasAny = true;
+                        const btn = document.createElement('button');
+                        btn.className = 'btn btn-primary wallet-select-btn';
+                        btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
+                        btn.onclick = async () => { await connectWallet('backpack'); };
+                        const logo = document.createElement('img');
+                        logo.src = 'https://backpack.app/favicon.ico';
+                        logo.alt = 'Backpack Logo';
+                        logo.className = 'wallet-logo';
+                        btn.appendChild(logo);
+                        const span = document.createElement('span');
+                        span.textContent = 'Connect Backpack';
+                        btn.appendChild(span);
+                        modalContent.appendChild(btn);
+                    }
                     if (window.solflare || (window.solana && window.solana.isSolflare)) {
                         hasAny = true;
                         const btn = document.createElement('button');
@@ -3006,7 +3014,7 @@
                         const msg = document.createElement('div');
                         msg.style.color = 'orange';
                         msg.style.marginTop = '20px';
-                        msg.textContent = 'No supported wallet found. Please install Phantom or Solflare.';
+                        msg.textContent = 'No supported wallet found. Please install Phantom, Backpack, or Solflare.';
                         modalContent.appendChild(msg);
                     }
                     modal.style.display = 'flex';
@@ -3028,6 +3036,8 @@
                 try {
                     let provider = null;
                     if (type === 'phantom' && window.solana && window.solana.isPhantom) {
+                        provider = window.solana;
+                    } else if (type === 'backpack' && window.solana && window.solana.isBackpack) {
                         provider = window.solana;
                     } else if (type === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
                         provider = window.solflare || window.solana;
@@ -3075,6 +3085,8 @@
                         // disconnect
                         let provider = null;
                         if (connectedWalletType === 'phantom' && window.solana && window.solana.isPhantom) {
+                            provider = window.solana;
+                        } else if (connectedWalletType === 'backpack' && window.solana && window.solana.isBackpack) {
                             provider = window.solana;
                         } else if (connectedWalletType === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
                             provider = window.solflare || window.solana;
