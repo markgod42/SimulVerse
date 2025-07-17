@@ -2438,6 +2438,7 @@
             }
             function showWhitepaper() {
                 // 메인 숨김, 백서 표시
+                window.scrollTo(0, 0);
                 document.getElementById('main-page-wrapper').style.display = 'none';
                 var ata = document.getElementById('ata-page-wrapper');
                 if(ata) ata.style.display = 'none';
@@ -3480,6 +3481,8 @@
                     if (provider.on) {
                         provider.on('disconnect', onDisconnect);
                     }
+                    // 연결된 지갑 종류 localStorage에 저장
+                    localStorage.setItem('wallet_connected', type);
                 } catch (e) {
                     alert('Failed to connect wallet: ' + (e && e.message ? e.message : e));
                 }
@@ -3493,6 +3496,8 @@
                 const bugWalletInput = document.getElementById('bug-wallet-address');
                 if (prayerWalletInput) prayerWalletInput.value = '';
                 if (bugWalletInput) bugWalletInput.value = '';
+                // 연결 정보 삭제
+                localStorage.removeItem('wallet_connected');
             }
             // Disconnect 버튼 동작
             if (connectBtn) {
@@ -3515,6 +3520,37 @@
                     }
                 });
             }
+            // 새로고침 후 자동 재연결 로직
+            async function tryAutoReconnect() {
+                const lastWallet = localStorage.getItem('wallet_connected');
+                if (!lastWallet) return;
+                let provider = null;
+                if (lastWallet === 'phantom' && window.solana && window.solana.isPhantom) {
+                    provider = window.solana;
+                } else if (lastWallet === 'backpack' && window.solana && window.solana.isBackpack) {
+                    provider = window.solana;
+                } else if (lastWallet === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
+                    provider = window.solflare || window.solana;
+                }
+                if (!provider) return;
+                try {
+                    // onlyIfTrusted: true 옵션으로 자동 재연결 시도
+                    await provider.connect({ onlyIfTrusted: true });
+                    connectedWalletType = lastWallet;
+                    connectedAddress = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
+                    // UI 업데이트
+                    const shortAddr = connectedAddress.slice(0, 4) + '...' + connectedAddress.slice(-4);
+                    connectBtn.textContent = `Disconnect: ${shortAddr}`;
+                    // 폼에 주소 입력
+                    const prayerWalletInput = document.getElementById('prayer-wallet-address');
+                    const bugWalletInput = document.getElementById('bug-wallet-address');
+                    if (prayerWalletInput) prayerWalletInput.value = connectedAddress;
+                    if (bugWalletInput) bugWalletInput.value = connectedAddress;
+                } catch (e) {
+                    // 자동 재연결 실패 시 무시
+                }
+            }
+            tryAutoReconnect();
         });
     </script>
     <script>
