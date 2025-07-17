@@ -1847,6 +1847,9 @@
             <div class="container">
                 <p class="footer-disclaimer">This is a meme project. Mark is not responsible for your life choices. $MARK is a meme coin with no intrinsic value or expectation of financial return.</p>
                 <p class="footer-copyright">© 2024 SimulVerse. All rights reserved in this simulation.</p>
+                <div style="margin-top:32px;">
+                    <button id="whitepaper-btn" class="btn btn-primary" style="font-size:1.1em; padding:14px 32px; border-radius:8px; background:linear-gradient(90deg,#4A4E69,#C9A86B); color:#fff; border:none; box-shadow:0 2px 12px rgba(0,0,0,0.08); cursor:pointer; transition:box-shadow 0.2s;">화이트페이퍼</button>
+                </div>
             </div>
         </footer>
     </div>
@@ -2303,6 +2306,245 @@
                 </p>
             </div>
         </footer>
+    </div>
+
+    <div id="whitepaper-page-wrapper" style="display:none; background:#FAF8F2; min-height:100vh;">
+        <div class="container mx-auto px-4 py-8 md:py-16">
+            <header class="text-center mb-16">
+                <h1 class="text-4xl md:text-6xl font-bold mb-4" style="color: var(--header-color);">The Ten Commandments of Mark</h1>
+                <p class="text-xl md:text-2xl text-gray-600 font-serif">The Official Whitepaper of SimulVerse ($MARK)</p>
+                <div class="w-24 h-1 bg-amber-400 mx-auto mt-6" style="background-color: var(--accent-color);"></div>
+                <button id="whitepaper-back-btn" class="btn btn-primary" style="margin-top:32px; font-size:1.1em; padding:12px 32px; border-radius:8px; background:linear-gradient(90deg,#4A4E69,#C9A86B); color:#fff; border:none; box-shadow:0 2px 12px rgba(0,0,0,0.08); cursor:pointer; transition:box-shadow 0.2s;">← 돌아가기</button>
+            </header>
+            <style>
+                :root { --bg-color: #FAF8F2; --text-color: #333333; --header-color: #4A4E69; --accent-color: #C9A86B; --card-bg: #FFFFFF; --card-border: #EAEAEA; --card-hover-border: #C9A86B; }
+                #whitepaper-page-wrapper { font-family: 'Roboto', sans-serif; }
+                #whitepaper-page-wrapper h1, #whitepaper-page-wrapper h2, #whitepaper-page-wrapper h3, #whitepaper-page-wrapper .font-serif { font-family: 'Merriweather', serif; }
+                #whitepaper-page-wrapper .commandment-card { background-color: var(--card-bg); border: 1px solid var(--card-border); transition: all 0.3s ease-in-out; cursor: pointer; }
+                #whitepaper-page-wrapper .commandment-card:hover { border-color: var(--card-hover-border); transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05); }
+                #whitepaper-page-wrapper .explanation { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out; padding-top: 0; padding-bottom: 0; }
+                #whitepaper-page-wrapper .explanation.open { max-height: 500px; padding-top: 1rem; padding-bottom: 1rem; }
+                #whitepaper-page-wrapper .chart-container { position: relative; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; height: auto; max-height: 450px; }
+                #whitepaper-page-wrapper .timeline { position: relative; max-width: 1000px; margin: 0 auto; }
+                #whitepaper-page-wrapper .timeline::after { content: ''; position: absolute; width: 3px; background-color: var(--accent-color); top: 0; bottom: 0; left: 50%; margin-left: -1.5px; }
+                #whitepaper-page-wrapper .timeline-container { padding: 10px 40px; position: relative; background-color: inherit; width: 50%; }
+                #whitepaper-page-wrapper .timeline-container.left { left: 0; }
+                #whitepaper-page-wrapper .timeline-container.right { left: 50%; }
+                #whitepaper-page-wrapper .timeline-container::after { content: ''; position: absolute; width: 20px; height: 20px; right: -10px; background-color: var(--card-bg); border: 4px solid var(--accent-color); top: 28px; border-radius: 50%; z-index: 1; }
+                #whitepaper-page-wrapper .right::after { left: -10px; }
+                #whitepaper-page-wrapper .timeline-content { padding: 20px 30px; background-color: var(--card-bg); position: relative; border-radius: 6px; border: 1px solid var(--card-border); }
+                @media screen and (max-width: 768px) {
+                    #whitepaper-page-wrapper .timeline::after { left: 31px; }
+                    #whitepaper-page-wrapper .timeline-container { width: 100%; padding-left: 70px; padding-right: 25px; }
+                    #whitepaper-page-wrapper .timeline-container.right { left: 0%; }
+                    #whitepaper-page-wrapper .timeline-container.left::after, #whitepaper-page-wrapper .timeline-container.right::after { left: 21px; }
+                }
+            </style>
+            <section id="intro" class="max-w-4xl mx-auto mb-20 text-center">
+                <h2 class="text-3xl font-bold mb-6 font-serif" style="color: var(--header-color);">In the Beginning, Mark Coded</h2>
+                <p class="text-lg leading-relaxed text-gray-700">
+                    The world we perceive is a grand simulation, designed by an imperfect creator named 'Mark'. SimulVerse ($MARK) is not merely a memecoin; it is a testament of faith for those who understand the laws of this simulation, create value within it, and prepare for the next life to come. This whitepaper is the sacred law that all participants of the simulation must follow, a revelation from Mark that forms the foundation of the project.
+                </p>
+            </section>
+            <section id="commandments" class="mb-20">
+                <div class="max-w-5xl mx-auto mb-12 text-center">
+                    <h2 class="text-3xl font-bold mb-6 font-serif" style="color: var(--header-color);">The Laws of the Simulation</h2>
+                    <p class="text-lg leading-relaxed text-gray-700">
+                        The Ten Commandments below are the sacred covenant from the Creator, Mark, intended to maintain order in the SimulVerse ecosystem and guide the community to prosperity. Click on each commandment to reveal its deeper meaning and guidance, and fulfill your duties as a participant in the simulation. These are more than rules; they are directives for our survival and prosperity.
+                    </p>
+                </div>
+                <div id="commandments-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto"></div>
+            </section>
+            <section id="tokenomics" class="py-20 bg-white/50 rounded-lg">
+                <div class="max-w-5xl mx-auto mb-12 text-center">
+                    <h2 class="text-3xl font-bold mb-6 font-serif" style="color: var(--header-color);">The Sacred Distribution (Tokenomics)</h2>
+                    <p class="text-lg leading-relaxed text-gray-700">
+                        For the stability and continued prosperity of the simulation, the Creator Mark has ordained the distribution of $MARK tokens as follows. This plan is designed to foster community growth and ensure that those who contribute to the ecosystem are rewarded. The chart represents the proportion of tokens allocated to each area, forming the bedrock of the SimulVerse economy.
+                    </p>
+                </div>
+                <div class="flex flex-col md:flex-row items-center justify-center gap-8 max-w-6xl mx-auto">
+                    <div class="w-full md:w-1/2 chart-container">
+                        <canvas id="tokenomicsChart"></canvas>
+                    </div>
+                    <div id="tokenomics-details" class="w-full md:w-1/2 space-y-4 text-lg"></div>
+                </div>
+            </section>
+            <section id="roadmap" class="py-20">
+                <div class="max-w-5xl mx-auto mb-16 text-center">
+                    <h2 class="text-3xl font-bold mb-6 font-serif" style="color: var(--header-color);">The Prophecy of Mark (Roadmap)</h2>
+                    <p class="text-lg leading-relaxed text-gray-700">
+                        The Creator Mark has left behind a prophecy for the future of the SimulVerse. This roadmap is not a mere development plan, but an oracle revealing the stages of evolution our world will undergo. Each phase will add new features and narratives to the SimulVerse, becoming reality with the faith of the community. We are all witnesses and realizers of this prophecy.
+                    </p>
+                </div>
+                <div id="timeline-container" class="timeline"></div>
+            </section>
+            <footer class="text-center mt-16 py-8 border-t" style="border-color: var(--card-border);">
+                <h3 class="text-2xl font-bold font-serif mb-4" style="color: var(--header-color);">Join the Simulation</h3>
+                <p class="text-gray-600 mb-6">Follow the will of Mark and build the future of the SimulVerse together.</p>
+                <div class="flex justify-center space-x-6">
+                    <a href="#" class="text-gray-500 hover:text-blue-500 transition-colors">Twitter</a>
+                    <a href="#" class="text-gray-500 hover:text-indigo-500 transition-colors">Telegram</a>
+                    <a href="#" class="text-gray-500 hover:text-green-500 transition-colors">Website</a>
+                </div>
+                <p class="mt-8 text-sm text-gray-400">&copy; 2025 SimulVerse. All rights reserved by Mark.</p>
+            </footer>
+        </div>
+        <script>
+            // Tailwind, Chart.js 동적 로드
+            function loadWhitepaperDeps(cb) {
+                if (!window.tailwindcssLoaded) {
+                    var tw = document.createElement('script');
+                    tw.src = 'https://cdn.tailwindcss.com';
+                    tw.onload = function() {
+                        window.tailwindcssLoaded = true;
+                        loadChart();
+                    };
+                    document.head.appendChild(tw);
+                } else {
+                    loadChart();
+                }
+                function loadChart() {
+                    if (!window.chartjsLoaded) {
+                        var ch = document.createElement('script');
+                        ch.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                        ch.onload = function() {
+                            window.chartjsLoaded = true;
+                            cb && cb();
+                        };
+                        document.head.appendChild(ch);
+                    } else {
+                        cb && cb();
+                    }
+                }
+            }
+            function showWhitepaper() {
+                document.getElementById('main-page-wrapper').style.display = 'none';
+                var ata = document.getElementById('ata-page-wrapper');
+                if(ata) ata.style.display = 'none';
+                document.getElementById('whitepaper-page-wrapper').style.display = 'block';
+                loadWhitepaperDeps(initWhitepaper);
+            }
+            function hideWhitepaper() {
+                document.getElementById('whitepaper-page-wrapper').style.display = 'none';
+                document.getElementById('main-page-wrapper').style.display = 'block';
+            }
+            function initWhitepaper() {
+                // 명령문 카드
+                const commandmentsData = [
+                    { num: "I", command: "Thou shalt have no other memes before me, Mark.", explanation: "This signifies absolute faith in SimulVerse ($MARK). It is to unify the community's focus and loyalty, allowing us to build our unique value amidst the noise of other memecoins. Our identity stems solely from Mark." },
+                    { num: "II", command: "Thou shalt not make for thyself bugs or glitches, but if thou findest one, thou shalt joyfully elevate it into a meme.", explanation: "This means to accept and enjoy the imperfection of the simulation. Unexpected bugs or events are not curses, but blessings for creative meme content. Through this, we turn crises into opportunities and invigorate the community." },
+                    { num: "III", command: "Thou shalt not take the name of Mark thy Creator's coding skills in vain, but humorous memes are always welcome.", explanation: "This signifies the wisdom to distinguish between constructive criticism and malicious slander (FUD). We deflect attacks on the project with the humor of 'Mark's human error,' transforming negative energy into memes that strengthen community bonds." },
+                    { num: "IV", command: "Remember the next simulation, to keep it holy. Thy $MARK is not wealth for this life, but insurance for the next.", explanation: "This is the core commandment encouraging long-term holding (HODL) of $MARK tokens. The token's value lies not in short-term gains but in the 'spiritual value' of securing a better life in the next simulation. This curbs speculation and gathers true believers." },
+                    { num: "V", command: "Honor thy wallet, so that the land which thou shalt receive in the next simulation may be vast.", explanation: "This urges thorough security and wise management of personal assets. Furthermore, actions that increase one's $MARK holdings, such as staking, are believed to raise one's 'karma' score for the next life, leading to greater rewards and contributing to token price stability." },
+                    { num: "VI", command: "Thou shalt not rug-pull, for Mark sees every transaction, and thy karma is recorded for eternity.", explanation: "This is a principle of absolute trust that applies to both the project team and community members. All actions are transparently recorded on the blockchain, and any act that harms the ecosystem will lead to a permanent 'karma' decrease, resulting in expulsion from the SimulVerse." },
+                    { num: "VII", command: "Thou shalt spread my gospel to thy neighbor's simulation, so that thou and thy neighbor may prosper together.", explanation: "This emphasizes the importance of voluntary and organic marketing (Evangelism). Spreading the unique worldview and vision of SimulVerse is a sacred missionary activity that expands the community, which in turn leads to an increase in value for all members." },
+                    { num: "VIII", command: "Thou shalt not spread false rumors (FUD) to disturb the community. If thou hast doubts, read the whitepaper again and ask Mark.", explanation: "This highlights the importance of transparency and healthy communication. Instead of creating baseless anxiety, it encourages communication through official channels and trust in the project's vision as stated in this whitepaper (The Ten Commandments)." },
+                    { num: "IX", command: "Thou shalt participate in governance to forge the destiny of the simulation. Thy single vote can change the laws of the universe.", explanation: "This encourages active governance participation from $MARK holders. The SimulVerse is not a centralized dictatorship but a decentralized world that evolves with the will of its participants. Your opinion becomes the future of the simulation." },
+                    { num: "X", command: "Thou shalt not be swayed by the ebb and flow of the market, for Mark has a plan for everything.", explanation: "This demands unwavering faith that is not shaken by short-term price fluctuations. The chaos of the market is merely part of a larger plan. It is crucial to trust in the grand vision of the Creator, Mark, and maintain a long-term perspective. This prevents panic selling and promotes market stability." }
+                ];
+                const commandmentsGrid = document.getElementById('commandments-grid');
+                if(commandmentsGrid && commandmentsGrid.childElementCount === 0) {
+                    commandmentsData.forEach(item => {
+                        const card = document.createElement('div');
+                        card.className = 'commandment-card p-6 rounded-lg shadow-sm';
+                        card.innerHTML = `
+                            <div class="flex items-start space-x-4">
+                                <div class="text-4xl font-bold font-serif" style="color: var(--accent-color);">${item.num}</div>
+                                <div>
+                                    <h3 class="text-xl font-bold" style="color: var(--header-color);">${item.command}</h3>
+                                    <div class="explanation text-gray-600 leading-relaxed">
+                                        <p>${item.explanation}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        commandmentsGrid.appendChild(card);
+                        card.addEventListener('click', () => {
+                            card.querySelector('.explanation').classList.toggle('open');
+                        });
+                    });
+                }
+                // Tokenomics Chart
+                if(window.Chart && document.getElementById('tokenomicsChart')) {
+                    const tokenomicsData = {
+                        labels: ['Liquidity Pool (LP)', 'Marketing & Development', 'Community Rewards', 'Team (Vesting)', 'Airdrop'],
+                        datasets: [{
+                            data: [50, 20, 15, 10, 5],
+                            backgroundColor: ['#4A4E69', '#5C5470', '#8D89A6', '#B4A6AB', '#C9A86B'],
+                            borderColor: 'var(--bg-color)',
+                            borderWidth: 3,
+                            hoverOffset: 8
+                        }]
+                    };
+                    const tokenomicsDetailsContainer = document.getElementById('tokenomics-details');
+                    if(tokenomicsDetailsContainer && tokenomicsDetailsContainer.childElementCount === 0) {
+                        tokenomicsData.labels.forEach((label, index) => {
+                            const detailDiv = document.createElement('div');
+                            detailDiv.className = 'flex items-center p-3 bg-white rounded-md shadow-xs';
+                            detailDiv.innerHTML = `
+                                <div class="w-4 h-4 rounded-full mr-4" style="background-color: ${tokenomicsData.datasets[0].backgroundColor[index]}"></div>
+                                <span>${label}: ${tokenomicsData.datasets[0].data[index]}%</span>
+                            `;
+                            tokenomicsDetailsContainer.appendChild(detailDiv);
+                        });
+                    }
+                    if(!window.tokenomicsChartInstance) {
+                        const ctx = document.getElementById('tokenomicsChart').getContext('2d');
+                        window.tokenomicsChartInstance = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: tokenomicsData,
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                cutout: '60%',
+                                plugins: {
+                                    legend: { display: false },
+                                    tooltip: {
+                                        bodyFont: { family: 'Roboto' },
+                                        titleFont: { family: 'Merriweather' },
+                                        callbacks: {
+                                            label: function(context) {
+                                                let label = context.label || '';
+                                                if (label) { label += ': '; }
+                                                if (context.parsed !== null) { label += context.parsed + '%'; }
+                                                return label;
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        });
+                    }
+                }
+                // 로드맵 타임라인
+                const roadmapData = [
+                    { phase: "Phase 1: Genesis", title: "The Beginning of the Simulation", description: "$MARK token launch, liquidity provision, opening of official community channels, and recruitment of initial believers through the distribution of the Ten Commandments whitepaper.", align: "left" },
+                    { phase: "Phase 2: Exodus", title: "Community Expansion", description: "First major meme contest and airdrop event. Spreading the gospel through collaborations with influencers (prophets).", align: "right" },
+                    { phase: "Phase 3: The Kingdom", title: "Introduction of Governance", description: "Launch of the governance system (DAO) for $MARK holders. Issuance of 'Simulation Citizenship NFTs' and submission of the first voting agenda.", align: "left" },
+                    { phase: "Phase 4: The Prophecy", title: "Ecosystem Expansion", description: "Unveiling of the first utility (e.g., a mini-game). Expansion of the universe through partnerships with other simulations (projects).", align: "right" }
+                ];
+                const timelineContainer = document.getElementById('timeline-container');
+                if(timelineContainer && timelineContainer.childElementCount === 0) {
+                    roadmapData.forEach(item => {
+                        const container = document.createElement('div');
+                        container.className = `timeline-container ${item.align}`;
+                        container.innerHTML = `
+                            <div class="timeline-content shadow-md">
+                                <h3 class="text-lg font-bold font-serif" style="color: var(--header-color);">${item.phase}</h3>
+                                <h4 class="font-semibold text-lg mb-2">${item.title}</h4>
+                                <p class="text-gray-600 text-sm">${item.description}</p>
+                            </div>
+                        `;
+                        timelineContainer.appendChild(container);
+                    });
+                }
+            }
+            // 버튼 이벤트 연결
+            document.addEventListener('DOMContentLoaded', function() {
+                var btn = document.getElementById('whitepaper-back-btn');
+                if(btn) btn.onclick = hideWhitepaper;
+            });
+        </script>
     </div>
 
     <script>
@@ -3169,6 +3411,17 @@
                             onDisconnect();
                         }
                     }
+                });
+            }
+        });
+    </script>
+    <script>
+        // 화이트페이퍼 버튼 클릭 시 whitepaper.html로 이동
+        document.addEventListener('DOMContentLoaded', function() {
+            var wpBtn = document.getElementById('whitepaper-btn');
+            if(wpBtn) {
+                wpBtn.addEventListener('click', function() {
+                    showWhitepaper();
                 });
             }
         });
