@@ -372,11 +372,14 @@
         }
         
         .mark-image {
-            max-width: 100%;
-            height: auto;
+            width: auto !important;
+            height: auto !important;
+            max-width: 100% !important;
             border-radius: 15px;
             border: 3px solid var(--primary-color);
             box-shadow: 0 0 25px rgba(0, 255, 195, 0.4);
+            display: block;
+            margin: 0 auto;
         }
         
         .image-caption {
@@ -2391,6 +2394,7 @@
         <script>
             // Tailwind, Chart.js 동적 로드
             var _htmlFontSize = null, _bodyFontSize = null, _htmlClass = null, _bodyClass = null, _htmlStyle = null, _bodyStyle = null;
+            var _markImageStyle = null, _markImageClass = null;
             function loadWhitepaperDeps(cb) {
                 // Tailwind 동적 로드 (중복 방지)
                 if (!window.tailwindcssLoaded) {
@@ -2432,6 +2436,12 @@
                 _bodyClass = document.body.className;
                 _htmlStyle = document.documentElement.getAttribute('style');
                 _bodyStyle = document.body.getAttribute('style');
+                // mark-image 스타일/클래스 백업
+                var markImg = document.querySelector('.mark-image');
+                if (markImg) {
+                    _markImageStyle = markImg.getAttribute('style');
+                    _markImageClass = markImg.className;
+                }
                 // body, html, .container 스타일 원복
                 document.body.style.backgroundColor = '';
                 document.body.style.color = '';
@@ -2454,6 +2464,13 @@
                 var tw = document.getElementById('tailwindcss-cdn-script');
                 if(tw) tw.remove();
                 window.tailwindcssLoaded = false;
+                // mark-image 스타일/클래스 복구
+                var markImg = document.querySelector('.mark-image');
+                if (markImg) {
+                    if (_markImageStyle !== null) markImg.setAttribute('style', _markImageStyle);
+                    else markImg.removeAttribute('style');
+                    if (_markImageClass !== null) markImg.className = _markImageClass;
+                }
                 // body, html, .container 스타일 원복
                 document.body.style.backgroundColor = '';
                 document.body.style.color = '';
