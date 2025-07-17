@@ -1532,8 +1532,7 @@
                         </div>
                         
                         <div class="hero-image">
-                            <img src="https://i.ibb.co/YTYLPXMQ/image.jpg" alt="Mark - Your Creator" class="mark-image" id="mark-image">
-                            <div class="image-caption">Meet Mark - Your Creator (probably debugging right now)</div>
+                            <div id="mark-image-shadow-root"></div>
                         </div>
                     </div>
                 </section>
@@ -3528,6 +3527,40 @@
                 });
             }
         });
+    </script>
+    <script>
+    // Mark 이미지를 Shadow DOM에 렌더링하여 Tailwind 등 외부 CSS 영향 100% 차단
+    function renderMarkImage() {
+        const container = document.getElementById('mark-image-shadow-root');
+        if (!container) return;
+        if (!container.shadowRoot) {
+            const shadow = container.attachShadow({mode: 'open'});
+            shadow.innerHTML = `
+                <style>
+                    img {
+                        display: block;
+                        max-width: 100%;
+                        width: auto;
+                        height: auto;
+                        border-radius: 15px;
+                        border: 3px solid #00ffc3;
+                        box-shadow: 0 0 25px rgba(0, 255, 195, 0.4);
+                        margin: 0 auto;
+                        box-sizing: border-box;
+                    }
+                    .image-caption {
+                        margin-top: 15px;
+                        font-style: italic;
+                        color: #aaa;
+                        text-align: center;
+                    }
+                </style>
+                <img src="https://i.ibb.co/YTYLPXMQ/image.jpg" alt="Mark - Your Creator">
+                <div class="image-caption">Meet Mark - Your Creator (probably debugging right now)</div>
+            `;
+        }
+    }
+    document.addEventListener('DOMContentLoaded', renderMarkImage);
     </script>
 </body>
 </html>
