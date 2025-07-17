@@ -1450,6 +1450,20 @@
             }
         }
     </style>
+    <style id="tailwind-img-reset">
+        img.mark-image {
+            all: unset;
+            display: block;
+            max-width: 100% !important;
+            width: auto !important;
+            height: auto !important;
+            border-radius: 15px;
+            border: 3px solid var(--primary-color);
+            box-shadow: 0 0 25px rgba(0, 255, 195, 0.4);
+            margin: 0 auto;
+            box-sizing: border-box !important;
+        }
+    </style>
 </head>
 <body>
     <div id="starfield"></div>
@@ -1518,7 +1532,7 @@
                         </div>
                         
                         <div class="hero-image">
-                            <img src="https://i.ibb.co/YTYLPXMQ/image.jpg" alt="Mark - Your Creator" class="mark-image">
+                            <img src="https://i.ibb.co/YTYLPXMQ/image.jpg" alt="Mark - Your Creator" class="mark-image" id="mark-image">
                             <div class="image-caption">Meet Mark - Your Creator (probably debugging right now)</div>
                         </div>
                     </div>
@@ -2437,10 +2451,22 @@
                 _htmlStyle = document.documentElement.getAttribute('style');
                 _bodyStyle = document.body.getAttribute('style');
                 // mark-image 스타일/클래스 백업
-                var markImg = document.querySelector('.mark-image');
+                var markImg = document.getElementById('mark-image');
                 if (markImg) {
-                    _markImageStyle = markImg.getAttribute('style');
-                    _markImageClass = markImg.className;
+                    markImg.removeAttribute('style');
+                    markImg.removeAttribute('width');
+                    markImg.removeAttribute('height');
+                    markImg.className = 'mark-image';
+                    // 필요한 스타일만 다시 적용
+                    markImg.style.display = 'block';
+                    markImg.style.maxWidth = '100%';
+                    markImg.style.width = 'auto';
+                    markImg.style.height = 'auto';
+                    markImg.style.borderRadius = '15px';
+                    markImg.style.border = '3px solid var(--primary-color)';
+                    markImg.style.boxShadow = '0 0 25px rgba(0, 255, 195, 0.4)';
+                    markImg.style.margin = '0 auto';
+                    markImg.style.boxSizing = 'border-box';
                 }
                 // body, html, .container 스타일 원복
                 document.body.style.backgroundColor = '';
@@ -2471,14 +2497,20 @@
                     }
                 });
                 // mark-image 스타일/클래스 복구 및 인라인 width/height/max-width 제거
-                var markImg = document.querySelector('.mark-image');
+                var markImg = document.getElementById('mark-image');
                 if (markImg) {
                     if (_markImageStyle !== null) markImg.setAttribute('style', _markImageStyle);
                     else markImg.removeAttribute('style');
                     if (_markImageClass !== null) markImg.className = _markImageClass;
-                    markImg.removeAttribute('width');
-                    markImg.removeAttribute('height');
-                    markImg.removeAttribute('max-width');
+                    // Tailwind가 남긴 클래스 강제 제거
+                    markImg.classList.remove('w-full', 'h-auto', 'max-w-full', 'min-w-0', 'min-h-0');
+                    // 인라인 스타일 속성도 강제 초기화
+                    markImg.style.width = '';
+                    markImg.style.height = '';
+                    markImg.style.maxWidth = '';
+                    markImg.style.minWidth = '';
+                    markImg.style.minHeight = '';
+                    markImg.style.boxSizing = '';
                 }
                 // body, html, .container 스타일 원복
                 document.body.style.backgroundColor = '';
