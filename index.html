@@ -1839,6 +1839,9 @@
                         <a href="https://t.me/simulverse42" class="community-link telegram" target="_blank"><div class="link-icon">💬</div><div class="link-content"><div class="link-title">Telegram</div><div class="link-description">Chat with fellow dwellers</div></div></a>
                         <a href="https://www.instagram.com/simulverse42" class="community-link instagram" target="_blank"><div class="link-icon">📸</div><div class="link-content"><div class="link-title">Instagram</div><div class="link-description">Behind-the-scenes simulation content</div></div></a>
                     </div>
+                    <div style="display:flex; justify-content:center; margin:32px 0 0 0;">
+                        <button id="whitepaper-btn" class="btn btn-primary" style="font-size:1.1em; padding:14px 32px; border-radius:8px; background:linear-gradient(90deg,#00ffc3,#0d0d1a); color:#fff; border:none; box-shadow:0 2px 12px rgba(0,0,0,0.08); cursor:pointer; transition:box-shadow 0.2s;">Whitepaper</button>
+                    </div>
                 </section>
             </div>
         </main>
@@ -1847,9 +1850,6 @@
             <div class="container">
                 <p class="footer-disclaimer">This is a meme project. Mark is not responsible for your life choices. $MARK is a meme coin with no intrinsic value or expectation of financial return.</p>
                 <p class="footer-copyright">© 2024 SimulVerse. All rights reserved in this simulation.</p>
-                <div style="margin-top:32px;">
-                    <button id="whitepaper-btn" class="btn btn-primary" style="font-size:1.1em; padding:14px 32px; border-radius:8px; background:linear-gradient(90deg,#4A4E69,#C9A86B); color:#fff; border:none; box-shadow:0 2px 12px rgba(0,0,0,0.08); cursor:pointer; transition:box-shadow 0.2s;">화이트페이퍼</button>
-                </div>
             </div>
         </footer>
     </div>
@@ -2308,31 +2308,30 @@
         </footer>
     </div>
 
-    <div id="whitepaper-page-wrapper" style="display:none; background:#FAF8F2; min-height:100vh;">
+    <div id="whitepaper-page-wrapper" style="display:none; min-height:100vh;">
         <div class="container mx-auto px-4 py-8 md:py-16">
             <header class="text-center mb-16">
-                <h1 class="text-4xl md:text-6xl font-bold mb-4" style="color: var(--header-color);">The Ten Commandments of Mark</h1>
-                <p class="text-xl md:text-2xl text-gray-600 font-serif">The Official Whitepaper of SimulVerse ($MARK)</p>
-                <div class="w-24 h-1 bg-amber-400 mx-auto mt-6" style="background-color: var(--accent-color);"></div>
-                <button id="whitepaper-back-btn" class="btn btn-primary" style="margin-top:32px; font-size:1.1em; padding:12px 32px; border-radius:8px; background:linear-gradient(90deg,#4A4E69,#C9A86B); color:#fff; border:none; box-shadow:0 2px 12px rgba(0,0,0,0.08); cursor:pointer; transition:box-shadow 0.2s;">← 돌아가기</button>
+                <h1 class="text-4xl md:text-6xl font-bold mb-4" style="color: #4A4E69; font-family:'Merriweather',serif;">The Ten Commandments of Mark</h1>
+                <p class="text-xl md:text-2xl text-gray-600 font-serif" style="font-family:'Merriweather',serif;">The Official Whitepaper of SimulVerse ($MARK)</p>
+                <div class="w-24 h-1 bg-amber-400 mx-auto mt-6" style="background-color: #C9A86B;"></div>
+                <button id="whitepaper-back-btn" class="btn btn-primary" style="margin-top:32px; font-size:1.1em; padding:12px 32px; border-radius:8px; background:linear-gradient(90deg,#4A4E69,#C9A86B); color:#fff; border:none; box-shadow:0 2px 12px rgba(0,0,0,0.08); cursor:pointer; transition:box-shadow 0.2s;">← Back</button>
             </header>
             <style>
-                :root { --bg-color: #FAF8F2; --text-color: #333333; --header-color: #4A4E69; --accent-color: #C9A86B; --card-bg: #FFFFFF; --card-border: #EAEAEA; --card-hover-border: #C9A86B; }
-                #whitepaper-page-wrapper { font-family: 'Roboto', sans-serif; }
+                #whitepaper-page-wrapper { background: #FAF8F2 !important; color: #333 !important; font-family: 'Roboto', sans-serif; }
                 #whitepaper-page-wrapper h1, #whitepaper-page-wrapper h2, #whitepaper-page-wrapper h3, #whitepaper-page-wrapper .font-serif { font-family: 'Merriweather', serif; }
-                #whitepaper-page-wrapper .commandment-card { background-color: var(--card-bg); border: 1px solid var(--card-border); transition: all 0.3s ease-in-out; cursor: pointer; }
-                #whitepaper-page-wrapper .commandment-card:hover { border-color: var(--card-hover-border); transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05); }
+                #whitepaper-page-wrapper .commandment-card { background-color: #fff; border: 1px solid #EAEAEA; transition: all 0.3s ease-in-out; cursor: pointer; }
+                #whitepaper-page-wrapper .commandment-card:hover { border-color: #C9A86B; transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05); }
                 #whitepaper-page-wrapper .explanation { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out; padding-top: 0; padding-bottom: 0; }
                 #whitepaper-page-wrapper .explanation.open { max-height: 500px; padding-top: 1rem; padding-bottom: 1rem; }
                 #whitepaper-page-wrapper .chart-container { position: relative; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; height: auto; max-height: 450px; }
                 #whitepaper-page-wrapper .timeline { position: relative; max-width: 1000px; margin: 0 auto; }
-                #whitepaper-page-wrapper .timeline::after { content: ''; position: absolute; width: 3px; background-color: var(--accent-color); top: 0; bottom: 0; left: 50%; margin-left: -1.5px; }
+                #whitepaper-page-wrapper .timeline::after { content: ''; position: absolute; width: 3px; background-color: #C9A86B; top: 0; bottom: 0; left: 50%; margin-left: -1.5px; }
                 #whitepaper-page-wrapper .timeline-container { padding: 10px 40px; position: relative; background-color: inherit; width: 50%; }
                 #whitepaper-page-wrapper .timeline-container.left { left: 0; }
                 #whitepaper-page-wrapper .timeline-container.right { left: 50%; }
-                #whitepaper-page-wrapper .timeline-container::after { content: ''; position: absolute; width: 20px; height: 20px; right: -10px; background-color: var(--card-bg); border: 4px solid var(--accent-color); top: 28px; border-radius: 50%; z-index: 1; }
+                #whitepaper-page-wrapper .timeline-container::after { content: ''; position: absolute; width: 20px; height: 20px; right: -10px; background-color: #fff; border: 4px solid #C9A86B; top: 28px; border-radius: 50%; z-index: 1; }
                 #whitepaper-page-wrapper .right::after { left: -10px; }
-                #whitepaper-page-wrapper .timeline-content { padding: 20px 30px; background-color: var(--card-bg); position: relative; border-radius: 6px; border: 1px solid var(--card-border); }
+                #whitepaper-page-wrapper .timeline-content { padding: 20px 30px; background-color: #fff; position: relative; border-radius: 6px; border: 1px solid #EAEAEA; }
                 @media screen and (max-width: 768px) {
                     #whitepaper-page-wrapper .timeline::after { left: 31px; }
                     #whitepaper-page-wrapper .timeline-container { width: 100%; padding-left: 70px; padding-right: 25px; }
