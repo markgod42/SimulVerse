@@ -3436,7 +3436,7 @@
                             window.location.href = `phantom://app/ul/browse/${siteUrl}`;
                         };
                         const phantomLogo = document.createElement('img');
-                        phantomLogo.src = 'https://cdn.jsdelivr.net/gh/solana-labs/token-list/assets/mainnet/phantom.png';
+                        phantomLogo.src = 'https://i.ibb.co/H5KnQH1/images.jpg';
                         phantomLogo.alt = 'Phantom Logo';
                         phantomLogo.className = 'wallet-logo';
                         phantomBtn.appendChild(phantomLogo);
@@ -3454,7 +3454,7 @@
                             window.location.href = `backpack://app/open?url=${siteUrl}`;
                         };
                         const backpackLogo = document.createElement('img');
-                        backpackLogo.src = 'https://backpack.app/favicon.ico';
+                        backpackLogo.src = 'https://i.ibb.co/8nkGvqKT/33.jpg';
                         backpackLogo.alt = 'Backpack Logo';
                         backpackLogo.className = 'wallet-logo';
                         backpackBtn.appendChild(backpackLogo);
@@ -3472,7 +3472,7 @@
                             window.location.href = `solflare://open?url=${siteUrl}`;
                         };
                         const solflareLogo = document.createElement('img');
-                        solflareLogo.src = 'https://cdn.jsdelivr.net/gh/solana-labs/token-list/assets/mainnet/solflare.png';
+                        solflareLogo.src = 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png';
                         solflareLogo.alt = 'Solflare Logo';
                         solflareLogo.className = 'wallet-logo';
                         solflareBtn.appendChild(solflareLogo);
@@ -3481,6 +3481,8 @@
                         solflareBtn.appendChild(solflareSpan);
                         modalContent.appendChild(solflareBtn);
                         hasAny = true;
+                        // WalletConnect (모바일은 QR코드가 불편하므로 PC에서만 노출)
+                        // ...
                         if (!hasAny) {
                             const msg = document.createElement('div');
                             msg.style.color = 'orange';
@@ -3502,7 +3504,7 @@
                         btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
                         btn.onclick = async () => { await connectWallet('phantom'); };
                         const logo = document.createElement('img');
-                        logo.src = 'https://cdn.jsdelivr.net/gh/solana-labs/token-list/assets/mainnet/phantom.png';
+                        logo.src = 'https://i.ibb.co/H5KnQH1/images.jpg';
                         logo.alt = 'Phantom Logo';
                         logo.className = 'wallet-logo';
                         btn.appendChild(logo);
@@ -3518,7 +3520,7 @@
                         btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
                         btn.onclick = async () => { await connectWallet('backpack'); };
                         const logo = document.createElement('img');
-                        logo.src = 'https://backpack.app/favicon.ico';
+                        logo.src = 'https://i.ibb.co/8nkGvqKT/33.jpg';
                         logo.alt = 'Backpack Logo';
                         logo.className = 'wallet-logo';
                         btn.appendChild(logo);
@@ -3534,7 +3536,7 @@
                         btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
                         btn.onclick = async () => { await connectWallet('solflare'); };
                         const logo = document.createElement('img');
-                        logo.src = 'https://cdn.jsdelivr.net/gh/solana-labs/token-list/assets/mainnet/solflare.png';
+                        logo.src = 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png';
                         logo.alt = 'Solflare Logo';
                         logo.className = 'wallet-logo';
                         btn.appendChild(logo);
@@ -3543,11 +3545,26 @@
                         btn.appendChild(span);
                         modalContent.appendChild(btn);
                     }
+                    // WalletConnect 버튼 추가
+                    hasAny = true;
+                    const wcBtn = document.createElement('button');
+                    wcBtn.className = 'btn btn-primary wallet-select-btn';
+                    wcBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
+                    wcBtn.onclick = async () => { await connectWallet('walletconnect'); };
+                    const wcLogo = document.createElement('img');
+                    wcLogo.src = 'https://avatars.githubusercontent.com/u/37784886?s=200';
+                    wcLogo.alt = 'WalletConnect Logo';
+                    wcLogo.className = 'wallet-logo';
+                    wcBtn.appendChild(wcLogo);
+                    const wcSpan = document.createElement('span');
+                    wcSpan.textContent = 'Connect WalletConnect';
+                    wcBtn.appendChild(wcSpan);
+                    modalContent.appendChild(wcBtn);
                     if (!hasAny) {
                         const msg = document.createElement('div');
                         msg.style.color = 'orange';
                         msg.style.marginTop = '20px';
-                        msg.textContent = 'No supported wallet found. Please install Phantom, Backpack, or Solflare.';
+                        msg.textContent = 'No supported wallet found. Please install Phantom, Backpack, Solflare, or use WalletConnect.';
                         modalContent.appendChild(msg);
                     }
                     modal.style.display = 'flex';
@@ -3574,6 +3591,40 @@
                         provider = window.solana;
                     } else if (type === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
                         provider = window.solflare || window.solana;
+                    } else if (type === 'walletconnect') {
+                        // WalletConnect 연동
+                        if (!window.WalletConnectProvider) {
+                            alert('WalletConnectProvider 라이브러리가 로드되지 않았습니다.');
+                            return;
+                        }
+                        provider = new window.WalletConnectProvider.default({
+                            rpc: {
+                                1: 'https://api.mainnet-beta.solana.com',
+                                101: 'https://api.devnet.solana.com',
+                            },
+                            chainId: 1,
+                            qrcode: true
+                        });
+                        await provider.enable();
+                        // WalletConnect는 EVM 계열이 기본이므로, Solana용으로는 별도 어댑터 필요(데모용 주소만 표시)
+                        connectedWalletType = 'walletconnect';
+                        connectedAddress = provider.accounts && provider.accounts[0] ? provider.accounts[0] : '(Unknown)';
+                        // UI 업데이트
+                        const shortAddr = connectedAddress.slice(0, 4) + '...' + connectedAddress.slice(-4);
+                        connectBtn.textContent = `Disconnect: ${shortAddr}`;
+                        // 폼에 주소 입력
+                        const prayerWalletInput = document.getElementById('prayer-wallet-address');
+                        const bugWalletInput = document.getElementById('bug-wallet-address');
+                        if (prayerWalletInput) prayerWalletInput.value = connectedAddress;
+                        if (bugWalletInput) bugWalletInput.value = connectedAddress;
+                        // 모달 닫기
+                        modal.style.display = 'none';
+                        // disconnect 이벤트 등록
+                        if (provider.on) {
+                            provider.on('disconnect', onDisconnect);
+                        }
+                        window.walletConnectProvider = provider; // 전역에 저장(Disconnect용)
+                        return;
                     }
                     if (!provider) {
                         alert('Wallet provider not found.');
@@ -3597,8 +3648,6 @@
                     if (provider.on) {
                         provider.on('disconnect', onDisconnect);
                     }
-                    // 연결된 지갑 종류 localStorage에 저장
-                    localStorage.setItem('wallet_connected', type);
                 } catch (e) {
                     alert('Failed to connect wallet: ' + (e && e.message ? e.message : e));
                 }
@@ -3637,36 +3686,36 @@
                 });
             }
             // 새로고침 후 자동 재연결 로직
-            async function tryAutoReconnect() {
-                const lastWallet = localStorage.getItem('wallet_connected');
-                if (!lastWallet) return;
-                let provider = null;
-                if (lastWallet === 'phantom' && window.solana && window.solana.isPhantom) {
-                    provider = window.solana;
-                } else if (lastWallet === 'backpack' && window.solana && window.solana.isBackpack) {
-                    provider = window.solana;
-                } else if (lastWallet === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
-                    provider = window.solflare || window.solana;
-                }
-                if (!provider) return;
-                try {
-                    // onlyIfTrusted: true 옵션으로 자동 재연결 시도
-                    await provider.connect({ onlyIfTrusted: true });
-                    connectedWalletType = lastWallet;
-                    connectedAddress = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
-                    // UI 업데이트
-                    const shortAddr = connectedAddress.slice(0, 4) + '...' + connectedAddress.slice(-4);
-                    connectBtn.textContent = `Disconnect: ${shortAddr}`;
-                    // 폼에 주소 입력
-                    const prayerWalletInput = document.getElementById('prayer-wallet-address');
-                    const bugWalletInput = document.getElementById('bug-wallet-address');
-                    if (prayerWalletInput) prayerWalletInput.value = connectedAddress;
-                    if (bugWalletInput) bugWalletInput.value = connectedAddress;
-                } catch (e) {
-                    // 자동 재연결 실패 시 무시
-                }
-            }
-            tryAutoReconnect();
+            // async function tryAutoReconnect() {
+            //     const lastWallet = localStorage.getItem('wallet_connected');
+            //     if (!lastWallet) return;
+            //     let provider = null;
+            //     if (lastWallet === 'phantom' && window.solana && window.solana.isPhantom) {
+            //         provider = window.solana;
+            //     } else if (lastWallet === 'backpack' && window.solana && window.solana.isBackpack) {
+            //         provider = window.solana;
+            //     } else if (lastWallet === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
+            //         provider = window.solflare || window.solana;
+            //     }
+            //     if (!provider) return;
+            //     try {
+            //         // onlyIfTrusted: true 옵션으로 자동 재연결 시도
+            //         await provider.connect({ onlyIfTrusted: true });
+            //         connectedWalletType = lastWallet;
+            //         connectedAddress = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
+            //         // UI 업데이트
+            //         const shortAddr = connectedAddress.slice(0, 4) + '...' + connectedAddress.slice(-4);
+            //         connectBtn.textContent = `Disconnect: ${shortAddr}`;
+            //         // 폼에 주소 입력
+            //         const prayerWalletInput = document.getElementById('prayer-wallet-address');
+            //         const bugWalletInput = document.getElementById('bug-wallet-address');
+            //         if (prayerWalletInput) prayerWalletInput.value = connectedAddress;
+            //         if (bugWalletInput) bugWalletInput.value = connectedAddress;
+            //     } catch (e) {
+            //         // 자동 재연결 실패 시 무시
+            //     }
+            // }
+            // tryAutoReconnect(); // 자동 재연결 함수 및 호출 제거
         });
     </script>
     <script>
