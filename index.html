@@ -2332,7 +2332,7 @@
             <style>
                 /* Whitepaper-specific styles to match the main theme */
                 #whitepaper-page-wrapper {
-                    background-color: var(--background-color);
+                    background-color: transparent; /* MODIFIED: Made background transparent for matrix effect */
                     color: var(--text-color);
                     font-family: 'Inter', sans-serif;
                     padding-top: 60px;
@@ -2716,8 +2716,8 @@
                                     legend: { display: false },
                                     tooltip: {
                                         backgroundColor: 'rgba(13, 13, 26, 0.9)',
-                                        titleColor: 'var(--primary-color)',
-                                        bodyColor: '#e0e0e0',
+                                        titleColor: '#FFFFFF', /* MODIFIED: Set tooltip title text color to white */
+                                        bodyColor: '#FFFFFF', /* MODIFIED: Set tooltip body text color to white */
                                         titleFont: { family: "'Orbitron', sans-serif", size: 14 },
                                         bodyFont: { family: "'Inter', sans-serif", size: 12 },
                                         padding: 10,
@@ -2926,7 +2926,7 @@
             "Mark has decided that all cats are now liquid. Please adjust your physics engines.",
             "The 'mid-life crisis' event has been moved to age 25 for efficiency.",
             "Mark is considering a 'New Game+' mode for the afterlife.",
-            "The simulation's anti-cheat system has flagged several politicians.",
+            "The 'simulation's anti-cheat' system has flagged several politicians.",
             "Mark has added a new achievement: 'Survived a family gathering without arguing'.",
             "The 'imposter syndrome' debuff is now a global passive effect.",
             "Mark is looking for volunteer beta testers for the 'dinosaur' expansion pack.",
@@ -3322,7 +3322,7 @@
             { nickname: 'Physics Tester', text: "The phenomenon of toast always landing butter-side down seems to be a conspiracy by cats, not a gravity bug. Please investigate.", status: 'FEATURE, NOT A BUG', reaction: '😂 (12.1k votes)' },
             { nickname: 'Time Traveler', text: "I swear I only slept for 5 minutes, but hours have passed. There seems to be a time acceleration bug.", status: 'CANNOT REPRODUCE', reaction: '🤔 (9.8k votes)' },
             { nickname: 'Existential Debugger', text: "Sometimes I get confused whether I'm an NPC or a player. Please let me see my character info screen.", status: 'PENDING REVIEW', reaction: '🤯 (8.5k votes)' },
-            { nickname: 'Audio Engineer', text: "There's a bug where my singing ability dramatically improves only in the shower. Please apply this patch globally.", status: 'VERIFIED', reaction: '🎤 (7.2k votes)' },
+            { nickname: 'Audio Engineer', text: "There's a bug where my singing ability dramatically improves only in the shower. Please apply this patch globally.", status: 'VERIFIED', reaction: '  (7.2k votes)' },
             { nickname: 'Network Admin', text: "Whenever I go to a place with a weak Wi-Fi signal, I suddenly get important ideas. Is this an intended feature?", status: 'FEATURE, NOT A BUG', reaction: '💡 (6.9k votes)' },
             { nickname: 'Memory Manager', text: "The memory leak issue of forgetting why I entered a room is too frequent. A `System.gc()` call is needed.", status: 'VERIFIED', reaction: '🧠 (15.3k votes)' },
             { nickname: 'UI Improvement Proposer', text: "The 'undo' button in life is too small and hard to find. Please add a Ctrl+Z shortcut.", status: 'PENDING REVIEW', reaction: '⏪ (11.2k votes)' },
