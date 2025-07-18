@@ -3482,6 +3482,10 @@
                     let provider = null;
                     if (type === 'phantom' && window.solana && window.solana.isPhantom) {
                         provider = window.solana;
+                        // 기존 연결 강제 해제(로그아웃)
+                        if (provider.isConnected && provider.disconnect) {
+                            try { await provider.disconnect(); } catch (e) {}
+                        }
                     } else if (type === 'backpack' && window.solana && window.solana.isBackpack) {
                         provider = window.solana;
                     } else if (type === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
