@@ -3418,7 +3418,11 @@
             // Connect Wallet 버튼 클릭 시 모달 표시 (항상 동작)
             const connectBtn = document.getElementById('connect-wallet-btn');
             if (connectBtn) {
-                connectBtn.addEventListener('click', (e) => {
+                // 기존 모든 click 이벤트 제거
+                const newBtn = connectBtn.cloneNode(true);
+                connectBtn.parentNode.replaceChild(newBtn, connectBtn);
+                // 단 하나의 click 이벤트만 등록
+                newBtn.addEventListener('click', (e) => {
                     // 연결된 상태면 바로 disconnect (PC)
                     if (connectedWalletType) {
                         let provider = null;
