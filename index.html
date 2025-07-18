@@ -3419,145 +3419,49 @@
             const connectBtn = document.getElementById('connect-wallet-btn');
             if (connectBtn) {
                 connectBtn.addEventListener('click', () => {
-                    const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-                    const isPhantom = window.solana && window.solana.isPhantom;
-                    const isBackpack = window.solana && window.solana.isBackpack;
-                    const isSolflare = (window.solflare || (window.solana && window.solana.isSolflare));
-                    // 모바일 일반 브라우저에서만 딥링크 모달
-                    if (isMobile && !isPhantom && !isBackpack && !isSolflare) {
-                        while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
-                        let hasAny = false;
-                        // Phantom
-                        const phantomBtn = document.createElement('button');
-                        phantomBtn.className = 'btn btn-primary wallet-select-btn';
-                        phantomBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                        phantomBtn.onclick = async () => { await connectWallet('phantom'); };
-                        const phantomLogo = document.createElement('img');
-                        phantomLogo.src = 'https://i.ibb.co/H5KnQH1/images.jpg';
-                        phantomLogo.alt = 'Phantom Logo';
-                        phantomLogo.className = 'wallet-logo';
-                        phantomBtn.appendChild(phantomLogo);
-                        const phantomSpan = document.createElement('span');
-                        phantomSpan.textContent = 'Connect Phantom';
-                        phantomBtn.appendChild(phantomSpan);
-                        modalContent.appendChild(phantomBtn);
-                        hasAny = true;
-                        // Backpack
-                        const backpackBtn = document.createElement('button');
-                        backpackBtn.className = 'btn btn-primary wallet-select-btn';
-                        backpackBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                        backpackBtn.onclick = async () => { await connectWallet('backpack'); };
-                        const backpackLogo = document.createElement('img');
-                        backpackLogo.src = 'https://i.ibb.co/8nkGvqKT/33.jpg';
-                        backpackLogo.alt = 'Backpack Logo';
-                        backpackLogo.className = 'wallet-logo';
-                        backpackBtn.appendChild(backpackLogo);
-                        const backpackSpan = document.createElement('span');
-                        backpackSpan.textContent = 'Connect Backpack';
-                        backpackBtn.appendChild(backpackSpan);
-                        modalContent.appendChild(backpackBtn);
-                        hasAny = true;
-                        // Solflare
-                        const solflareBtn = document.createElement('button');
-                        solflareBtn.className = 'btn btn-primary wallet-select-btn';
-                        solflareBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                        solflareBtn.onclick = async () => { await connectWallet('solflare'); };
-                        const solflareLogo = document.createElement('img');
-                        solflareLogo.src = 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png';
-                        solflareLogo.alt = 'Solflare Logo';
-                        solflareLogo.className = 'wallet-logo';
-                        solflareBtn.appendChild(solflareLogo);
-                        const solflareSpan = document.createElement('span');
-                        solflareSpan.textContent = 'Connect Solflare';
-                        solflareBtn.appendChild(solflareSpan);
-                        modalContent.appendChild(solflareBtn);
-                        hasAny = true;
-                        // WalletConnect (모바일은 QR코드가 불편하므로 PC에서만 노출)
-                        // ...
-                        if (!hasAny) {
-                            const msg = document.createElement('div');
-                            msg.style.color = 'orange';
-                            msg.style.marginTop = '20px';
-                            msg.textContent = 'No supported wallet found. Please install Phantom, Backpack, or Solflare.';
-                            modalContent.appendChild(msg);
-                        }
-                        modal.style.display = 'flex';
-                        return;
-                    }
-                    // PC 또는 지갑앱 내 브라우저: 기존 방식
                     while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
-                    // 설치된 지갑만 버튼으로 표시
-                    let hasAny = false;
-                    if (window.solana && window.solana.isPhantom) {
-                        hasAny = true;
-                        const btn = document.createElement('button');
-                        btn.className = 'btn btn-primary wallet-select-btn';
-                        btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                        btn.onclick = async () => { await connectWallet('phantom'); };
-                        const logo = document.createElement('img');
-                        logo.src = 'https://i.ibb.co/H5KnQH1/images.jpg';
-                        logo.alt = 'Phantom Logo';
-                        logo.className = 'wallet-logo';
-                        btn.appendChild(logo);
-                        const span = document.createElement('span');
-                        span.textContent = 'Connect Phantom';
-                        btn.appendChild(span);
-                        modalContent.appendChild(btn);
-                    }
-                    if (window.solana && window.solana.isBackpack) {
-                        hasAny = true;
-                        const btn = document.createElement('button');
-                        btn.className = 'btn btn-primary wallet-select-btn';
-                        btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                        btn.onclick = async () => { await connectWallet('backpack'); };
-                        const logo = document.createElement('img');
-                        logo.src = 'https://i.ibb.co/8nkGvqKT/33.jpg';
-                        logo.alt = 'Backpack Logo';
-                        logo.className = 'wallet-logo';
-                        btn.appendChild(logo);
-                        const span = document.createElement('span');
-                        span.textContent = 'Connect Backpack';
-                        btn.appendChild(span);
-                        modalContent.appendChild(btn);
-                    }
-                    if (window.solflare || (window.solana && window.solana.isSolflare)) {
-                        hasAny = true;
-                        const btn = document.createElement('button');
-                        btn.className = 'btn btn-primary wallet-select-btn';
-                        btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                        btn.onclick = async () => { await connectWallet('solflare'); };
-                        const logo = document.createElement('img');
-                        logo.src = 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png';
-                        logo.alt = 'Solflare Logo';
-                        logo.className = 'wallet-logo';
-                        btn.appendChild(logo);
-                        const span = document.createElement('span');
-                        span.textContent = 'Connect Solflare';
-                        btn.appendChild(span);
-                        modalContent.appendChild(btn);
-                    }
-                    // WalletConnect 버튼 추가
-                    hasAny = true;
-                    const wcBtn = document.createElement('button');
-                    wcBtn.className = 'btn btn-primary wallet-select-btn';
-                    wcBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                    wcBtn.onclick = async () => { await connectWallet('walletconnect'); };
-                    const wcLogo = document.createElement('img');
-                    wcLogo.src = 'https://avatars.githubusercontent.com/u/37784886?s=200';
-                    wcLogo.alt = 'WalletConnect Logo';
-                    wcLogo.className = 'wallet-logo';
-                    wcBtn.appendChild(wcLogo);
-                    const wcSpan = document.createElement('span');
-                    wcSpan.textContent = 'Connect WalletConnect';
-                    wcBtn.appendChild(wcSpan);
-                    modalContent.appendChild(wcBtn);
-                    if (!hasAny) {
-                        const msg = document.createElement('div');
-                        msg.style.color = 'orange';
-                        msg.style.marginTop = '20px';
-                        msg.textContent = 'No supported wallet found. Please install Phantom, Backpack, Solflare, or use WalletConnect.';
-                        modalContent.appendChild(msg);
-                    }
+                    // 항상 3개 버튼 모두 노출
+                    const phantomBtn = document.createElement('button');
+                    phantomBtn.className = 'btn btn-primary wallet-select-btn';
+                    phantomBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
+                    phantomBtn.onclick = async () => { await connectWallet('phantom'); };
+                    const phantomLogo = document.createElement('img');
+                    phantomLogo.src = 'https://i.ibb.co/H5KnQH1/images.jpg';
+                    phantomLogo.alt = 'Phantom Logo';
+                    phantomLogo.className = 'wallet-logo';
+                    phantomBtn.appendChild(phantomLogo);
+                    const phantomSpan = document.createElement('span');
+                    phantomSpan.textContent = 'Connect Phantom';
+                    phantomBtn.appendChild(phantomSpan);
+                    modalContent.appendChild(phantomBtn);
+
+                    const backpackBtn = document.createElement('button');
+                    backpackBtn.className = 'btn btn-primary wallet-select-btn';
+                    backpackBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
+                    backpackBtn.onclick = async () => { await connectWallet('backpack'); };
+                    const backpackLogo = document.createElement('img');
+                    backpackLogo.src = 'https://i.ibb.co/8nkGvqKT/33.jpg';
+                    backpackLogo.alt = 'Backpack Logo';
+                    backpackLogo.className = 'wallet-logo';
+                    backpackBtn.appendChild(backpackLogo);
+                    const backpackSpan = document.createElement('span');
+                    backpackSpan.textContent = 'Connect Backpack';
+                    backpackBtn.appendChild(backpackSpan);
+                    modalContent.appendChild(backpackBtn);
+
+                    const solflareBtn = document.createElement('button');
+                    solflareBtn.className = 'btn btn-primary wallet-select-btn';
+                    solflareBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
+                    solflareBtn.onclick = async () => { await connectWallet('solflare'); };
+                    const solflareLogo = document.createElement('img');
+                    solflareLogo.src = 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png';
+                    solflareLogo.alt = 'Solflare Logo';
+                    solflareLogo.className = 'wallet-logo';
+                    solflareBtn.appendChild(solflareLogo);
+                    const solflareSpan = document.createElement('span');
+                    solflareSpan.textContent = 'Connect Solflare';
+                    solflareBtn.appendChild(solflareSpan);
+                    modalContent.appendChild(solflareBtn);
                     modal.style.display = 'flex';
                 });
             }
