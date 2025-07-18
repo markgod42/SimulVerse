@@ -3431,17 +3431,14 @@
                         const phantomBtn = document.createElement('button');
                         phantomBtn.className = 'btn btn-primary wallet-select-btn';
                         phantomBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                        phantomBtn.onclick = () => {
-                            const siteUrl = encodeURIComponent(window.location.href);
-                            window.location.href = `phantom://app/ul/browse/${siteUrl}`;
-                        };
+                        phantomBtn.onclick = async () => { await connectWallet('phantom'); };
                         const phantomLogo = document.createElement('img');
                         phantomLogo.src = 'https://i.ibb.co/H5KnQH1/images.jpg';
                         phantomLogo.alt = 'Phantom Logo';
                         phantomLogo.className = 'wallet-logo';
                         phantomBtn.appendChild(phantomLogo);
                         const phantomSpan = document.createElement('span');
-                        phantomSpan.textContent = 'Open in Phantom';
+                        phantomSpan.textContent = 'Connect Phantom';
                         phantomBtn.appendChild(phantomSpan);
                         modalContent.appendChild(phantomBtn);
                         hasAny = true;
@@ -3449,17 +3446,14 @@
                         const backpackBtn = document.createElement('button');
                         backpackBtn.className = 'btn btn-primary wallet-select-btn';
                         backpackBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                        backpackBtn.onclick = () => {
-                            const siteUrl = encodeURIComponent(window.location.href);
-                            window.location.href = `backpack://app/open?url=${siteUrl}`;
-                        };
+                        backpackBtn.onclick = async () => { await connectWallet('backpack'); };
                         const backpackLogo = document.createElement('img');
                         backpackLogo.src = 'https://i.ibb.co/8nkGvqKT/33.jpg';
                         backpackLogo.alt = 'Backpack Logo';
                         backpackLogo.className = 'wallet-logo';
                         backpackBtn.appendChild(backpackLogo);
                         const backpackSpan = document.createElement('span');
-                        backpackSpan.textContent = 'Open in Backpack';
+                        backpackSpan.textContent = 'Connect Backpack';
                         backpackBtn.appendChild(backpackSpan);
                         modalContent.appendChild(backpackBtn);
                         hasAny = true;
@@ -3467,17 +3461,14 @@
                         const solflareBtn = document.createElement('button');
                         solflareBtn.className = 'btn btn-primary wallet-select-btn';
                         solflareBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                        solflareBtn.onclick = () => {
-                            const siteUrl = encodeURIComponent(window.location.href);
-                            window.location.href = `solflare://open?url=${siteUrl}`;
-                        };
+                        solflareBtn.onclick = async () => { await connectWallet('solflare'); };
                         const solflareLogo = document.createElement('img');
                         solflareLogo.src = 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png';
                         solflareLogo.alt = 'Solflare Logo';
                         solflareLogo.className = 'wallet-logo';
                         solflareBtn.appendChild(solflareLogo);
                         const solflareSpan = document.createElement('span');
-                        solflareSpan.textContent = 'Open in Solflare';
+                        solflareSpan.textContent = 'Connect Solflare';
                         solflareBtn.appendChild(solflareSpan);
                         modalContent.appendChild(solflareBtn);
                         hasAny = true;
@@ -3591,24 +3582,17 @@
                         provider = window.solana;
                     } else if (type === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
                         provider = window.solflare || window.solana;
-                    } else if (type === 'walletconnect') {
-                        // WalletConnect 연동
-                        if (!window.WalletConnectProvider) {
-                            alert('WalletConnectProvider 라이브러리가 로드되지 않았습니다.');
-                            return;
-                        }
-                        provider = new window.WalletConnectProvider.default({
-                            rpc: {
-                                1: 'https://api.mainnet-beta.solana.com',
-                                101: 'https://api.devnet.solana.com',
-                            },
-                            chainId: 1,
-                            qrcode: true
-                        });
-                        await provider.enable();
-                        // WalletConnect는 EVM 계열이 기본이므로, Solana용으로는 별도 어댑터 필요(데모용 주소만 표시)
-                        connectedWalletType = 'walletconnect';
-                        connectedAddress = provider.accounts && provider.accounts[0] ? provider.accounts[0] : '(Unknown)';
+                    }
+                    if (!provider) {
+                        alert('Wallet provider not found.');
+                        return;
+                    }
+                    // 연결
+                    const connectResult = await provider.connect();
+                    // 연결 성공 시에만 주소 UI 반영
+                    if (provider.publicKey || (provider.publicKey && provider.publicKey.toString)) {
+                        connectedWalletType = type;
+                        connectedAddress = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
                         // UI 업데이트
                         const shortAddr = connectedAddress.slice(0, 4) + '...' + connectedAddress.slice(-4);
                         connectBtn.textContent = `Disconnect: ${shortAddr}`;
@@ -3617,31 +3601,7 @@
                         const bugWalletInput = document.getElementById('bug-wallet-address');
                         if (prayerWalletInput) prayerWalletInput.value = connectedAddress;
                         if (bugWalletInput) bugWalletInput.value = connectedAddress;
-                        // 모달 닫기
-                        modal.style.display = 'none';
-                        // disconnect 이벤트 등록
-                        if (provider.on) {
-                            provider.on('disconnect', onDisconnect);
-                        }
-                        window.walletConnectProvider = provider; // 전역에 저장(Disconnect용)
-                        return;
                     }
-                    if (!provider) {
-                        alert('Wallet provider not found.');
-                        return;
-                    }
-                    // 연결
-                    await provider.connect();
-                    connectedWalletType = type;
-                    connectedAddress = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
-                    // UI 업데이트
-                    const shortAddr = connectedAddress.slice(0, 4) + '...' + connectedAddress.slice(-4);
-                    connectBtn.textContent = `Disconnect: ${shortAddr}`;
-                    // 폼에 주소 입력
-                    const prayerWalletInput = document.getElementById('prayer-wallet-address');
-                    const bugWalletInput = document.getElementById('bug-wallet-address');
-                    if (prayerWalletInput) prayerWalletInput.value = connectedAddress;
-                    if (bugWalletInput) bugWalletInput.value = connectedAddress;
                     // 모달 닫기
                     modal.style.display = 'none';
                     // disconnect 이벤트 등록
