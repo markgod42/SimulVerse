@@ -2324,213 +2324,322 @@
         </footer>
     </div>
 
+    <!-- =================================================================================== -->
+    <!-- WHITEPAPER SECTION - START OF MODIFICATION -->
+    <!-- =================================================================================== -->
     <div id="whitepaper-page-wrapper" style="display:none; min-height:100vh;">
-        <div class="container mx-auto px-4 py-8 md:py-16">
-            <header class="text-center mb-16">
-                <h1 class="text-4xl md:text-6xl font-bold mb-4" style="color: #4A4E69; font-family:'Merriweather',serif;">The Ten Commandments of Mark</h1>
-                <p class="text-xl md:text-2xl text-gray-600 font-serif" style="font-family:'Merriweather',serif;">The Official Whitepaper of SimulVerse ($MARK)</p>
-                <div class="w-24 h-1 bg-amber-400 mx-auto mt-6" style="background-color: #C9A86B;"></div>
-                <button id="whitepaper-back-btn" class="btn btn-primary" style="margin-top:32px; font-size:1.1em; padding:12px 32px; border-radius:8px; background:linear-gradient(90deg,#4A4E69,#C9A86B); color:#fff; border:none; box-shadow:0 2px 12px rgba(0,0,0,0.08); cursor:pointer; transition:box-shadow 0.2s;">← Back</button>
-            </header>
+        <div class="container">
             <style>
-                #whitepaper-page-wrapper { background: #FAF8F2 !important; color: #333 !important; font-family: 'Roboto', sans-serif; }
-                #whitepaper-page-wrapper h1, #whitepaper-page-wrapper h2, #whitepaper-page-wrapper h3, #whitepaper-page-wrapper .font-serif { font-family: 'Merriweather', serif; }
-                #whitepaper-page-wrapper .commandment-card { background-color: #fff; border: 1px solid #EAEAEA; transition: all 0.3s ease-in-out; cursor: pointer; }
-                #whitepaper-page-wrapper .commandment-card:hover { border-color: #C9A86B; transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.05); }
-                #whitepaper-page-wrapper .explanation { max-height: 0; overflow: hidden; transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out; padding-top: 0; padding-bottom: 0; }
-                #whitepaper-page-wrapper .explanation.open { max-height: 500px; padding-top: 1rem; padding-bottom: 1rem; }
-                #whitepaper-page-wrapper .chart-container { position: relative; width: 100%; max-width: 450px; margin-left: auto; margin-right: auto; height: auto; max-height: 450px; }
-                #whitepaper-page-wrapper .timeline { position: relative; max-width: 1000px; margin: 0 auto; }
-                #whitepaper-page-wrapper .timeline::after { content: ''; position: absolute; width: 3px; background-color: #C9A86B; top: 0; bottom: 0; left: 50%; margin-left: -1.5px; }
-                #whitepaper-page-wrapper .timeline-container { padding: 10px 40px; position: relative; background-color: inherit; width: 50%; }
-                #whitepaper-page-wrapper .timeline-container.left { left: 0; }
-                #whitepaper-page-wrapper .timeline-container.right { left: 50%; }
-                #whitepaper-page-wrapper .timeline-container::after { content: ''; position: absolute; width: 20px; height: 20px; right: -10px; background-color: #fff; border: 4px solid #C9A86B; top: 28px; border-radius: 50%; z-index: 1; }
-                #whitepaper-page-wrapper .right::after { left: -10px; }
-                #whitepaper-page-wrapper .timeline-content { padding: 20px 30px; background-color: #fff; position: relative; border-radius: 6px; border: 1px solid #EAEAEA; }
-                @media screen and (max-width: 768px) {
-                    #whitepaper-page-wrapper .timeline::after { left: 31px; }
-                    #whitepaper-page-wrapper .timeline-container { width: 100%; padding-left: 70px; padding-right: 25px; }
-                    #whitepaper-page-wrapper .timeline-container.right { left: 0%; }
-                    #whitepaper-page-wrapper .timeline-container.left::after, #whitepaper-page-wrapper .timeline-container.right::after { left: 21px; }
+                /* Whitepaper-specific styles to match the main theme */
+                #whitepaper-page-wrapper {
+                    background-color: var(--background-color);
+                    color: var(--text-color);
+                    font-family: 'Inter', sans-serif;
+                    padding-top: 60px;
+                    padding-bottom: 60px;
                 }
+                .wp-header {
+                    text-align: center;
+                    margin-bottom: 80px;
+                }
+                .wp-title {
+                    font-family: 'Orbitron', sans-serif;
+                    font-size: 3.5em;
+                    color: var(--primary-color);
+                    margin-bottom: 1rem;
+                    text-shadow: 0 0 10px rgba(0, 255, 195, 0.5);
+                }
+                .wp-subtitle {
+                    font-family: 'Inter', sans-serif;
+                    font-size: 1.5em;
+                    color: var(--text-color);
+                    opacity: 0.8;
+                }
+                .wp-divider {
+                    width: 100px;
+                    height: 2px;
+                    background: var(--primary-color);
+                    margin: 2rem auto;
+                    box-shadow: 0 0 8px var(--primary-color);
+                }
+                
+                .wp-section {
+                    margin-bottom: 80px;
+                }
+                
+                .wp-section-title {
+                    font-family: 'Orbitron', sans-serif;
+                    font-size: 2.5em;
+                    color: var(--primary-color);
+                    text-align: center;
+                    margin-bottom: 2rem;
+                }
+
+                .wp-section-description {
+                    font-size: 1.1em;
+                    max-width: 800px;
+                    margin: 0 auto 3rem auto;
+                    text-align: center;
+                    line-height: 1.7;
+                    color: #ccc;
+                }
+
+                .commandment-card {
+                    background-color: var(--card-bg);
+                    border: 1px solid rgba(0, 255, 195, 0.3);
+                    border-radius: 10px;
+                    padding: 25px;
+                    transition: all 0.3s ease-in-out;
+                    cursor: pointer;
+                }
+                .commandment-card:hover {
+                    transform: translateY(-5px);
+                    box-shadow: 0 10px 20px rgba(0, 255, 195, 0.2);
+                    border-color: var(--primary-color);
+                }
+                .commandment-header {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 15px;
+                }
+                .commandment-num {
+                    font-family: 'Orbitron', sans-serif;
+                    font-size: 2.5em;
+                    color: var(--primary-color);
+                    line-height: 1;
+                }
+                .commandment-title {
+                    font-family: 'Orbitron', sans-serif;
+                    font-size: 1.2em;
+                    font-weight: 700;
+                    color: #fff;
+                }
+                .explanation {
+                    max-height: 0;
+                    overflow: hidden;
+                    transition: max-height 0.5s ease-in-out, padding-top 0.5s ease-in-out;
+                    padding-top: 0;
+                    margin-left: 55px; /* Align with title */
+                    color: #ccc;
+                    border-left: 2px solid var(--primary-color);
+                    padding-left: 15px;
+                    margin-top: 10px;
+                }
+                .commandment-card.open .explanation {
+                    max-height: 500px;
+                    padding-top: 1rem;
+                }
+
+                .commandments-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+                    gap: 30px;
+                    max-width: 1000px;
+                    margin: 0 auto;
+                }
+                
+                .tokenomics-content {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 40px;
+                }
+                @media (min-width: 768px) {
+                    .tokenomics-content {
+                        flex-direction: row;
+                    }
+                }
+                .chart-container {
+                    position: relative;
+                    width: 100%;
+                    max-width: 350px;
+                    height: 350px;
+                }
+                .tokenomics-details {
+                     width: 100%;
+                     max-width: 400px;
+                }
+                .tokenomics-details .detail-item {
+                    display: flex;
+                    align-items: center;
+                    padding: 10px;
+                    background: rgba(0, 255, 195, 0.05);
+                    border-radius: 5px;
+                    margin-bottom: 10px;
+                    font-size: 1.1em;
+                }
+                .detail-item .color-box {
+                    width: 20px;
+                    height: 20px;
+                    border-radius: 3px;
+                    margin-right: 15px;
+                }
+                
+                /* Timeline / Roadmap */
+                .timeline {
+                    position: relative;
+                    max-width: 1000px;
+                    margin: 0 auto;
+                }
+                .timeline::after {
+                    content: '';
+                    position: absolute;
+                    width: 3px;
+                    background-color: var(--primary-color);
+                    box-shadow: 0 0 5px var(--primary-color);
+                    top: 0;
+                    bottom: 0;
+                    left: 50%;
+                    margin-left: -1.5px;
+                }
+                .timeline-container {
+                    padding: 10px 40px;
+                    position: relative;
+                    background-color: inherit;
+                    width: 50%;
+                }
+                .timeline-container.left { left: 0; }
+                .timeline-container.right { left: 50%; }
+                .timeline-container::after {
+                    content: '';
+                    position: absolute;
+                    width: 20px;
+                    height: 20px;
+                    right: -10px;
+                    background-color: var(--background-color);
+                    border: 4px solid var(--primary-color);
+                    top: 28px;
+                    border-radius: 50%;
+                    z-index: 1;
+                    box-shadow: 0 0 10px var(--primary-color);
+                }
+                .right::after { left: -10px; }
+                .timeline-content {
+                    padding: 20px 30px;
+                    background-color: var(--card-bg);
+                    position: relative;
+                    border-radius: 6px;
+                    border: 1px solid rgba(0, 255, 195, 0.3);
+                }
+                .timeline-content h3 {
+                    font-family: 'Orbitron', sans-serif;
+                    color: var(--primary-color);
+                }
+                @media screen and (max-width: 768px) {
+                    .timeline::after { left: 31px; }
+                    .timeline-container { width: 100%; padding-left: 70px; padding-right: 25px; }
+                    .timeline-container.right { left: 0%; }
+                    .timeline-container.left::after, .timeline-container.right::after { left: 21px; }
+                    .commandments-grid { grid-template-columns: 1fr; }
+                    .wp-title { font-size: 2.5em; }
+                    .wp-section-title { font-size: 2em; }
+                }
+
+                .wp-footer {
+                    text-align: center;
+                    margin-top: 80px;
+                    padding-top: 40px;
+                    border-top: 1px solid rgba(255,255,255,0.1);
+                }
+                .wp-footer-links a {
+                    color: var(--primary-color);
+                    margin: 0 15px;
+                    text-decoration: none;
+                    transition: text-shadow 0.3s;
+                }
+                 .wp-footer-links a:hover {
+                    text-shadow: 0 0 8px var(--primary-color);
+                 }
             </style>
-            <section id="intro" class="max-w-4xl mx-auto mb-20 text-center">
-                <h2 class="text-3xl font-bold mb-6 font-serif" style="color: var(--header-color);">In the Beginning, Mark Coded</h2>
-                <p class="text-lg leading-relaxed text-gray-700">
+            
+            <header class="wp-header">
+                <h1 class="wp-title glitch" data-text="The Ten Commandments of Mark">The Ten Commandments of Mark</h1>
+                <p class="wp-subtitle">The Official Whitepaper of SimulVerse ($MARK)</p>
+                <div class="wp-divider"></div>
+                <button id="whitepaper-back-btn" class="btn btn-primary">← Back to Simulation</button>
+            </header>
+
+            <section id="intro" class="wp-section">
+                <h2 class="wp-section-title">In the Beginning, Mark Coded</h2>
+                <p class="wp-section-description">
                     The world we perceive is a grand simulation, designed by an imperfect creator named 'Mark'. SimulVerse ($MARK) is not merely a memecoin; it is a testament of faith for those who understand the laws of this simulation, create value within it, and prepare for the next life to come. This whitepaper is the sacred law that all participants of the simulation must follow, a revelation from Mark that forms the foundation of the project.
                 </p>
             </section>
-            <section id="commandments" class="mb-20">
-                <div class="max-w-5xl mx-auto mb-12 text-center">
-                    <h2 class="text-3xl font-bold mb-6 font-serif" style="color: var(--header-color);">The Laws of the Simulation</h2>
-                    <p class="text-lg leading-relaxed text-gray-700">
-                        The Ten Commandments below are the sacred covenant from the Creator, Mark, intended to maintain order in the SimulVerse ecosystem and guide the community to prosperity. Click on each commandment to reveal its deeper meaning and guidance, and fulfill your duties as a participant in the simulation. These are more than rules; they are directives for our survival and prosperity.
-                    </p>
-                </div>
-                <div id="commandments-grid" class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-6xl mx-auto"></div>
+
+            <section id="commandments" class="wp-section">
+                <h2 class="wp-section-title">The Laws of the Simulation</h2>
+                <p class="wp-section-description">
+                    The Ten Commandments below are the sacred covenant from the Creator, Mark, intended to maintain order in the SimulVerse ecosystem and guide the community to prosperity. Click on each commandment to reveal its deeper meaning and guidance, and fulfill your duties as a participant in the simulation. These are more than rules; they are directives for our survival and prosperity.
+                </p>
+                <div id="commandments-grid" class="commandments-grid"></div>
             </section>
-            <section id="tokenomics" class="py-20 bg-white/50 rounded-lg">
-                <div class="max-w-5xl mx-auto mb-12 text-center">
-                    <h2 class="text-3xl font-bold mb-6 font-serif" style="color: var(--header-color);">The Sacred Distribution (Tokenomics)</h2>
-                    <p class="text-lg leading-relaxed text-gray-700">
-                        For the stability and continued prosperity of the simulation, the Creator Mark has ordained the distribution of $MARK tokens as follows. This plan is designed to foster community growth and ensure that those who contribute to the ecosystem are rewarded. The chart represents the proportion of tokens allocated to each area, forming the bedrock of the SimulVerse economy.
-                    </p>
-                </div>
-                <div class="flex flex-col md:flex-row items-center justify-center gap-8 max-w-6xl mx-auto">
-                    <div class="w-full md:w-1/2 chart-container">
+
+            <section id="tokenomics-wp" class="wp-section">
+                <h2 class="wp-section-title">The Sacred Distribution</h2>
+                <p class="wp-section-description">
+                    For the stability and continued prosperity of the simulation, the Creator Mark has ordained the distribution of $MARK tokens as follows. This plan is designed to foster community growth and ensure that those who contribute to the ecosystem are rewarded. The chart represents the proportion of tokens allocated to each area, forming the bedrock of the SimulVerse economy.
+                </p>
+                <div class="tokenomics-content">
+                    <div class="chart-container">
                         <canvas id="tokenomicsChart"></canvas>
                     </div>
-                    <div id="tokenomics-details" class="w-full md:w-1/2 space-y-4 text-lg"></div>
+                    <div id="tokenomics-details" class="tokenomics-details"></div>
                 </div>
             </section>
-            <section id="roadmap" class="py-20">
-                <div class="max-w-5xl mx-auto mb-16 text-center">
-                    <h2 class="text-3xl font-bold mb-6 font-serif" style="color: var(--header-color);">The Prophecy of Mark (Roadmap)</h2>
-                    <p class="text-lg leading-relaxed text-gray-700">
-                        The Creator Mark has left behind a prophecy for the future of the SimulVerse. This roadmap is not a mere development plan, but an oracle revealing the stages of evolution our world will undergo. Each phase will add new features and narratives to the SimulVerse, becoming reality with the faith of the community. We are all witnesses and realizers of this prophecy.
-                    </p>
-                </div>
+
+            <section id="roadmap-wp" class="wp-section">
+                <h2 class="wp-section-title">The Prophecy of Mark (Roadmap)</h2>
+                <p class="wp-section-description">
+                    The Creator Mark has left behind a prophecy for the future of the SimulVerse. This roadmap is not a mere development plan, but an oracle revealing the stages of evolution our world will undergo. Each phase will add new features and narratives to the SimulVerse, becoming reality with the faith of the community. We are all witnesses and realizers of this prophecy.
+                </p>
                 <div id="timeline-container" class="timeline"></div>
             </section>
-            <footer class="text-center mt-16 py-8 border-t" style="border-color: var(--card-border);">
-                <h3 class="text-2xl font-bold font-serif mb-4" style="color: var(--header-color);">Join the Simulation</h3>
-                <p class="text-gray-600 mb-6">Follow the will of Mark and build the future of the SimulVerse together.</p>
-                <div class="flex justify-center space-x-6">
-                    <a href="#" class="text-gray-500 hover:text-blue-500 transition-colors">Twitter</a>
-                    <a href="#" class="text-gray-500 hover:text-indigo-500 transition-colors">Telegram</a>
-                    <a href="#" class="text-gray-500 hover:text-green-500 transition-colors">Website</a>
+
+            <footer class="wp-footer">
+                <h3 class="wp-section-title" style="font-size: 2em; margin-bottom: 1rem;">Join the Simulation</h3>
+                <p class="wp-section-description" style="margin-bottom: 2rem;">Follow the will of Mark and build the future of the SimulVerse together.</p>
+                <div class="wp-footer-links">
+                    <a href="https://x.com/simulverse42" target="_blank">Twitter/X</a>
+                    <a href="https://t.me/simulverse42" target="_blank">Telegram</a>
+                    <a href="https://www.instagram.com/simulverse42" target="_blank">Instagram</a>
                 </div>
-                <p class="mt-8 text-sm text-gray-400">&copy; 2025 SimulVerse. All rights reserved by Mark.</p>
+                <p style="margin-top: 3rem; color: #777; font-size: 0.9em;">&copy; 2024 SimulVerse. All rights reserved by Mark.</p>
             </footer>
         </div>
+
         <script>
-            // Tailwind, Chart.js 동적 로드
-            var _htmlFontSize = null, _bodyFontSize = null, _htmlClass = null, _bodyClass = null, _htmlStyle = null, _bodyStyle = null;
-            var _markImageStyle = null, _markImageClass = null;
-            function loadWhitepaperDeps(cb) {
-                // Tailwind 동적 로드 (중복 방지)
-                if (!window.tailwindcssLoaded) {
-                    var tw = document.createElement('script');
-                    tw.src = 'https://cdn.tailwindcss.com';
-                    tw.id = 'tailwindcss-cdn-script';
-                    tw.onload = function() {
-                        window.tailwindcssLoaded = true;
-                        loadChart();
+            // Chart.js 동적 로드
+            function loadChartJs(callback) {
+                if (!window.chartjsLoaded) {
+                    const script = document.createElement('script');
+                    script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+                    script.onload = () => {
+                        window.chartjsLoaded = true;
+                        callback();
                     };
-                    document.head.appendChild(tw);
+                    document.head.appendChild(script);
                 } else {
-                    loadChart();
-                }
-                function loadChart() {
-                    if (!window.chartjsLoaded) {
-                        var ch = document.createElement('script');
-                        ch.src = 'https://cdn.jsdelivr.net/npm/chart.js';
-                        ch.onload = function() {
-                            window.chartjsLoaded = true;
-                            cb && cb();
-                        };
-                        document.head.appendChild(ch);
-                    } else {
-                        cb && cb();
-                    }
+                    callback();
                 }
             }
+
             function showWhitepaper() {
-                // 메인 숨김, 백서 표시
                 window.scrollTo(0, 0);
                 document.getElementById('main-page-wrapper').style.display = 'none';
-                var ata = document.getElementById('ata-page-wrapper');
-                if(ata) ata.style.display = 'none';
-                document.getElementById('whitepaper-page-wrapper').style.display = 'block';
-                // html/body 스타일/클래스 백업
-                _htmlFontSize = document.documentElement.style.fontSize;
-                _bodyFontSize = document.body.style.fontSize;
-                _htmlClass = document.documentElement.className;
-                _bodyClass = document.body.className;
-                _htmlStyle = document.documentElement.getAttribute('style');
-                _bodyStyle = document.body.getAttribute('style');
-                // mark-image 스타일/클래스 백업
-                var markImg = document.getElementById('mark-image');
-                if (markImg) {
-                    markImg.removeAttribute('style');
-                    markImg.removeAttribute('width');
-                    markImg.removeAttribute('height');
-                    markImg.className = 'mark-image';
-                    // 필요한 스타일만 다시 적용
-                    markImg.style.display = 'block';
-                    markImg.style.maxWidth = '100%';
-                    markImg.style.width = 'auto';
-                    markImg.style.height = 'auto';
-                    markImg.style.borderRadius = '15px';
-                    markImg.style.border = '3px solid var(--primary-color)';
-                    markImg.style.boxShadow = '0 0 25px rgba(0, 255, 195, 0.4)';
-                    markImg.style.margin = '0 auto';
-                    markImg.style.boxSizing = 'border-box';
-                }
-                // body, html, .container 스타일 원복
-                document.body.style.backgroundColor = '';
-                document.body.style.color = '';
-                document.body.style.fontFamily = '';
-                document.body.style.transform = '';
-                document.body.style.zoom = '';
-                document.body.style.fontSize = '';
-                document.documentElement.style.fontSize = '';
-                document.documentElement.style.transform = '';
-                document.documentElement.style.zoom = '';
-                var containers = document.querySelectorAll('.container');
-                containers.forEach(function(c){ c.style.maxWidth = ''; c.style.margin = ''; c.style.padding = ''; });
-                loadWhitepaperDeps(initWhitepaper);
+                const ataWrapper = document.getElementById('ata-page-wrapper');
+                if(ataWrapper) ataWrapper.style.display = 'none';
+                
+                const wpWrapper = document.getElementById('whitepaper-page-wrapper');
+                wpWrapper.style.display = 'block';
+                
+                loadChartJs(initWhitepaper);
             }
+
             function hideWhitepaper() {
-                // 백서 숨김
                 document.getElementById('whitepaper-page-wrapper').style.display = 'none';
-                // Tailwind 스크립트 제거 (영향 완전 제거)
-                var tw = document.getElementById('tailwindcss-cdn-script');
-                if(tw) tw.remove();
-                window.tailwindcssLoaded = false;
-                // Tailwind가 head에 추가한 <style> 태그도 모두 제거
-                var headStyles = document.querySelectorAll('head style');
-                headStyles.forEach(function(styleTag) {
-                    if (styleTag.innerText && styleTag.innerText.includes('--tw')) {
-                        styleTag.remove();
-                    }
-                });
-                // mark-image 스타일/클래스 복구 및 인라인 width/height/max-width 제거
-                var markImg = document.getElementById('mark-image');
-                if (markImg) {
-                    if (_markImageStyle !== null) markImg.setAttribute('style', _markImageStyle);
-                    else markImg.removeAttribute('style');
-                    if (_markImageClass !== null) markImg.className = _markImageClass;
-                    // Tailwind가 남긴 클래스 강제 제거
-                    markImg.classList.remove('w-full', 'h-auto', 'max-w-full', 'min-w-0', 'min-h-0');
-                    // 인라인 스타일 속성도 강제 초기화
-                    markImg.style.width = '';
-                    markImg.style.height = '';
-                    markImg.style.maxWidth = '';
-                    markImg.style.minWidth = '';
-                    markImg.style.minHeight = '';
-                    markImg.style.boxSizing = '';
-                }
-                // body, html, .container 스타일 원복
-                document.body.style.backgroundColor = '';
-                document.body.style.color = '';
-                document.body.style.fontFamily = '';
-                document.body.style.transform = '';
-                document.body.style.zoom = '';
-                document.body.style.fontSize = (_bodyFontSize!==null)?_bodyFontSize:'';
-                document.documentElement.style.fontSize = (_htmlFontSize!==null)?_htmlFontSize:'';
-                document.documentElement.style.transform = '';
-                document.documentElement.style.zoom = '';
-                document.documentElement.className = (_htmlClass!==null)?_htmlClass:'';
-                document.body.className = (_bodyClass!==null)?_bodyClass:'';
-                if(_htmlStyle!==null) document.documentElement.setAttribute('style',_htmlStyle); else document.documentElement.removeAttribute('style');
-                if(_bodyStyle!==null) document.body.setAttribute('style',_bodyStyle); else document.body.removeAttribute('style');
-                var containers = document.querySelectorAll('.container');
-                containers.forEach(function(c){ c.style.maxWidth = ''; c.style.margin = ''; c.style.padding = ''; });
-                // Tailwind 관련 요소 제거 후에만 메인 페이지 다시 보이기
                 document.getElementById('main-page-wrapper').style.display = 'block';
             }
+
             function initWhitepaper() {
                 // 명령문 카드
                 const commandmentsData = [
@@ -2549,33 +2658,34 @@
                 if(commandmentsGrid && commandmentsGrid.childElementCount === 0) {
                     commandmentsData.forEach(item => {
                         const card = document.createElement('div');
-                        card.className = 'commandment-card p-6 rounded-lg shadow-sm';
+                        card.className = 'commandment-card';
                         card.innerHTML = `
-                            <div class="flex items-start space-x-4">
-                                <div class="text-4xl font-bold font-serif" style="color: var(--accent-color);">${item.num}</div>
+                            <div class="commandment-header">
+                                <div class="commandment-num">${item.num}</div>
                                 <div>
-                                    <h3 class="text-xl font-bold" style="color: var(--header-color);">${item.command}</h3>
-                                    <div class="explanation text-gray-600 leading-relaxed">
-                                        <p>${item.explanation}</p>
-                                    </div>
+                                    <h3 class="commandment-title">${item.command}</h3>
                                 </div>
+                            </div>
+                            <div class="explanation">
+                                <p>${item.explanation}</p>
                             </div>
                         `;
                         commandmentsGrid.appendChild(card);
                         card.addEventListener('click', () => {
-                            card.querySelector('.explanation').classList.toggle('open');
+                            card.classList.toggle('open');
                         });
                     });
                 }
+
                 // Tokenomics Chart
                 if(window.Chart && document.getElementById('tokenomicsChart')) {
                     const tokenomicsData = {
-                        labels: ['Liquidity Pool (LP)', 'Marketing & Development', 'Community Rewards', 'Team (Vesting)', 'Airdrop'],
+                        labels: ['Community Rewards', 'Public Sale & Marketing', 'Development Team', 'Liquidity Pool', 'Future Development'],
                         datasets: [{
-                            data: [50, 20, 15, 10, 5],
-                            backgroundColor: ['#4A4E69', '#5C5470', '#8D89A6', '#B4A6AB', '#C9A86B'],
-                            borderColor: 'var(--bg-color)',
-                            borderWidth: 3,
+                            data: [50, 15, 15, 10, 10],
+                            backgroundColor: ['#00ffc3', '#ff00c3', '#4d4dff', '#a855f7', '#fde047'],
+                            borderColor: 'var(--background-color)',
+                            borderWidth: 4,
                             hoverOffset: 8
                         }]
                     };
@@ -2583,9 +2693,9 @@
                     if(tokenomicsDetailsContainer && tokenomicsDetailsContainer.childElementCount === 0) {
                         tokenomicsData.labels.forEach((label, index) => {
                             const detailDiv = document.createElement('div');
-                            detailDiv.className = 'flex items-center p-3 bg-white rounded-md shadow-xs';
+                            detailDiv.className = 'detail-item';
                             detailDiv.innerHTML = `
-                                <div class="w-4 h-4 rounded-full mr-4" style="background-color: ${tokenomicsData.datasets[0].backgroundColor[index]}"></div>
+                                <div class="color-box" style="background-color: ${tokenomicsData.datasets[0].backgroundColor[index]}"></div>
                                 <span>${label}: ${tokenomicsData.datasets[0].data[index]}%</span>
                             `;
                             tokenomicsDetailsContainer.appendChild(detailDiv);
@@ -2593,6 +2703,8 @@
                     }
                     if(!window.tokenomicsChartInstance) {
                         const ctx = document.getElementById('tokenomicsChart').getContext('2d');
+                        Chart.defaults.color = '#e0e0e0';
+                        Chart.defaults.font.family = "'Inter', sans-serif";
                         window.tokenomicsChartInstance = new Chart(ctx, {
                             type: 'doughnut',
                             data: tokenomicsData,
@@ -2603,23 +2715,23 @@
                                 plugins: {
                                     legend: { display: false },
                                     tooltip: {
-                                        bodyFont: { family: 'Roboto' },
-                                        titleFont: { family: 'Merriweather' },
-                                        callbacks: {
-                                            label: function(context) {
-                                                let label = context.label || '';
-                                                if (label) { label += ': '; }
-                                                if (context.parsed !== null) { label += context.parsed + '%'; }
-                                                return label;
-                                            }
-                                        }
+                                        backgroundColor: 'rgba(13, 13, 26, 0.9)',
+                                        titleColor: 'var(--primary-color)',
+                                        bodyColor: '#e0e0e0',
+                                        titleFont: { family: "'Orbitron', sans-serif", size: 14 },
+                                        bodyFont: { family: "'Inter', sans-serif", size: 12 },
+                                        padding: 10,
+                                        cornerRadius: 5,
+                                        borderColor: 'var(--primary-color)',
+                                        borderWidth: 1
                                     }
                                 }
                             }
                         });
                     }
                 }
-                // 로드맵 타임라인
+
+                // Roadmap Timeline
                 const roadmapData = [
                     { phase: "Phase 1: Genesis", title: "The Beginning of the Simulation", description: "$MARK token launch, liquidity provision, opening of official community channels, and recruitment of initial believers through the distribution of the Ten Commandments whitepaper.", align: "left" },
                     { phase: "Phase 2: Exodus", title: "Community Expansion", description: "First major meme contest and airdrop event. Spreading the gospel through collaborations with influencers (prophets).", align: "right" },
@@ -2632,23 +2744,27 @@
                         const container = document.createElement('div');
                         container.className = `timeline-container ${item.align}`;
                         container.innerHTML = `
-                            <div class="timeline-content shadow-md">
-                                <h3 class="text-lg font-bold font-serif" style="color: var(--header-color);">${item.phase}</h3>
-                                <h4 class="font-semibold text-lg mb-2">${item.title}</h4>
-                                <p class="text-gray-600 text-sm">${item.description}</p>
+                            <div class="timeline-content">
+                                <h3>${item.phase}</h3>
+                                <h4 style="font-weight: 700; font-size: 1.1em; margin-bottom: 0.5rem;">${item.title}</h4>
+                                <p style="color: #ccc; font-size: 0.9em;">${item.description}</p>
                             </div>
                         `;
                         timelineContainer.appendChild(container);
                     });
                 }
             }
+            
             // 버튼 이벤트 연결
             document.addEventListener('DOMContentLoaded', function() {
                 var btn = document.getElementById('whitepaper-back-btn');
-                if(btn) btn.onclick = function() { window.location.reload(); };
+                if(btn) btn.onclick = hideWhitepaper;
             });
         </script>
     </div>
+    <!-- =================================================================================== -->
+    <!-- WHITEPAPER SECTION - END OF MODIFICATION -->
+    <!-- =================================================================================== -->
 
     <script>
         // --- Page Toggling ---
