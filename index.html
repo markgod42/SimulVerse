@@ -3492,7 +3492,7 @@
                         return;
                     }
                     // 연결
-                    const connectResult = await provider.connect();
+                    const connectResult = await provider.connect({ onlyIfTrusted: false });
                     // 연결 성공 시에만 주소 UI 반영
                     if (provider.publicKey || (provider.publicKey && provider.publicKey.toString)) {
                         connectedWalletType = type;
