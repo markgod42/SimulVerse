@@ -3394,197 +3394,7 @@
     <script src="libs/solana/web3.iife.min.js"></script>
     <script>
         // --- Custom Solana Wallet Connect Logic (Phantom & Solflare) ---
-        document.addEventListener('DOMContentLoaded', () => {
-            // 모달 생성 (항상 생성)
-            const modal = document.createElement('div');
-            modal.style.cssText = `
-                display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
-                overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
-            `;
-            const modalContent = document.createElement('div');
-            modalContent.style.cssText = `
-                background-color: var(--card-bg); padding: 20px; border: 1px solid var(--primary-color);
-                border-radius: 10px; text-align: center; width: 90%; max-width: 350px;
-            `;
-            const modalTitle = document.createElement('h3');
-            modalTitle.textContent = 'Select Wallet';
-            modalTitle.style.fontFamily = "'Orbitron', sans-serif";
-            modalTitle.style.color = "var(--primary-color)";
-            modalTitle.style.marginBottom = "20px";
-            modalContent.appendChild(modalTitle);
-            modal.appendChild(modalContent);
-            document.body.appendChild(modal);
-
-            // Connect Wallet 버튼 클릭 시 모달 표시 (항상 동작)
-            const connectBtn = document.getElementById('connect-wallet-btn');
-            if (connectBtn) {
-                connectBtn.addEventListener('click', () => {
-                    while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
-                    // 항상 3개 버튼 모두 노출
-                    const phantomBtn = document.createElement('button');
-                    phantomBtn.className = 'btn btn-primary wallet-select-btn';
-                    phantomBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                    phantomBtn.onclick = async () => { await connectWallet('phantom'); };
-                    const phantomLogo = document.createElement('img');
-                    phantomLogo.src = 'https://i.ibb.co/H5KnQH1/images.jpg';
-                    phantomLogo.alt = 'Phantom Logo';
-                    phantomLogo.className = 'wallet-logo';
-                    phantomBtn.appendChild(phantomLogo);
-                    const phantomSpan = document.createElement('span');
-                    phantomSpan.textContent = 'Connect Phantom';
-                    phantomBtn.appendChild(phantomSpan);
-                    modalContent.appendChild(phantomBtn);
-
-                    const backpackBtn = document.createElement('button');
-                    backpackBtn.className = 'btn btn-primary wallet-select-btn';
-                    backpackBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                    backpackBtn.onclick = async () => { await connectWallet('backpack'); };
-                    const backpackLogo = document.createElement('img');
-                    backpackLogo.src = 'https://i.ibb.co/8nkGvqKT/33.jpg';
-                    backpackLogo.alt = 'Backpack Logo';
-                    backpackLogo.className = 'wallet-logo';
-                    backpackBtn.appendChild(backpackLogo);
-                    const backpackSpan = document.createElement('span');
-                    backpackSpan.textContent = 'Connect Backpack';
-                    backpackBtn.appendChild(backpackSpan);
-                    modalContent.appendChild(backpackBtn);
-
-                    const solflareBtn = document.createElement('button');
-                    solflareBtn.className = 'btn btn-primary wallet-select-btn';
-                    solflareBtn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                    solflareBtn.onclick = async () => { await connectWallet('solflare'); };
-                    const solflareLogo = document.createElement('img');
-                    solflareLogo.src = 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png';
-                    solflareLogo.alt = 'Solflare Logo';
-                    solflareLogo.className = 'wallet-logo';
-                    solflareBtn.appendChild(solflareLogo);
-                    const solflareSpan = document.createElement('span');
-                    solflareSpan.textContent = 'Connect Solflare';
-                    solflareBtn.appendChild(solflareSpan);
-                    modalContent.appendChild(solflareBtn);
-                    modal.style.display = 'flex';
-                });
-            }
-            // 모달 외부 클릭 시 닫기
-            window.addEventListener('click', (event) => {
-                if (event.target === modal) {
-                    modal.style.display = "none";
-                }
-            });
-
-            // 연결된 상태 관리
-            let connectedWalletType = null;
-            let connectedAddress = null;
-
-            // 실제 연결 함수
-            async function connectWallet(type) {
-                try {
-                    let provider = null;
-                    if (type === 'phantom' && window.solana && window.solana.isPhantom) {
-                        provider = window.solana;
-                        // 기존 연결 강제 해제(로그아웃)
-                        if (provider.isConnected && provider.disconnect) {
-                            try { await provider.disconnect(); } catch (e) {}
-                        }
-                    } else if (type === 'backpack' && window.solana && window.solana.isBackpack) {
-                        provider = window.solana;
-                    } else if (type === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
-                        provider = window.solflare || window.solana;
-                    }
-                    if (!provider) {
-                        alert('Wallet provider not found.');
-                        return;
-                    }
-                    // 연결
-                    const connectResult = await provider.connect({ onlyIfTrusted: false });
-                    // 연결 성공 시에만 주소 UI 반영
-                    if (provider.publicKey || (provider.publicKey && provider.publicKey.toString)) {
-                        connectedWalletType = type;
-                        connectedAddress = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
-                        // UI 업데이트
-                        const shortAddr = connectedAddress.slice(0, 4) + '...' + connectedAddress.slice(-4);
-                        connectBtn.textContent = `Disconnect: ${shortAddr}`;
-                        // 폼에 주소 입력
-                        const prayerWalletInput = document.getElementById('prayer-wallet-address');
-                        const bugWalletInput = document.getElementById('bug-wallet-address');
-                        if (prayerWalletInput) prayerWalletInput.value = connectedAddress;
-                        if (bugWalletInput) bugWalletInput.value = connectedAddress;
-                    }
-                    // 모달 닫기
-                    modal.style.display = 'none';
-                    // disconnect 이벤트 등록
-                    if (provider.on) {
-                        provider.on('disconnect', onDisconnect);
-                    }
-                } catch (e) {
-                    alert('Failed to connect wallet: ' + (e && e.message ? e.message : e));
-                }
-            }
-            // Disconnect 처리
-            function onDisconnect() {
-                connectedWalletType = null;
-                connectedAddress = null;
-                connectBtn.textContent = 'Connect Wallet';
-                const prayerWalletInput = document.getElementById('prayer-wallet-address');
-                const bugWalletInput = document.getElementById('bug-wallet-address');
-                if (prayerWalletInput) prayerWalletInput.value = '';
-                if (bugWalletInput) bugWalletInput.value = '';
-                // 연결 정보 삭제
-                localStorage.removeItem('wallet_connected');
-            }
-            // Disconnect 버튼 동작
-            if (connectBtn) {
-                connectBtn.addEventListener('click', () => {
-                    if (connectedWalletType) {
-                        // disconnect
-                        let provider = null;
-                        if (connectedWalletType === 'phantom' && window.solana && window.solana.isPhantom) {
-                            provider = window.solana;
-                        } else if (connectedWalletType === 'backpack' && window.solana && window.solana.isBackpack) {
-                            provider = window.solana;
-                        } else if (connectedWalletType === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
-                            provider = window.solflare || window.solana;
-                        }
-                        if (provider && provider.disconnect) {
-                            provider.disconnect();
-                        } else {
-                            onDisconnect();
-                        }
-                    }
-                });
-            }
-            // 새로고침 후 자동 재연결 로직
-            // async function tryAutoReconnect() {
-            //     const lastWallet = localStorage.getItem('wallet_connected');
-            //     if (!lastWallet) return;
-            //     let provider = null;
-            //     if (lastWallet === 'phantom' && window.solana && window.solana.isPhantom) {
-            //         provider = window.solana;
-            //     } else if (lastWallet === 'backpack' && window.solana && window.solana.isBackpack) {
-            //         provider = window.solana;
-            //     } else if (lastWallet === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
-            //         provider = window.solflare || window.solana;
-            //     }
-            //     if (!provider) return;
-            //     try {
-            //         // onlyIfTrusted: true 옵션으로 자동 재연결 시도
-            //         await provider.connect({ onlyIfTrusted: true });
-            //         connectedWalletType = lastWallet;
-            //         connectedAddress = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
-            //         // UI 업데이트
-            //         const shortAddr = connectedAddress.slice(0, 4) + '...' + connectedAddress.slice(-4);
-            //         connectBtn.textContent = `Disconnect: ${shortAddr}`;
-            //         // 폼에 주소 입력
-            //         const prayerWalletInput = document.getElementById('prayer-wallet-address');
-            //         const bugWalletInput = document.getElementById('bug-wallet-address');
-            //         if (prayerWalletInput) prayerWalletInput.value = connectedAddress;
-            //         if (bugWalletInput) bugWalletInput.value = connectedAddress;
-            //     } catch (e) {
-            //         // 자동 재연결 실패 시 무시
-            //     }
-            // }
-            // tryAutoReconnect(); // 자동 재연결 함수 및 호출 제거
-        });
+        // (지갑 연동 관련 코드 전체 삭제)
     </script>
     <script>
         // 화이트페이퍼 버튼 클릭 시 whitepaper.html로 이동
@@ -3630,6 +3440,137 @@
         }
     }
     document.addEventListener('DOMContentLoaded', renderMarkImage);
+    </script>
+    <script>
+    // --- Solana Wallet Connect Logic (Phantom, Backpack, Solflare) ---
+    document.addEventListener('DOMContentLoaded', () => {
+        // 모달 생성
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+            overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
+        `;
+        const modalContent = document.createElement('div');
+        modalContent.style.cssText = `
+            background-color: var(--card-bg); padding: 20px; border: 1px solid var(--primary-color);
+            border-radius: 10px; text-align: center; width: 90%; max-width: 350px;
+        `;
+        const modalTitle = document.createElement('h3');
+        modalTitle.textContent = 'Select Wallet';
+        modalTitle.style.fontFamily = "'Orbitron', sans-serif";
+        modalTitle.style.color = "var(--primary-color)";
+        modalTitle.style.marginBottom = "20px";
+        modalContent.appendChild(modalTitle);
+        modal.appendChild(modalContent);
+        document.body.appendChild(modal);
+
+        // Connect Wallet 버튼 클릭 시 모달 표시
+        const connectBtn = document.getElementById('connect-wallet-btn');
+        if (connectBtn) {
+            connectBtn.addEventListener('click', () => {
+                while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
+                // 3개 버튼 모두 노출
+                const wallets = [
+                    {
+                        id: 'phantom',
+                        name: 'Phantom',
+                        logo: 'https://i.ibb.co/H5KnQH1/images.jpg',
+                        deeplink: (url) => `phantom://app/ul/browse/${encodeURIComponent(url)}`
+                    },
+                    {
+                        id: 'backpack',
+                        name: 'Backpack',
+                        logo: 'https://i.ibb.co/8nkGvqKT/33.jpg',
+                        deeplink: (url) => `backpack://app/open?url=${encodeURIComponent(url)}`
+                    },
+                    {
+                        id: 'solflare',
+                        name: 'Solflare',
+                        logo: 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png',
+                        deeplink: (url) => `solflare://open?url=${encodeURIComponent(url)}`
+                    }
+                ];
+                const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+                wallets.forEach(wallet => {
+                    const btn = document.createElement('button');
+                    btn.className = 'btn btn-primary wallet-select-btn';
+                    btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
+                    btn.onclick = async () => {
+                        if (isMobile) {
+                            // 모바일: 딥링크로 앱 이동
+                            window.location.href = wallet.deeplink(window.location.href);
+                            modal.style.display = 'none';
+                            return;
+                        }
+                        // PC: 확장프로그램 연동
+                        let provider = null;
+                        if (wallet.id === 'phantom' && window.solana && window.solana.isPhantom) {
+                            provider = window.solana;
+                            if (provider.isConnected && provider.disconnect) {
+                                try { await provider.disconnect(); } catch (e) {}
+                            }
+                        } else if (wallet.id === 'backpack' && window.solana && window.solana.isBackpack) {
+                            provider = window.solana;
+                            if (provider.isConnected && provider.disconnect) {
+                                try { await provider.disconnect(); } catch (e) {}
+                            }
+                        } else if (wallet.id === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
+                            provider = window.solflare || window.solana;
+                            if (provider.isConnected && provider.disconnect) {
+                                try { await provider.disconnect(); } catch (e) {}
+                            }
+                        }
+                        if (!provider) {
+                            alert(`${wallet.name} wallet extension is not installed.`);
+                            return;
+                        }
+                        try {
+                            await provider.connect({ onlyIfTrusted: false });
+                            if (provider.publicKey || (provider.publicKey && provider.publicKey.toString)) {
+                                const address = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
+                                const shortAddr = address.slice(0, 4) + '...' + address.slice(-4);
+                                connectBtn.textContent = `Disconnect: ${shortAddr}`;
+                                // 폼에 주소 입력
+                                const prayerWalletInput = document.getElementById('prayer-wallet-address');
+                                const bugWalletInput = document.getElementById('bug-wallet-address');
+                                if (prayerWalletInput) prayerWalletInput.value = address;
+                                if (bugWalletInput) bugWalletInput.value = address;
+                            }
+                            modal.style.display = 'none';
+                            if (provider.on) {
+                                provider.on('disconnect', () => {
+                                    connectBtn.textContent = 'Connect Wallet';
+                                    const prayerWalletInput = document.getElementById('prayer-wallet-address');
+                                    const bugWalletInput = document.getElementById('bug-wallet-address');
+                                    if (prayerWalletInput) prayerWalletInput.value = '';
+                                    if (bugWalletInput) bugWalletInput.value = '';
+                                });
+                            }
+                        } catch (e) {
+                            alert('Failed to connect wallet: ' + (e && e.message ? e.message : e));
+                        }
+                    };
+                    const logo = document.createElement('img');
+                    logo.src = wallet.logo;
+                    logo.alt = wallet.name + ' Logo';
+                    logo.className = 'wallet-logo';
+                    btn.appendChild(logo);
+                    const span = document.createElement('span');
+                    span.textContent = `Connect ${wallet.name}`;
+                    btn.appendChild(span);
+                    modalContent.appendChild(btn);
+                });
+                modal.style.display = 'flex';
+            });
+        }
+        // 모달 외부 클릭 시 닫기
+        window.addEventListener('click', (event) => {
+            if (event.target === modal) {
+                modal.style.display = "none";
+            }
+        });
+    });
+    // ... existing code ...
     </script>
 </body>
 </html>
