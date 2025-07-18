@@ -3521,7 +3521,7 @@
                             }
                         }
                         if (!provider) {
-                            alert(`${wallet.name} wallet extension is not installed.`);
+                            alert("Please open this site in your wallet app's built-in browser (Phantom/Backpack/Solflare: Open in-app browser and try again).");
                             return;
                         }
                         try {
@@ -3530,7 +3530,7 @@
                                 const address = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
                                 const shortAddr = address.slice(0, 4) + '...' + address.slice(-4);
                                 connectBtn.textContent = `Disconnect: ${shortAddr}`;
-                                // 폼에 주소 입력
+                                // Form address input
                                 const prayerWalletInput = document.getElementById('prayer-wallet-address');
                                 const bugWalletInput = document.getElementById('bug-wallet-address');
                                 if (prayerWalletInput) prayerWalletInput.value = address;
@@ -3547,7 +3547,7 @@
                                 });
                             }
                         } catch (e) {
-                            alert('Failed to connect wallet: ' + (e && e.message ? e.message : e));
+                            alert('Failed to connect wallet. Please check your wallet app or extension and try again.');
                         }
                     };
                     const logo = document.createElement('img');
