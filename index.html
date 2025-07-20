@@ -3502,6 +3502,11 @@
                                 if (provider.publicKey || (provider.publicKey && provider.publicKey.toString)) {
                                     const address = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
                                     const shortAddr = address.slice(0, 4) + '...' + address.slice(-4);
+                                    
+                                    // 연결 상태 업데이트
+                                    connectedWalletType = wallet.id;
+                                    connectedAddress = address;
+                                    
                                     connectBtn.textContent = `Disconnect: ${shortAddr}`;
                                     // Form address input
                                     const prayerWalletInput = document.getElementById('prayer-wallet-address');
@@ -3511,13 +3516,7 @@
                                 }
                                 modal.style.display = 'none';
                                 if (provider.on) {
-                                    provider.on('disconnect', () => {
-                                        connectBtn.textContent = 'Connect Wallet';
-                                        const prayerWalletInput = document.getElementById('prayer-wallet-address');
-                                        const bugWalletInput = document.getElementById('bug-wallet-address');
-                                        if (prayerWalletInput) prayerWalletInput.value = '';
-                                        if (bugWalletInput) bugWalletInput.value = '';
-                                    });
+                                    provider.on('disconnect', onDisconnect);
                                 }
                             } catch (e) {
                                 alert('Failed to connect wallet. Please check your wallet app or extension and try again.\n' + (e && e.message ? e.message : e));
