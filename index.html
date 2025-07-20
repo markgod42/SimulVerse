@@ -3395,7 +3395,7 @@
     <script>
         // --- Custom Solana Wallet Connect Logic (Phantom & Solflare) ---
         document.addEventListener('DOMContentLoaded', () => {
-            // 모달 생성 (항상 생성)
+            // 지갑 선택 모달 생성
             const modal = document.createElement('div');
             modal.style.cssText = `
                 display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
@@ -3415,14 +3415,88 @@
             modal.appendChild(modalContent);
             document.body.appendChild(modal);
 
+            // Disconnect 확인 모달 생성
+            const disconnectModal = document.createElement('div');
+            disconnectModal.style.cssText = `
+                display: none; position: fixed; z-index: 2001; left: 0; top: 0; width: 100%; height: 100%;
+                overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
+            `;
+            const disconnectModalContent = document.createElement('div');
+            disconnectModalContent.style.cssText = `
+                background-color: var(--card-bg); padding: 30px; border: 2px solid var(--primary-color);
+                border-radius: 15px; text-align: center; width: 90%; max-width: 400px;
+                box-shadow: 0 0 30px rgba(0, 255, 195, 0.3);
+            `;
+            
+            const disconnectTitle = document.createElement('h3');
+            disconnectTitle.textContent = 'Disconnect Wallet';
+            disconnectTitle.style.cssText = `
+                font-family: 'Orbitron', sans-serif; color: var(--primary-color); 
+                margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;
+            `;
+            
+            const disconnectMessage = document.createElement('p');
+            disconnectMessage.textContent = 'Are you sure you want to disconnect your wallet?';
+            disconnectMessage.style.cssText = `
+                color: var(--text-color); margin-bottom: 30px; font-size: 1.1em; line-height: 1.5;
+            `;
+            
+            const disconnectButtons = document.createElement('div');
+            disconnectButtons.style.cssText = `
+                display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
+            `;
+            
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'Yes, Disconnect';
+            confirmBtn.style.cssText = `
+                padding: 12px 25px; background-color: var(--primary-color); color: var(--background-color);
+                border: 2px solid var(--primary-color); border-radius: 5px; font-weight: 700;
+                cursor: pointer; transition: all 0.3s; text-transform: uppercase;
+            `;
+            confirmBtn.onmouseover = () => {
+                confirmBtn.style.boxShadow = '0 0 15px var(--primary-color)';
+            };
+            confirmBtn.onmouseout = () => {
+                confirmBtn.style.boxShadow = 'none';
+            };
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.style.cssText = `
+                padding: 12px 25px; background-color: transparent; color: var(--text-color);
+                border: 2px solid var(--text-color); border-radius: 5px; font-weight: 700;
+                cursor: pointer; transition: all 0.3s; text-transform: uppercase;
+            `;
+            cancelBtn.onmouseover = () => {
+                cancelBtn.style.borderColor = 'var(--primary-color)';
+                cancelBtn.style.color = 'var(--primary-color)';
+                cancelBtn.style.boxShadow = '0 0 15px var(--primary-color)';
+            };
+            cancelBtn.onmouseout = () => {
+                cancelBtn.style.borderColor = 'var(--text-color)';
+                cancelBtn.style.color = 'var(--text-color)';
+                cancelBtn.style.boxShadow = 'none';
+            };
+            
+            disconnectButtons.appendChild(confirmBtn);
+            disconnectButtons.appendChild(cancelBtn);
+            disconnectModalContent.appendChild(disconnectTitle);
+            disconnectModalContent.appendChild(disconnectMessage);
+            disconnectModalContent.appendChild(disconnectButtons);
+            disconnectModal.appendChild(disconnectModalContent);
+            document.body.appendChild(disconnectModal);
+
             // Connect Wallet 버튼 클릭 시 모달 표시 (항상 동작)
             const connectBtn = document.getElementById('connect-wallet-btn');
             if (connectBtn && !connectBtn._walletEventRegistered) {
                 connectBtn._walletEventRegistered = true;
                 connectBtn.addEventListener('click', (e) => {
-                    // 연결된 상태면 확인 팝업 표시
+                    // 연결된 상태면 커스텀 확인 모달 표시
                     if (connectedWalletType) {
-                        if (confirm('Are you sure you want to disconnect your wallet?')) {
+                        disconnectModal.style.display = 'flex';
+                        
+                        // 확인 버튼 클릭 시 연결 해제
+                        confirmBtn.onclick = () => {
                             let provider = null;
                             if (connectedWalletType === 'phantom' && window.solana && window.solana.isPhantom) {
                                 provider = window.solana;
@@ -3436,8 +3510,15 @@
                             } else {
                                 onDisconnect();
                             }
-                        }
-                        return; // 팝업 띄우지 않음
+                            disconnectModal.style.display = 'none';
+                        };
+                        
+                        // 취소 버튼 클릭 시 모달 닫기
+                        cancelBtn.onclick = () => {
+                            disconnectModal.style.display = 'none';
+                        };
+                        
+                        return; // 지갑 선택 팝업 띄우지 않음
                     }
                     // 연결 안 된 상태면 팝업 띄움
                     while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
@@ -3539,6 +3620,9 @@
             window.addEventListener('click', (event) => {
                 if (event.target === modal) {
                     modal.style.display = "none";
+                }
+                if (event.target === disconnectModal) {
+                    disconnectModal.style.display = "none";
                 }
             });
 
