@@ -3557,6 +3557,20 @@
             installModal.appendChild(installModalContent);
             document.body.appendChild(installModal);
 
+            // 지갑 설치 URL 반환 함수
+            function getInstallUrl(walletId) {
+                switch(walletId) {
+                    case 'phantom':
+                        return 'https://phantom.app/';
+                    case 'backpack':
+                        return 'https://backpack.app/';
+                    case 'solflare':
+                        return 'https://solflare.com/';
+                    default:
+                        return '';
+                }
+            }
+
             // Connect Wallet 버튼 클릭 시 모달 표시 (항상 동작)
             const connectBtn = document.getElementById('connect-wallet-btn');
             if (connectBtn && !connectBtn._walletEventRegistered) {
@@ -3621,8 +3635,42 @@
                         btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
                         btn.onclick = async () => {
                             if (isMobile) {
-                                // 모바일: 항상 딥링크로 앱 이동(팝업 없이)
-                                window.location.href = wallet.deeplink(window.location.href);
+                                // 모바일: 지갑 앱 설치 여부 확인 후 처리
+                                const deeplinkUrl = wallet.deeplink(window.location.href);
+                                const installUrl = getInstallUrl(wallet.id);
+                                
+                                // 딥링크 시도 전 현재 페이지 URL 저장
+                                const currentUrl = window.location.href;
+                                
+                                // 딥링크 시도
+                                window.location.href = deeplinkUrl;
+                                
+                                // 2초 후 페이지가 변경되지 않았으면 앱이 설치되지 않은 것으로 판단
+                                setTimeout(() => {
+                                    if (window.location.href === currentUrl) {
+                                        // 앱이 설치되지 않음 - 설치 안내 모달 표시
+                                        const messageElement = document.getElementById('install-modal-message');
+                                        if (messageElement) {
+                                            messageElement.textContent = `${wallet.name} wallet app is not installed on your mobile device. Please install the app and try again.`;
+                                        }
+                                        
+                                        // Install Wallet 버튼 클릭 시 해당 지갑 설치 페이지로 이동
+                                        installBtn.onclick = () => {
+                                            if (installUrl) {
+                                                window.open(installUrl, '_blank');
+                                            }
+                                            installModal.style.display = 'none';
+                                        };
+                                        
+                                        // Close 버튼 클릭 시 모달 닫기
+                                        closeInstallBtn.onclick = () => {
+                                            installModal.style.display = 'none';
+                                        };
+                                        
+                                        installModal.style.display = 'flex';
+                                    }
+                                }, 2000);
+                                
                                 modal.style.display = 'none';
                                 return;
                             }
@@ -3653,14 +3701,7 @@
                                 
                                 // Install Wallet 버튼 클릭 시 해당 지갑 설치 페이지로 이동
                                 installBtn.onclick = () => {
-                                    let installUrl = '';
-                                    if (wallet.id === 'phantom') {
-                                        installUrl = 'https://phantom.app/';
-                                    } else if (wallet.id === 'backpack') {
-                                        installUrl = 'https://backpack.app/';
-                                    } else if (wallet.id === 'solflare') {
-                                        installUrl = 'https://solflare.com/';
-                                    }
+                                    const installUrl = getInstallUrl(wallet.id);
                                     if (installUrl) {
                                         window.open(installUrl, '_blank');
                                     }
