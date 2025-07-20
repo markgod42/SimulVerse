@@ -3575,7 +3575,7 @@
             const connectBtn = document.getElementById('connect-wallet-btn');
             if (connectBtn && !connectBtn._walletEventRegistered) {
                 connectBtn._walletEventRegistered = true;
-                connectBtn.addEventListener('click', (e) => {
+                connectBtn.addEventListener('click', async (e) => {
                     // 연결된 상태면 커스텀 확인 모달 표시
                     if (connectedWalletType) {
                         disconnectModal.style.display = 'flex';
