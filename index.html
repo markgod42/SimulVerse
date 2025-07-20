@@ -3420,20 +3420,22 @@
             if (connectBtn && !connectBtn._walletEventRegistered) {
                 connectBtn._walletEventRegistered = true;
                 connectBtn.addEventListener('click', (e) => {
-                    // 연결된 상태면 바로 disconnect (PC)
+                    // 연결된 상태면 확인 팝업 표시
                     if (connectedWalletType) {
-                        let provider = null;
-                        if (connectedWalletType === 'phantom' && window.solana && window.solana.isPhantom) {
-                            provider = window.solana;
-                        } else if (connectedWalletType === 'backpack' && window.solana && window.solana.isBackpack) {
-                            provider = window.solana;
-                        } else if (connectedWalletType === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
-                            provider = window.solflare || window.solana;
-                        }
-                        if (provider && provider.disconnect) {
-                            provider.disconnect();
-                        } else {
-                            onDisconnect();
+                        if (confirm('Are you sure you want to disconnect your wallet?')) {
+                            let provider = null;
+                            if (connectedWalletType === 'phantom' && window.solana && window.solana.isPhantom) {
+                                provider = window.solana;
+                            } else if (connectedWalletType === 'backpack' && window.solana && window.solana.isBackpack) {
+                                provider = window.solana;
+                            } else if (connectedWalletType === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
+                                provider = window.solflare || window.solana;
+                            }
+                            if (provider && provider.disconnect) {
+                                provider.disconnect();
+                            } else {
+                                onDisconnect();
+                            }
                         }
                         return; // 팝업 띄우지 않음
                     }
@@ -3495,7 +3497,8 @@
                                 return;
                             }
                             try {
-                                await provider.connect({ onlyIfTrusted: false });
+                                // Force user to manually connect by not using onlyIfTrusted
+                                await provider.connect();
                                 if (provider.publicKey || (provider.publicKey && provider.publicKey.toString)) {
                                     const address = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
                                     const shortAddr = address.slice(0, 4) + '...' + address.slice(-4);
@@ -3563,8 +3566,8 @@
                         alert('Wallet provider not found.');
                         return;
                     }
-                    // 연결
-                    const connectResult = await provider.connect({ onlyIfTrusted: false });
+                    // 연결 - 사용자가 명시적으로 연결을 요청하도록 함
+                    const connectResult = await provider.connect();
                     // 연결 성공 시에만 주소 UI 반영
                     if (provider.publicKey || (provider.publicKey && provider.publicKey.toString)) {
                         connectedWalletType = type;
@@ -3600,27 +3603,7 @@
                 // 연결 정보 삭제
                 localStorage.removeItem('wallet_connected');
             }
-            // Disconnect 버튼 동작
-            if (connectBtn) {
-                connectBtn.addEventListener('click', () => {
-                    if (connectedWalletType) {
-                        // disconnect
-                        let provider = null;
-                        if (connectedWalletType === 'phantom' && window.solana && window.solana.isPhantom) {
-                            provider = window.solana;
-                        } else if (connectedWalletType === 'backpack' && window.solana && window.solana.isBackpack) {
-                            provider = window.solana;
-                        } else if (connectedWalletType === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
-                            provider = window.solflare || window.solana;
-                        }
-                        if (provider && provider.disconnect) {
-                            provider.disconnect();
-                        } else {
-                            onDisconnect();
-                        }
-                    }
-                });
-            }
+            // Disconnect 버튼 동작은 위의 이벤트 리스너에서 처리됨
             // 새로고침 후 자동 재연결 로직
             // async function tryAutoReconnect() {
             //     const lastWallet = localStorage.getItem('wallet_connected');
