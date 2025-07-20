@@ -3605,7 +3605,54 @@
                         
                         return; // 지갑 선택 팝업 띄우지 않음
                     }
-                    // 연결 안 된 상태면 팝업 띄움
+                    
+                    // 모바일 지갑 브라우저 감지 및 자동 연결
+                    const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+                    let provider = null;
+                    let walletType = null;
+                    
+                    if (isMobile) {
+                        if (window.solana && window.solana.isPhantom) {
+                            provider = window.solana;
+                            walletType = 'phantom';
+                        } else if (window.solana && window.solana.isBackpack) {
+                            provider = window.solana;
+                            walletType = 'backpack';
+                        } else if (window.solflare) {
+                            provider = window.solflare;
+                            walletType = 'solflare';
+                        }
+                        
+                        if (provider) {
+                            try {
+                                await provider.connect();
+                                const address = provider.publicKey ? provider.publicKey.toString() : '';
+                                connectedWalletType = walletType;
+                                connectedAddress = address;
+                                connectBtn.textContent = `Disconnect: ${address.slice(0,4)}...${address.slice(-4)}`;
+                                // 폼에 주소 입력
+                                const prayerWalletInput = document.getElementById('prayer-wallet-address');
+                                const bugWalletInput = document.getElementById('bug-wallet-address');
+                                if (prayerWalletInput) prayerWalletInput.value = address;
+                                if (bugWalletInput) bugWalletInput.value = address;
+                                // disconnect 이벤트 등록
+                                if (provider.on) {
+                                    provider.on('disconnect', onDisconnect);
+                                }
+                                return; // 팝업 띄우지 않음
+                            } catch (e) {
+                                // 연결 실패 시 에러 안내
+                                const messageElement = document.getElementById('install-modal-message');
+                                if (messageElement) {
+                                    messageElement.textContent = 'Failed to connect wallet. Please try again in your wallet browser.';
+                                }
+                                installModal.style.display = 'flex';
+                                return;
+                            }
+                        }
+                    }
+                    
+                    // 일반 모바일/PC: 지갑 선택 팝업 띄움
                     while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
                     // 3개 버튼 모두 노출
                     const wallets = [
@@ -3628,7 +3675,6 @@
                             deeplink: (url) => `solflare://open?url=${encodeURIComponent(url)}`
                         }
                     ];
-                    const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
                     wallets.forEach(wallet => {
                         const btn = document.createElement('button');
                         btn.className = 'btn btn-primary wallet-select-btn';
