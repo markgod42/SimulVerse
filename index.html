@@ -3976,29 +3976,44 @@
             ];
 
             async function fetchNewsHeadline() {
-                const topics = ['technology', 'entertainment', 'science', 'health'];
-                const randomTopic = topics[Math.floor(Math.random() * topics.length)];
-                const url = `https://gnews.io/api/v4/top-headlines?lang=en&topic=${randomTopic}&max=10&token=${GNEWS_API_KEY}`;
+                // BBC, Yahoo RSS에서 헤드라인 1건 랜덤 추출
+                const rssFeeds = [
+                  'http://newsrss.bbc.co.uk/rss/newsonline_uk_edition/world/rss.xml',
+                  'http://rss.news.yahoo.com/rss/world'
+                ];
+                function fetchRssHeadlines(rssUrl) {
+                  const proxyUrl = `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`;
+                  return fetch(proxyUrl)
+                    .then(res => res.json())
+                    .then(data => {
+                      const parser = new DOMParser();
+                      const xml = parser.parseFromString(data.contents, 'text/xml');
+                      const items = xml.querySelectorAll('item');
+                      const headlines = [];
+                      items.forEach(item => {
+                        const title = item.querySelector('title').textContent;
+                        headlines.push(title);
+                      });
+                      return headlines;
+                    })
+                    .catch(() => []);
+                }
                 try {
-                    const response = await fetch(url);
-                    if (!response.ok) {
-                        throw new Error(`GNews API request failed with status ${response.status}`);
-                    }
-                    const data = await response.json();
-                    if (data.articles && data.articles.length > 0) {
-                        const randomIndex = Math.floor(Math.random() * data.articles.length);
-                        return data.articles[randomIndex].title;
-                    } else {
-                        throw new Error("No articles found in GNews response for the selected topic.");
-                    }
-                } catch (error) {
-                    console.error("Error fetching news:", error);
+                  const results = await Promise.all(rssFeeds.map(fetchRssHeadlines));
+                  const allHeadlines = results.flat().filter(Boolean);
+                  if (allHeadlines.length === 0) {
                     return fallbackHeadlines[Math.floor(Math.random() * fallbackHeadlines.length)];
+                  }
+                  const randomHeadline = allHeadlines[Math.floor(Math.random() * allHeadlines.length)];
+                  return randomHeadline;
+                } catch (error) {
+                  console.error("Error fetching RSS news:", error);
+                  return fallbackHeadlines[Math.floor(Math.random() * fallbackHeadlines.length)];
                 }
             }
 
             async function getMarksExplanation(headline) {
-                const prompt = `You are Mark, a brilliant but lazy grad student who built our reality as a simulation. The following headline just broke in the real world: "${headline}".\nYour task is to creatively and humorously explain the "real" reason this happened from your perspective as the simulation's creator. Was it a bug? A failed experiment? Did you spill soda on the motherboard? Connect it to your life as a grad student. The explanation must be short, witty, and absolutely hilarious. Don't be too technical.`;
+                const prompt = `너는 '마크'라는 게으르고 장난기 많은 대학원생이야. 아래 뉴스 헤드라인이 현실에서 막 떴어: "${headline}".\n이 일이 왜 일어났는지 아주 쉽고, 전문 용어 없이, 유머러스하게 3~4문장 정도로 설명해줘. 너무 짧지 않게, 어린아이도 이해할 수 있게, 네가 실수하거나 장난친 상황을 상상해서 써줘. (예: "내가 실수로 버튼을 잘못 눌렀어! 사실 어제 밤새 게임하다가 코드를 엉망으로 짰거든. 그래서 오늘 이런 일이 벌어진 거야. 다음엔 더 조심할게!" 처럼.)`;
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
                 const payload = {
                     contents: [{
