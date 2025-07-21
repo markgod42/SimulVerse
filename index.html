@@ -4081,20 +4081,23 @@
             }
             async function updateOracle() {
                 if (!loadingState || !newsState || !errorState) return;
-                loadingState.classList.remove('hidden');
+                // 항상 모든 상태 숨김으로 시작
+                loadingState.classList.add('hidden');
                 newsState.classList.add('hidden');
                 errorState.classList.add('hidden');
                 try {
+                    // 로딩만 잠깐 보여주고 바로 숨김
+                    loadingState.classList.remove('hidden');
                     const headline = await fetchNewsHeadline();
                     const explanation = await getMarksExplanation(headline);
-                    // 정상적으로 데이터가 있으면 에러 메시지 숨김
+                    // 정상적으로 데이터가 있으면 로딩/에러 숨기고 뉴스만 노출
                     if (headline && explanation) {
                         realHeadlineEl.textContent = headline;
                         markExplanationEl.textContent = explanation;
                         updateTimestamp();
                         loadingState.classList.add('hidden');
-                        newsState.classList.remove('hidden');
                         errorState.classList.add('hidden');
+                        newsState.classList.remove('hidden');
                         // 더보기/접기 버튼 처리
                         setTimeout(() => {
                             if (markExplanationEl.scrollHeight > markExplanationEl.offsetHeight + 5) {
@@ -4110,7 +4113,7 @@
                             }
                         }, 100);
                     } else {
-                        // 데이터가 비정상적이면 에러 표시
+                        // 데이터가 비정상적이면 에러만 노출
                         loadingState.classList.add('hidden');
                         newsState.classList.add('hidden');
                         errorState.classList.remove('hidden');
@@ -4142,6 +4145,10 @@
                 };
             }
             document.addEventListener('DOMContentLoaded', () => {
+                // 진입 시 모든 상태 숨김
+                if (document.getElementById('loading-state')) document.getElementById('loading-state').classList.add('hidden');
+                if (document.getElementById('news-state')) document.getElementById('news-state').classList.add('hidden');
+                if (document.getElementById('error-state')) document.getElementById('error-state').classList.add('hidden');
                 updateOracle();
                 setInterval(updateOracle, 1800000);
                 setInterval(updateTimestamp, 60000);
