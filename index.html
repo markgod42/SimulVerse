@@ -1449,6 +1449,92 @@
                 justify-content: center;
             }
         }
+        /* 오라클 영역 스타일 개선 */
+        #oracle-section {
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        #oracle-content {
+            max-width: 100%;
+            margin: 0 auto;
+            background: var(--card-bg);
+            border-radius: 12px;
+            border: 1px solid var(--primary-color);
+            box-shadow: 0 4px 24px rgba(0,255,195,0.08);
+            padding: 32px 24px 28px 24px;
+        }
+        @media (max-width: 768px) {
+            #oracle-section {
+                max-width: 98vw;
+                padding: 0 2vw;
+            }
+            #oracle-content {
+                padding: 20px 6vw 18px 6vw;
+            }
+        }
+        .oracle-label {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.1em;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+        }
+        .oracle-headline-group {
+            margin-bottom: 18px;
+        }
+        .oracle-divider {
+            border-bottom: 1px solid rgba(0,255,195,0.15);
+            margin: 18px 0 18px 0;
+        }
+        .oracle-explanation-group {
+            margin-bottom: 0;
+        }
+        #mark-explanation {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            transition: all 0.2s;
+            font-size: 1.08em;
+            line-height: 1.7;
+            margin-bottom: 0;
+        }
+        #oracle-more-btn, #oracle-less-btn {
+            display: none;
+            margin-top: 8px;
+            background: none;
+            border: none;
+            color: var(--primary-color);
+            font-weight: 700;
+            cursor: pointer;
+            font-size: 1em;
+        }
+        @media (max-width: 576px) {
+            #oracle-content {
+                padding: 12px 2vw 12px 2vw;
+            }
+            #mark-explanation {
+                font-size: 1em;
+            }
+        }
+        .oracle-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .oracle-breaking-news {
+            font-family: 'Orbitron', sans-serif;
+            color: #ff00c3;
+            font-weight: 700;
+            font-size: 1.1em;
+            letter-spacing: 1px;
+        }
+        #news-timestamp {
+            font-size: 0.98em;
+            color: #aaa;
+            font-family: 'Inter', sans-serif;
+        }
     </style>
     <style id="tailwind-img-reset">
         img.mark-image {
