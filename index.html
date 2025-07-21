@@ -1451,13 +1451,18 @@
         }
         /* 오라클 영역 스타일 개선 */
         #oracle-section {
-            max-width: 1050px;
+            max-width: 100vw;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             margin: 0 auto;
         }
         #oracle-content {
             width: 100%;
             max-width: 1050px;
-            margin: 0 auto;
+            margin-left: auto;
+            margin-right: auto;
             background: var(--card-bg);
             border-radius: 16px;
             border: 2.5px solid var(--primary-color);
@@ -1465,6 +1470,10 @@
             padding: 38px 48px 32px 48px;
             position: relative;
             overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
         }
         @media (max-width: 1200px) {
             #oracle-section, #oracle-content {
@@ -1474,11 +1483,13 @@
         @media (max-width: 900px) {
             #oracle-content {
                 padding: 24px 2vw 20px 2vw;
+                max-width: 100vw;
             }
         }
         @media (max-width: 576px) {
             #oracle-content {
                 padding: 12px 2vw 12px 2vw;
+                max-width: 100vw;
             }
         }
         /* 뉴스 속보 느낌 효과 */
@@ -1594,6 +1605,22 @@
             #mark-explanation {
                 font-size: 1em;
             }
+        }
+        /* BREAKING NEWS 텍스트 생동감 효과 */
+        .oracle-breaking-news {
+            position: relative;
+            animation: breaking-glow 1.2s infinite alternate, breaking-shake 0.18s 2 alternate;
+        }
+        @keyframes breaking-glow {
+            0% { text-shadow: 0 0 8px #ff003c, 0 0 16px #ffae00, 0 0 2px #fff; color: #ff003c; }
+            100% { text-shadow: 0 0 20px #ffae00, 0 0 40px #ff003c, 0 0 8px #fff; color: #ffae00; }
+        }
+        @keyframes breaking-shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-2px) rotate(-1deg); }
+            50% { transform: translateX(2px) rotate(1deg); }
+            75% { transform: translateX(-1px) rotate(-1deg); }
+            100% { transform: translateX(0); }
         }
     </style>
     <style id="tailwind-img-reset">
@@ -4013,7 +4040,7 @@
             }
 
             async function getMarksExplanation(headline) {
-                const prompt = `너는 '마크'라는 게으르고 장난기 많은 대학원생이야. 아래 뉴스 헤드라인이 현실에서 막 떴어: "${headline}".\n이 일이 왜 일어났는지 아주 쉽고, 전문 용어 없이, 유머러스하게 3~4문장 정도로 설명해줘. 너무 짧지 않게, 어린아이도 이해할 수 있게, 네가 실수하거나 장난친 상황을 상상해서 써줘. (예: "내가 실수로 버튼을 잘못 눌렀어! 사실 어제 밤새 게임하다가 코드를 엉망으로 짰거든. 그래서 오늘 이런 일이 벌어진 거야. 다음엔 더 조심할게!" 처럼.)`;
+                const prompt = `You are Mark, a lazy and playful grad student who created this world as a simulation. Here is a real-world news headline: "${headline}".\nIf the headline is about people dying, getting hurt, or a tragic event, you must react with sadness, empathy, and apologize sincerely (be less humorous, show you feel sorry and regretful). For all other headlines, explain the real reason in a simple, funny, and easy-to-understand way (3-4 sentences, no technical words, imagine you made a silly mistake or prank). Always answer in English.`;
                 const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_API_KEY}`;
                 const payload = {
                     contents: [{
@@ -4060,28 +4087,38 @@
                 try {
                     const headline = await fetchNewsHeadline();
                     const explanation = await getMarksExplanation(headline);
-                    realHeadlineEl.textContent = headline;
-                    markExplanationEl.textContent = explanation;
-                    updateTimestamp();
-                    loadingState.classList.add('hidden');
-                    newsState.classList.remove('hidden');
-                    // 더보기/접기 버튼 처리
-                    setTimeout(() => {
-                        if (markExplanationEl.scrollHeight > markExplanationEl.offsetHeight + 5) {
-                            moreBtn.style.display = 'inline-block';
-                            lessBtn.style.display = 'none';
-                            markExplanationEl.style.display = '-webkit-box';
-                            markExplanationEl.style.webkitLineClamp = 3;
-                            markExplanationEl.style.overflow = 'hidden';
-                            markExplanationEl.style.textOverflow = 'ellipsis';
-                        } else {
-                            moreBtn.style.display = 'none';
-                            lessBtn.style.display = 'none';
-                        }
-                    }, 100);
+                    // 정상적으로 데이터가 있으면 에러 메시지 숨김
+                    if (headline && explanation) {
+                        realHeadlineEl.textContent = headline;
+                        markExplanationEl.textContent = explanation;
+                        updateTimestamp();
+                        loadingState.classList.add('hidden');
+                        newsState.classList.remove('hidden');
+                        errorState.classList.add('hidden');
+                        // 더보기/접기 버튼 처리
+                        setTimeout(() => {
+                            if (markExplanationEl.scrollHeight > markExplanationEl.offsetHeight + 5) {
+                                moreBtn.style.display = 'inline-block';
+                                lessBtn.style.display = 'none';
+                                markExplanationEl.style.display = '-webkit-box';
+                                markExplanationEl.style.webkitLineClamp = 3;
+                                markExplanationEl.style.overflow = 'hidden';
+                                markExplanationEl.style.textOverflow = 'ellipsis';
+                            } else {
+                                moreBtn.style.display = 'none';
+                                lessBtn.style.display = 'none';
+                            }
+                        }, 100);
+                    } else {
+                        // 데이터가 비정상적이면 에러 표시
+                        loadingState.classList.add('hidden');
+                        newsState.classList.add('hidden');
+                        errorState.classList.remove('hidden');
+                    }
                 } catch (error) {
                     console.error("Failed to update oracle:", error);
                     loadingState.classList.add('hidden');
+                    newsState.classList.add('hidden');
                     errorState.classList.remove('hidden');
                 }
             }
