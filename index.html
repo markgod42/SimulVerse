@@ -1623,11 +1623,11 @@
             100% { transform: translateX(0); }
         }
         .sim-status-section {
-            background: rgba(20, 20, 40, 0.85);
+            background: var(--card-bg);
             border-radius: 18px;
             margin: 48px auto 48px auto;
-            padding: 36px 24px 32px 24px;
-            box-shadow: 0 4px 32px 0 rgba(0,0,0,0.18);
+            padding: 40px 24px 32px 24px;
+            box-shadow: 0 4px 32px 0 rgba(0,255,195,0.10);
             max-width: 1100px;
         }
         .sim-status-top {
@@ -1638,13 +1638,13 @@
             flex-wrap: wrap;
         }
         .sim-status-card {
-            background: var(--card-bg);
-            border-radius: 14px;
-            box-shadow: 0 2px 16px 0 rgba(0,255,195,0.08);
+            background: rgba(25, 25, 40, 0.92);
+            border-radius: 16px;
+            box-shadow: 0 2px 16px 0 rgba(0,255,195,0.10);
             padding: 28px 32px 22px 32px;
-            min-width: 260px;
+            min-width: 240px;
             max-width: 320px;
-            flex: 1 1 260px;
+            flex: 1 1 240px;
             display: flex;
             flex-direction: column;
             align-items: flex-start;
@@ -1652,34 +1652,36 @@
         }
         .sim-status-title {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.35em;
+            font-size: 1.18em;
             color: var(--primary-color);
             margin-bottom: 8px;
             font-weight: 700;
+            letter-spacing: 1px;
         }
         .sim-status-value {
-            font-size: 2.3em;
+            font-size: 2.1em;
             font-family: 'Orbitron', sans-serif;
             font-weight: 900;
             color: #fff;
             margin-bottom: 8px;
+            letter-spacing: 1px;
         }
         .sim-status-bar {
             width: 100%;
-            height: 10px;
-            background: #23233a;
-            border-radius: 8px;
+            height: 9px;
+            background: #18182a;
+            border-radius: 7px;
             margin-bottom: 10px;
             overflow: hidden;
         }
         .sim-status-bar-inner {
             height: 100%;
             background: linear-gradient(90deg, #00ffc3 0%, #29d6ff 100%);
-            border-radius: 8px;
+            border-radius: 7px;
             transition: width 0.7s cubic-bezier(.4,2,.6,1);
         }
         .sim-status-desc {
-            font-size: 1em;
+            font-size: 0.98em;
             color: #b6f7f0;
             margin-top: 2px;
             font-family: 'Inter', sans-serif;
@@ -1691,32 +1693,33 @@
             flex-wrap: wrap;
         }
         .sim-status-bugs, .sim-status-patches {
-            background: var(--card-bg);
-            border-radius: 14px;
-            box-shadow: 0 2px 16px 0 rgba(0,255,195,0.08);
-            padding: 24px 18px 18px 18px;
-            flex: 1 1 340px;
-            min-width: 320px;
+            background: rgba(25, 25, 40, 0.92);
+            border-radius: 16px;
+            box-shadow: 0 2px 16px 0 rgba(0,255,195,0.10);
+            padding: 22px 18px 16px 18px;
+            flex: 1 1 320px;
+            min-width: 260px;
             max-width: 480px;
         }
         .sim-status-subtitle {
             font-family: 'Orbitron', sans-serif;
-            font-size: 1.25em;
+            font-size: 1.13em;
             color: var(--primary-color);
-            margin-bottom: 16px;
+            margin-bottom: 14px;
             font-weight: 700;
+            letter-spacing: 1px;
         }
         #bug-report-list-sim, #patch-list-sim {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
         .sim-bug-item, .sim-patch-item {
-            background: rgba(40,40,60,0.85);
-            border-radius: 8px;
-            padding: 12px 16px 10px 16px;
+            background: rgba(40,40,60,0.92);
+            border-radius: 10px;
+            padding: 10px 14px 8px 14px;
             color: #fff;
-            font-size: 1.08em;
+            font-size: 1.03em;
             box-shadow: 0 1px 6px 0 rgba(0,255,195,0.04);
             display: flex;
             flex-direction: column;
@@ -1724,19 +1727,21 @@
         .sim-bug-title {
             font-weight: 700;
             color: #fff;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
+            font-size: 1.04em;
         }
         .sim-bug-meta {
-            font-size: 0.98em;
+            font-size: 0.97em;
             color: #b6f7f0;
         }
         .sim-patch-title {
             font-weight: 700;
             color: #fff;
-            margin-bottom: 2px;
+            margin-bottom: 1px;
+            font-size: 1.04em;
         }
         .sim-patch-meta {
-            font-size: 0.98em;
+            font-size: 0.97em;
             color: #b6f7f0;
         }
         @media (max-width: 900px) {
@@ -1877,24 +1882,6 @@
                     </div>
                 </section>
                 
-                <section id="live-activity">
-                    <h2 class="section-title">Live Simulation Activity</h2>
-                    <p class="section-description">Our universe is more active than ever. See how many entities are interacting with the Creator right now.</p>
-                    <div class="activity-grid">
-                        <div class="activity-card">
-                            <div class="activity-title">Prayers Sent Today</div>
-                            <div class="activity-count" id="prayers-today">0</div>
-                            <img src="https://media.giphy.com/media/3oKIPuM1xe7G1i2iBi/giphy.gif" alt="Praying Hands GIF">
-                        </div>
-                        <div class="activity-card">
-                            <div class="activity-title">Bugs Reported Today</div>
-                            <div class="activity-count" id="bugs-today">0</div>
-                             <img src="https://media.giphy.com/media/l2JJKs3I69qfaQleE/giphy.gif" alt="Bug GIF">
-                        </div>
-                    </div>
-                </section>
-
-                <!-- Simulation Status Monitor 영역 시작 -->
                 <section id="simulation-status-monitor" class="sim-status-section">
                     <h2 class="section-title" style="font-family: 'Orbitron', sans-serif; font-size:2.5em; text-align:center; background: linear-gradient(90deg, #29d6ff 0%, #b36fff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 32px;">Simulation Status Monitor</h2>
                     <div class="sim-status-top">
@@ -1928,7 +1915,6 @@
                         </div>
                     </div>
                 </section>
-                <!-- Simulation Status Monitor 영역 끝 -->
 
                 <section id="prayer" class="prayer-section">
                     <h2 class="section-title">Daily Prayer Mining</h2>
@@ -4399,14 +4385,14 @@
     }
     function renderBugsAndPatches() {
         // Bug Reports
-        let bugs = shuffle(bugTitles).slice(0,30);
+        let bugs = shuffle(bugTitles).slice(0,3);
         let bugHtml = bugs.map((title,i)=>{
             let meta = bugMeta[Math.floor(Math.random()*bugMeta.length)];
             return `<div class='sim-bug-item'><div class='sim-bug-title'>${title}</div><div class='sim-bug-meta'>${meta}</div></div>`;
         }).join('');
         bugList.innerHTML = bugHtml;
         // Patches
-        let patches = shuffle(patchTitles).slice(0,30);
+        let patches = shuffle(patchTitles).slice(0,3);
         let patchHtml = patches.map((title,i)=>{
             let meta = patchMeta[Math.floor(Math.random()*patchMeta.length)];
             let date = randomDate();
