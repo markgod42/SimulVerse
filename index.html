@@ -1622,6 +1622,133 @@
             75% { transform: translateX(-1px) rotate(-1deg); }
             100% { transform: translateX(0); }
         }
+        .sim-status-section {
+            background: rgba(20, 20, 40, 0.85);
+            border-radius: 18px;
+            margin: 48px auto 48px auto;
+            padding: 36px 24px 32px 24px;
+            box-shadow: 0 4px 32px 0 rgba(0,0,0,0.18);
+            max-width: 1100px;
+        }
+        .sim-status-top {
+            display: flex;
+            gap: 32px;
+            justify-content: center;
+            margin-bottom: 32px;
+            flex-wrap: wrap;
+        }
+        .sim-status-card {
+            background: var(--card-bg);
+            border-radius: 14px;
+            box-shadow: 0 2px 16px 0 rgba(0,255,195,0.08);
+            padding: 28px 32px 22px 32px;
+            min-width: 260px;
+            max-width: 320px;
+            flex: 1 1 260px;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+        .sim-status-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.35em;
+            color: var(--primary-color);
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        .sim-status-value {
+            font-size: 2.3em;
+            font-family: 'Orbitron', sans-serif;
+            font-weight: 900;
+            color: #fff;
+            margin-bottom: 8px;
+        }
+        .sim-status-bar {
+            width: 100%;
+            height: 10px;
+            background: #23233a;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            overflow: hidden;
+        }
+        .sim-status-bar-inner {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffc3 0%, #29d6ff 100%);
+            border-radius: 8px;
+            transition: width 0.7s cubic-bezier(.4,2,.6,1);
+        }
+        .sim-status-desc {
+            font-size: 1em;
+            color: #b6f7f0;
+            margin-top: 2px;
+            font-family: 'Inter', sans-serif;
+        }
+        .sim-status-bottom {
+            display: flex;
+            gap: 32px;
+            margin-top: 32px;
+            flex-wrap: wrap;
+        }
+        .sim-status-bugs, .sim-status-patches {
+            background: var(--card-bg);
+            border-radius: 14px;
+            box-shadow: 0 2px 16px 0 rgba(0,255,195,0.08);
+            padding: 24px 18px 18px 18px;
+            flex: 1 1 340px;
+            min-width: 320px;
+            max-width: 480px;
+        }
+        .sim-status-subtitle {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.25em;
+            color: var(--primary-color);
+            margin-bottom: 16px;
+            font-weight: 700;
+        }
+        #bug-report-list-sim, #patch-list-sim {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .sim-bug-item, .sim-patch-item {
+            background: rgba(40,40,60,0.85);
+            border-radius: 8px;
+            padding: 12px 16px 10px 16px;
+            color: #fff;
+            font-size: 1.08em;
+            box-shadow: 0 1px 6px 0 rgba(0,255,195,0.04);
+            display: flex;
+            flex-direction: column;
+        }
+        .sim-bug-title {
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+        .sim-bug-meta {
+            font-size: 0.98em;
+            color: #b6f7f0;
+        }
+        .sim-patch-title {
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 2px;
+        }
+        .sim-patch-meta {
+            font-size: 0.98em;
+            color: #b6f7f0;
+        }
+        @media (max-width: 900px) {
+            .sim-status-top, .sim-status-bottom {
+                flex-direction: column;
+                gap: 18px;
+            }
+            .sim-status-card, .sim-status-bugs, .sim-status-patches {
+                min-width: 0;
+                max-width: 100%;
+            }
+        }
     </style>
     <style id="tailwind-img-reset">
         img.mark-image {
@@ -1766,6 +1893,42 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Simulation Status Monitor 영역 시작 -->
+                <section id="simulation-status-monitor" class="sim-status-section">
+                    <h2 class="section-title" style="font-family: 'Orbitron', sans-serif; font-size:2.5em; text-align:center; background: linear-gradient(90deg, #29d6ff 0%, #b36fff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 32px;">Simulation Status Monitor</h2>
+                    <div class="sim-status-top">
+                        <div class="sim-status-card">
+                            <div class="sim-status-title"><span style="font-size:1.3em;">🖥️</span> CPU Usage</div>
+                            <div class="sim-status-value" id="cpu-usage">80.6%</div>
+                            <div class="sim-status-bar"><div class="sim-status-bar-inner" id="cpu-bar"></div></div>
+                            <div class="sim-status-desc" id="cpu-desc">Mark is working on his thesis</div>
+                        </div>
+                        <div class="sim-status-card">
+                            <div class="sim-status-title"><span style="font-size:1.3em;">🗄️</span> RAM Usage</div>
+                            <div class="sim-status-value" id="ram-usage">80.5%</div>
+                            <div class="sim-status-bar"><div class="sim-status-bar-inner" id="ram-bar"></div></div>
+                            <div class="sim-status-desc" id="ram-desc">Reality processing stable</div>
+                        </div>
+                        <div class="sim-status-card">
+                            <div class="sim-status-title"><span style="font-size:1.3em;">🌐</span> Network Traffic</div>
+                            <div class="sim-status-value" id="net-usage">87.0%</div>
+                            <div class="sim-status-bar"><div class="sim-status-bar-inner" id="net-bar"></div></div>
+                            <div class="sim-status-desc" id="net-desc">High prayer activity detected</div>
+                        </div>
+                    </div>
+                    <div class="sim-status-bottom">
+                        <div class="sim-status-bugs">
+                            <div class="sim-status-subtitle"><span style="font-size:1.2em;">🦎</span> Reality Bug Reports</div>
+                            <div id="bug-report-list-sim"></div>
+                        </div>
+                        <div class="sim-status-patches">
+                            <div class="sim-status-subtitle"><span style="font-size:1.2em;">🛠️</span> Recent Patches</div>
+                            <div id="patch-list-sim"></div>
+                        </div>
+                    </div>
+                </section>
+                <!-- Simulation Status Monitor 영역 끝 -->
 
                 <section id="prayer" class="prayer-section">
                     <h2 class="section-title">Daily Prayer Mining</h2>
@@ -4150,6 +4313,110 @@
                 setInterval(updateTimestamp, 60000);
             });
         }
+    </script>
+    <script>
+// --- Simulation Status Monitor Dynamic Logic ---
+(function() {
+    // --- CPU/RAM/Network Usage ---
+    const cpuUsage = document.getElementById('cpu-usage');
+    const ramUsage = document.getElementById('ram-usage');
+    const netUsage = document.getElementById('net-usage');
+    const cpuBar = document.getElementById('cpu-bar');
+    const ramBar = document.getElementById('ram-bar');
+    const netBar = document.getElementById('net-bar');
+    const cpuDesc = document.getElementById('cpu-desc');
+    const ramDesc = document.getElementById('ram-desc');
+    const netDesc = document.getElementById('net-desc');
+    const cpuDescs = [
+        "Mark is working on his thesis",
+        "Background simulation running",
+        "Mark is debugging reality",
+        "Mark is playing video games",
+        "Mark is running a quantum experiment"
+    ];
+    const ramDescs = [
+        "Reality processing stable",
+        "Memory leak detected (patched)",
+        "SimulVerse cache optimized",
+        "RAM defragmentation ongoing",
+        "All entities loaded"
+    ];
+    const netDescs = [
+        "High prayer activity detected",
+        "Network stable",
+        "Packet loss: negligible",
+        "Mark is streaming cat videos",
+        "Prayer requests spiking"
+    ];
+    function randomPercent(base=75, range=20) {
+        return (base + Math.random() * range).toFixed(1);
+    }
+    function animateStatus() {
+        const cpu = randomPercent();
+        const ram = randomPercent();
+        const net = randomPercent();
+        cpuUsage.textContent = cpu + "%";
+        ramUsage.textContent = ram + "%";
+        netUsage.textContent = net + "%";
+        cpuBar.style.width = cpu + "%";
+        ramBar.style.width = ram + "%";
+        netBar.style.width = net + "%";
+        cpuDesc.textContent = cpuDescs[Math.floor(Math.random()*cpuDescs.length)];
+        ramDesc.textContent = ramDescs[Math.floor(Math.random()*ramDescs.length)];
+        netDesc.textContent = netDescs[Math.floor(Math.random()*netDescs.length)];
+    }
+    setInterval(animateStatus, 1000);
+    animateStatus();
+
+    // --- Reality Bug Reports & Recent Patches ---
+    const bugList = document.getElementById('bug-report-list-sim');
+    const patchList = document.getElementById('patch-list-sim');
+    // 가상 버그/패치 데이터 샘플
+    const bugTitles = [
+        "Gravity inconsistency in Australia", "Time dilation near coffee shops", "Random déjà vu events", "Unexplained cat appearances", "Spontaneous rain indoors", "Invisible walls in cities", "NPCs repeating phrases", "Sudden existential dread", "Floating objects in parks", "Reverse aging glitch", "Unscheduled solar eclipses", "Coffee always lukewarm", "Teleporting pigeons", "WiFi signal in forests", "Unstable quantum dice", "Uncanny valley effect", "Unopenable doors", "Infinite loading screens", "Glitchy reflections", "Unpredictable traffic lights", "Ghostly elevator music", "Unbreakable cookies", "Rainbows at night", "Unresponsive vending machines", "Sudden language swaps", "Delayed echo in canyons", "Unusual luck streaks", "Unsolvable puzzles", "Spontaneous dance outbreaks", "Invisible umbrellas"
+    ];
+    const bugMeta = [
+        "Patch in progress - High", "Investigating - Medium", "Intentional feature - Low", "Reported by multiple users", "Rare occurrence", "Physics engine issue", "Pending Mark's review"
+    ];
+    const patchTitles = [
+        "Gravity stabilization", "Weather system update", "Christmas event", "Bug fix: déjà vu", "Coffee temperature patch", "Quantum dice fix", "NPC dialogue expansion", "Traffic light logic fix", "Reflection rendering patch", "Solar eclipse scheduler", "Rain indoors fix", "Cat appearance control", "WiFi signal boost", "Uncanny valley patch", "Elevator music toggle", "Cookie breakability update", "Rainbow rendering fix", "Vending machine patch", "Language swap hotfix", "Echo delay reduction", "Luck streak balancer", "Puzzle solver AI", "Dance outbreak limiter", "Umbrella visibility patch", "Aging process fix", "Teleport pigeon patch", "Loading screen skip", "Door unlocker update", "Park object gravity fix", "Night rainbow removal", "Existential dread reducer"
+    ];
+    const patchMeta = [
+        "Stability improved", "Bug fixed", "Event started", "Performance optimized", "User happiness increased", "Physics normalized", "AI upgraded", "Security patch applied", "Feature enhanced", "Balance adjusted"
+    ];
+    // 날짜 생성 (2025.04.27~2025.10.21)
+    function randomDate() {
+        const start = new Date(2025, 3, 27).getTime();
+        const end = new Date(2025, 9, 21).getTime();
+        const d = new Date(start + Math.random() * (end - start));
+        const yyyy = d.getFullYear();
+        const mm = (d.getMonth()+1).toString().padStart(2,'0');
+        const dd = d.getDate().toString().padStart(2,'0');
+        return `${yyyy}.${mm}.${dd}`;
+    }
+    function shuffle(arr) {
+        return arr.map(v=>[Math.random(),v]).sort().map(v=>v[1]);
+    }
+    function renderBugsAndPatches() {
+        // Bug Reports
+        let bugs = shuffle(bugTitles).slice(0,30);
+        let bugHtml = bugs.map((title,i)=>{
+            let meta = bugMeta[Math.floor(Math.random()*bugMeta.length)];
+            return `<div class='sim-bug-item'><div class='sim-bug-title'>${title}</div><div class='sim-bug-meta'>${meta}</div></div>`;
+        }).join('');
+        bugList.innerHTML = bugHtml;
+        // Patches
+        let patches = shuffle(patchTitles).slice(0,30);
+        let patchHtml = patches.map((title,i)=>{
+            let meta = patchMeta[Math.floor(Math.random()*patchMeta.length)];
+            let date = randomDate();
+            return `<div class='sim-patch-item'><div class='sim-patch-title'>v${date} - ${title}</div><div class='sim-patch-meta'>${meta}</div></div>`;
+        }).join('');
+        patchList.innerHTML = patchHtml;
+    }
+    renderBugsAndPatches();
+    setInterval(renderBugsAndPatches, 30*60*1000); // 30분마다 갱신
+})();
     </script>
 </body>
 </html>
