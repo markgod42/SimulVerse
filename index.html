@@ -2983,7 +2983,10 @@
             }
 
             function showWhitepaper() {
+                // 스크롤 부드럽게 동작하는 CSS를 잠시 auto로 변경
+                document.documentElement.style.scrollBehavior = 'auto';
                 window.scrollTo(0, 0);
+                document.documentElement.style.scrollBehavior = '';
                 document.getElementById('main-page-wrapper').style.display = 'none';
                 const ataWrapper = document.getElementById('ata-page-wrapper');
                 if(ataWrapper) ataWrapper.style.display = 'none';
