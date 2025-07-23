@@ -611,24 +611,32 @@ document.getElementById('boost-fortune-btn').onclick = async function() {
         msg.textContent = "먼저 지갑을 연결해주세요.";
         return;
     }
+    const provider = window.solana || window.solflare;
+    if (!provider || !provider.isConnected || !provider.publicKey) {
+        msg.textContent = "지갑이 연결되어 있지 않습니다. 다시 연결해 주세요.";
+        btn.disabled = false;
+        return;
+    }
     btn.disabled = true;
     msg.textContent = "블록체인에 거래를 전송 중입니다...";
     try {
-        const provider = window.solana || window.solflare;
-        if (!provider) throw new Error("지갑이 감지되지 않았습니다.");
         const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'), 'confirmed');
         const fromPubkey = new solanaWeb3.PublicKey(connectedAddress);
         const toPubkey = new solanaWeb3.PublicKey(PROJECT_WALLET_ADDRESS);
         const mintPubkey = new solanaWeb3.PublicKey(MARK_MINT_ADDRESS);
-        // splToken 네임스페이스 사용
-        const fromTokenAccount = splToken.getAssociatedTokenAddressSync(
-            mintPubkey,
-            fromPubkey
-        );
-        const toTokenAccount = splToken.getAssociatedTokenAddressSync(
-            mintPubkey,
-            toPubkey
-        );
+        // ATA 직접 계산 함수
+        function getAssociatedTokenAddress(mint, owner) {
+            return solanaWeb3.PublicKey.findProgramAddressSync(
+                [
+                    owner.toBuffer(),
+                    splToken.TOKEN_PROGRAM_ID.toBuffer(),
+                    mint.toBuffer()
+                ],
+                splToken.ASSOCIATED_TOKEN_PROGRAM_ID
+            )[0];
+        }
+        const fromTokenAccount = getAssociatedTokenAddress(mintPubkey, fromPubkey);
+        const toTokenAccount = getAssociatedTokenAddress(mintPubkey, toPubkey);
         const amount = 100 * (10 ** MARK_DECIMALS);
         const transaction = new solanaWeb3.Transaction().add(
             splToken.createTransferInstruction(
