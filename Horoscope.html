@@ -11,13 +11,13 @@
     <link rel="icon" type="image/png" href="https://i.ibb.co/NgHMCZZX/image.png">
     <link rel="stylesheet" href="https://unpkg.com/@solana/wallet-adapter-react-ui@latest/styles.css" />
     <style>
-        /* index.html의 style 전체 복사 (아래는 핵심만, 실제로는 전체 스타일 붙여넣기 추천) */
         :root {
             --primary-color: #00ffc3;
             --background-color: #0d0d1a;
             --text-color: #e0e0e0;
             --header-bg: rgba(13, 13, 26, 0.8);
             --card-bg: rgba(25, 25, 40, 0.7);
+            --warning-color: #ff6b35;
         }
         body {
             background-color: var(--background-color);
@@ -40,8 +40,11 @@
         .footer { padding: 40px 0; text-align: center; background-color: #080810; margin-top: 60px;}
         #starfield { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: var(--background-color);}
         #matrix-rain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2;}
-        /* 운세 카드 스타일 */
         #horoscope-section { background: var(--card-bg); border-radius: 18px; margin: 100px auto 48px auto; padding: 40px 24px 32px 24px; box-shadow: 0 4px 32px 0 rgba(0,255,195,0.10); max-width: 1100px;}
+        .wallet-logo { width: 28px; height: 28px; border-radius: 6px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08);}
+        .wallet-select-btn { display: flex; align-items: center; gap: 12px; justify-content: center; font-weight: 700; font-size: 1.1em;}
+        .loader { border: 4px solid #222; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite;}
+        @keyframes spin { to { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
@@ -155,14 +158,72 @@
             <p class="footer-copyright">© 2024 SimulVerse. All rights reserved in this simulation.</p>
         </div>
     </footer>
-    <!-- 지갑 연결/모달/운세 관련 JS (index.html에서 복사) -->
-    <script src="libs/solana/web3.iife.min.js"></script>
     <script>
-    // 기존 index.html의 지갑 연결 모달/로직, 운세 관련 JS 전체 복사
-    // (실제 서비스에서는 이 부분도 index.html에서 사용하던 JS 전체를 복사해야 완벽하게 동작합니다)
-    // 'Back' 버튼 동작: index.html로 이동
     document.getElementById('back-to-main-btn').onclick = function() {
         window.location.href = 'index.html';
+    };
+    const simulationVariables = [
+        "Quantum Fluctuation", "Cosmic Alignment", "Server Maintenance", "Random Number Surge", "Glitchy Matrix", "Mark's Mood", "Coffee Quality", "Buggy Patch", "AI Uprising", "Lucky Day"
+    ];
+    const reasons = [
+        "Mark pulled an all-nighter.", "The simulation code was refactored.", "A cosmic ray hit the server.", "Mark's cat walked on the keyboard.", "The coffee was too strong.", "A bug was fixed (or introduced).", "Mark is feeling generous.", "The RNG gods smiled today.", "A new patch was deployed.", "Reality is unstable."
+    ];
+    const colors = ["Red", "Blue", "Green", "Yellow", "Purple", "Orange", "Pink", "Black", "White", "Cyan"];
+    const places = ["Library", "Café", "Park", "Home", "Lab", "Gym", "Beach", "Mountain", "Museum", "Arcade"];
+    const foods = ["Pizza", "Burger", "Sushi", "Ramen", "Salad", "Steak", "Ice Cream", "Taco", "Pasta", "Sandwich"];
+    let connectedAddress = null;
+    document.getElementById('connect-wallet-btn-horoscope').onclick = async function() {
+        try {
+            document.getElementById('connect-wallet-section-horoscope').style.display = 'none';
+            document.getElementById('horoscope-result-section').style.display = '';
+            document.getElementById('loading-state-horoscope').style.display = '';
+            document.getElementById('error-state-horoscope').style.display = 'none';
+            document.getElementById('fortune-state-horoscope').style.display = 'none';
+            setTimeout(() => {
+                connectedAddress = "So1aNa" + Math.random().toString(36).substring(2, 38);
+                showHoroscopeResult(connectedAddress);
+            }, 1000);
+        } catch (e) {
+            document.getElementById('loading-state-horoscope').style.display = 'none';
+            document.getElementById('error-state-horoscope').style.display = '';
+            document.getElementById('error-message-horoscope').textContent = e.message || "Failed to connect wallet.";
+        }
+    };
+    function showHoroscopeResult(address) {
+        document.getElementById('loading-state-horoscope').style.display = 'none';
+        document.getElementById('error-state-horoscope').style.display = 'none';
+        document.getElementById('fortune-state-horoscope').style.display = '';
+        document.getElementById('wallet-address').textContent = address;
+        const lastChar = address[address.length - 1];
+        document.getElementById('fate-variable').textContent = lastChar;
+        const seed = lastChar.charCodeAt(0);
+        function pick(arr) { return arr[seed % arr.length]; }
+        function randScore(offset) { return 40 + (seed * offset) % 60; }
+        document.getElementById('simulation-variable').textContent = pick(simulationVariables);
+        document.getElementById('reason').textContent = pick(reasons);
+        const overall = randScore(1);
+        const money = randScore(2);
+        const love = randScore(3);
+        const health = randScore(4);
+        document.getElementById('overall-score').textContent = `${overall} / 100`;
+        document.getElementById('money-score').textContent = `${money} / 100`;
+        document.getElementById('love-score').textContent = `${love} / 100`;
+        document.getElementById('health-score').textContent = `${health} / 100`;
+        document.getElementById('overall-bar').style.width = `${overall}%`;
+        document.getElementById('money-bar').style.width = `${money}%`;
+        document.getElementById('love-bar').style.width = `${love}%`;
+        document.getElementById('health-bar').style.width = `${health}%`;
+        document.getElementById('overall-text').textContent = overall > 70 ? "Great day for simulation exploits!" : "Stay cautious, reality is unstable.";
+        document.getElementById('money-text').textContent = money > 70 ? "Unexpected airdrop incoming?" : "Don't spend all your $MARK at once.";
+        document.getElementById('love-text').textContent = love > 70 ? "NPCs are unusually friendly today." : "Maybe avoid romance subplots.";
+        document.getElementById('health-text').textContent = health > 70 ? "System integrity: stable." : "Watch out for random bugs!";
+        document.getElementById('rec-color').textContent = pick(colors);
+        document.getElementById('rec-numbers').textContent = `${seed % 10}, ${(seed+3)%10}, ${(seed+7)%10}`;
+        document.getElementById('rec-place').textContent = pick(places);
+        document.getElementById('rec-food').textContent = pick(foods);
+    }
+    document.getElementById('boost-fortune-btn').onclick = function() {
+        document.getElementById('boost-message').textContent = "Mark received your offering. Maybe your fate will improve tomorrow!";
     };
     </script>
 </body>
