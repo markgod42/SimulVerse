@@ -4523,6 +4523,130 @@ document.addEventListener('DOMContentLoaded', function() {
         </div>
     </div>
 </section>
-
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Horoscope 영역 Connect Wallet 버튼에 동일한 연결 로직 적용
+        var connectBtnHoroscope = document.getElementById('connect-wallet-btn-horoscope');
+        if (connectBtnHoroscope && !connectBtnHoroscope._walletEventRegistered) {
+            connectBtnHoroscope._walletEventRegistered = true;
+            connectBtnHoroscope.addEventListener('click', async function(e) {
+                if (window.connectedWalletType) {
+                    if (typeof disconnectModal !== 'undefined') disconnectModal.style.display = 'flex';
+                    return;
+                }
+                const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+                let provider = null;
+                let walletType = null;
+                if (isMobile) {
+                    if (window.solana && window.solana.isPhantom) {
+                        provider = window.solana;
+                        walletType = 'phantom';
+                    } else if (window.solana && window.solana.isBackpack) {
+                        provider = window.solana;
+                        walletType = 'backpack';
+                    } else if (window.solflare) {
+                        provider = window.solflare;
+                        walletType = 'solflare';
+                    }
+                    if (provider) {
+                        try {
+                            await provider.connect();
+                            const address = provider.publicKey ? provider.publicKey.toString() : '';
+                            window.connectedWalletType = walletType;
+                            window.connectedAddress = address;
+                            connectBtnHoroscope.textContent = `Disconnect: ${address.slice(0,4)}...${address.slice(-4)}`;
+                            if (typeof showHoroscopeResult === 'function') showHoroscopeResult(address);
+                            if (provider.on) provider.on('disconnect', function() {
+                                window.connectedWalletType = null;
+                                window.connectedAddress = null;
+                                connectBtnHoroscope.textContent = 'Connect Wallet & See Fortune';
+                                document.getElementById('horoscope-result-section').style.display = 'none';
+                                document.getElementById('connect-wallet-section-horoscope').style.display = '';
+                            });
+                            return;
+                        } catch (e) {
+                            alert('Failed to connect wallet. Please try again in your wallet browser.');
+                            return;
+                        }
+                    }
+                }
+                // PC/일반: 지갑 선택 모달 재활용
+                if (typeof modal !== 'undefined' && typeof modalContent !== 'undefined') {
+                    while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
+                    const wallets = [
+                        { id: 'phantom', name: 'Phantom', logo: 'https://i.ibb.co/H5KnQH1/images.jpg' },
+                        { id: 'backpack', name: 'Backpack', logo: 'https://i.ibb.co/8nkGvqKT/33.jpg' },
+                        { id: 'solflare', name: 'Solflare', logo: 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png' }
+                    ];
+                    wallets.forEach(wallet => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn btn-primary wallet-select-btn';
+                        btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
+                        btn.onclick = async () => {
+                            let provider = null;
+                            if (wallet.id === 'phantom' && window.solana && window.solana.isPhantom) {
+                                provider = window.solana;
+                            } else if (wallet.id === 'backpack' && window.solana && window.solana.isBackpack) {
+                                provider = window.solana;
+                            } else if (wallet.id === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
+                                provider = window.solflare || window.solana;
+                            }
+                            if (!provider) {
+                                alert(`${wallet.name} wallet extension is not installed. Please install the extension and try again.`);
+                                return;
+                            }
+                            try {
+                                await provider.connect();
+                                if (provider.publicKey || (provider.publicKey && provider.publicKey.toString)) {
+                                    const address = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
+                                    window.connectedWalletType = wallet.id;
+                                    window.connectedAddress = address;
+                                    connectBtnHoroscope.textContent = `Disconnect: ${address.slice(0,4)}...${address.slice(-4)}`;
+                                    if (typeof showHoroscopeResult === 'function') showHoroscopeResult(address);
+                                    if (provider.on) provider.on('disconnect', function() {
+                                        window.connectedWalletType = null;
+                                        window.connectedAddress = null;
+                                        connectBtnHoroscope.textContent = 'Connect Wallet & See Fortune';
+                                        document.getElementById('horoscope-result-section').style.display = 'none';
+                                        document.getElementById('connect-wallet-section-horoscope').style.display = '';
+                                    });
+                                }
+                                modal.style.display = 'none';
+                            } catch (e) {
+                                alert('Failed to connect wallet. Please check your wallet app or extension and try again.');
+                            }
+                        };
+                        const logo = document.createElement('img');
+                        logo.src = wallet.logo;
+                        logo.alt = wallet.name + ' Logo';
+                        logo.className = 'wallet-logo';
+                        btn.appendChild(logo);
+                        const span = document.createElement('span');
+                        span.textContent = `Connect ${wallet.name}`;
+                        btn.appendChild(span);
+                        modalContent.appendChild(btn);
+                    });
+                    modal.style.display = 'flex';
+                }
+            });
+        }
+        // 2. '돌아가기' 버튼 텍스트 영어로 변경
+        var hs = document.getElementById('horoscope-section');
+        var backBtn = document.getElementById('back-to-main-btn');
+        if (hs && backBtn) {
+            backBtn.innerText = 'Back';
+        }
+        var observer = new MutationObserver(function() {
+            var btn = document.getElementById('back-to-main-btn');
+            if (btn && btn.innerText !== 'Back') btn.innerText = 'Back';
+        });
+        observer.observe(hs, { childList: true, subtree: true });
+        // 3. 새창(단독)에서 푸터 숨김 처리
+        if (window.opener == null || window.self === window.top) {
+            var footer = document.querySelector('.footer');
+            if (footer) footer.style.display = 'none';
+        }
+    });
+    </script>
 </body>
 </html>
