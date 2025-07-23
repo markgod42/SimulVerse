@@ -638,14 +638,17 @@ document.getElementById('boost-fortune-btn').onclick = async function() {
         const fromTokenAccount = getAssociatedTokenAddress(mintPubkey, fromPubkey);
         const toTokenAccount = getAssociatedTokenAddress(mintPubkey, toPubkey);
         const amount = 100 * (10 ** MARK_DECIMALS);
-        const transaction = new solanaWeb3.Transaction().add(
-            splToken.createTransferInstruction(
-                fromTokenAccount,
-                toTokenAccount,
-                fromPubkey,
-                amount
-            )
-        );
+        // TransferInstruction 직접 생성
+        const transferIx = new solanaWeb3.TransactionInstruction({
+            keys: [
+                { pubkey: fromTokenAccount, isSigner: false, isWritable: true },
+                { pubkey: toTokenAccount, isSigner: false, isWritable: true },
+                { pubkey: fromPubkey, isSigner: true, isWritable: false }
+            ],
+            programId: splToken.TOKEN_PROGRAM_ID,
+            data: new Uint8Array([3, ...numberToLEBuffer(amount, 8)])
+        });
+        const transaction = new solanaWeb3.Transaction().add(transferIx);
         transaction.feePayer = fromPubkey;
         let { blockhash } = await connection.getRecentBlockhash();
         transaction.recentBlockhash = blockhash;
