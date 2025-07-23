@@ -584,8 +584,86 @@ function showHoroscopeResult(address) {
 document.getElementById('back-to-main-btn').onclick = function() {
     window.location.href = 'index.html';
 };
-document.getElementById('boost-fortune-btn').onclick = function() {
-    document.getElementById('boost-message').textContent = "Mark received your offering. Maybe your fate will improve tomorrow!";
+// === [MARK 토큰/지갑 변수 선언] ===
+const MARK_MINT_ADDRESS = "MARK_MINT_ADDRESS"; // 실제 마크토큰 민트 주소로 교체
+const PROJECT_WALLET_ADDRESS = "JBk9pkuDcwmJwz7TrfVSnitPGdLutWyRBMzTaLZNHhi3";
+const MARK_DECIMALS = 9; // 실제 소수점 자리수로 교체(대부분 9)
+// === 운세 부스트 함수 ===
+async function boostHoroscopeUI() {
+    // 각 점수 15% 증가 (최대 100)
+    function boost(id) {
+        const el = document.getElementById(id);
+        let val = parseInt(el.textContent);
+        val = Math.min(100, Math.round(val * 1.15));
+        el.textContent = `${val} / 100`;
+        document.getElementById(id.replace('-score', '-bar')).style.width = `${val}%`;
+    }
+    boost('overall-score');
+    boost('money-score');
+    boost('love-score');
+    boost('health-score');
+}
+document.getElementById('boost-fortune-btn').onclick = async function() {
+    const btn = this;
+    const msg = document.getElementById('boost-message');
+    if (!connectedWalletType || !connectedAddress) {
+        msg.textContent = "먼저 지갑을 연결해주세요.";
+        return;
+    }
+    btn.disabled = true;
+    msg.textContent = "블록체인에 거래를 전송 중입니다...";
+    try {
+        const provider = window.solana || window.solflare;
+        if (!provider) throw new Error("지갑이 감지되지 않았습니다.");
+        const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'), 'confirmed');
+        const fromPubkey = new solanaWeb3.PublicKey(connectedAddress);
+        const toPubkey = new solanaWeb3.PublicKey(PROJECT_WALLET_ADDRESS);
+        const mintPubkey = new solanaWeb3.PublicKey(MARK_MINT_ADDRESS);
+        // Associated Token Account 찾기
+        const fromTokenAccount = await solanaWeb3.Token.getAssociatedTokenAddress(
+            solanaWeb3.ASSOCIATED_TOKEN_PROGRAM_ID,
+            solanaWeb3.TOKEN_PROGRAM_ID,
+            mintPubkey,
+            fromPubkey
+        );
+        const toTokenAccount = await solanaWeb3.Token.getAssociatedTokenAddress(
+            solanaWeb3.ASSOCIATED_TOKEN_PROGRAM_ID,
+            solanaWeb3.TOKEN_PROGRAM_ID,
+            mintPubkey,
+            toPubkey
+        );
+        // 100 $MARK (소수점 반영)
+        const amount = 100 * (10 ** MARK_DECIMALS);
+        // 트랜잭션 생성
+        const transaction = new solanaWeb3.Transaction().add(
+            solanaWeb3.Token.createTransferInstruction(
+                solanaWeb3.TOKEN_PROGRAM_ID,
+                fromTokenAccount,
+                toTokenAccount,
+                fromPubkey,
+                [],
+                amount
+            )
+        );
+        transaction.feePayer = fromPubkey;
+        let { blockhash } = await connection.getRecentBlockhash();
+        transaction.recentBlockhash = blockhash;
+        // 지갑으로 서명 요청
+        let signed = await provider.signTransaction(transaction);
+        // 트랜잭션 전송
+        let txid = await connection.sendRawTransaction(signed.serialize());
+        msg.textContent = "거래 확인 중...";
+        // 컨펌 대기
+        await connection.confirmTransaction(txid, 'confirmed');
+        // 운세 부스트
+        boostHoroscopeUI();
+        msg.textContent = "마크가 당신의 요청을 들었습니다! 운세가 상승했습니다.";
+        btn.disabled = true;
+        btn.textContent = "부스트 완료";
+    } catch (e) {
+        msg.textContent = "실패: " + (e.message || e);
+        btn.disabled = false;
+    }
 };
     </script>
 </body>
