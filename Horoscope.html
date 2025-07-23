@@ -621,11 +621,11 @@ document.getElementById('boost-fortune-btn').onclick = async function() {
         const toPubkey = new solanaWeb3.PublicKey(PROJECT_WALLET_ADDRESS);
         const mintPubkey = new solanaWeb3.PublicKey(MARK_MINT_ADDRESS);
         // splToken 네임스페이스 사용
-        const fromTokenAccount = await splToken.getAssociatedTokenAddress(
+        const fromTokenAccount = splToken.getAssociatedTokenAddressSync(
             mintPubkey,
             fromPubkey
         );
-        const toTokenAccount = await splToken.getAssociatedTokenAddress(
+        const toTokenAccount = splToken.getAssociatedTokenAddressSync(
             mintPubkey,
             toPubkey
         );
