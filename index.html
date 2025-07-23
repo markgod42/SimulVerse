@@ -1574,6 +1574,7 @@
         #mark-explanation {
             display: -webkit-box;
             -webkit-line-clamp: 3;
+            line-clamp: 3;
             -webkit-box-orient: vertical;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -1826,6 +1827,7 @@
                                 <a href="#bug-report" class="btn btn-primary"><span class="btn-text">Report a Bug</span></a>
                                 <button class="btn btn-secondary" onclick="window.open('https://raydium.io/', '_blank')"><span class="btn-text">Buy $MARK</span></button>
                                 <button class="btn btn-tertiary" onclick="location.href='#nfts'"><span class="btn-text">Get NFTs</span></button>
+                                <button class="btn btn-primary" onclick="showHoroscopeSection()"><span class="btn-text">Mark's Horoscope</span></button>
                             </div>
                         </div>
                         
@@ -1880,7 +1882,7 @@
                 </section>
 
                 <section id="simulation-status-monitor" class="sim-status-section">
-                    <h2 class="section-title" style="font-family: 'Orbitron', sans-serif; font-size:2.5em; text-align:center; background: linear-gradient(90deg, #29d6ff 0%, #b36fff 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 32px;">Simulation Status Monitor</h2>
+                    <h2 class="section-title" style="font-family: 'Orbitron', sans-serif; font-size:2.5em; text-align:center; background: linear-gradient(90deg, #29d6ff 0%, #b36fff 100%); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 32px;">Simulation Status Monitor</h2>
                     <div class="sim-status-top">
                         <div class="sim-status-card">
                             <div class="sim-status-title"><span style="font-size:1.3em;">🖥️</span> CPU Usage</div>
@@ -4404,5 +4406,184 @@
     setInterval(renderBugsAndPatches, 30*60*1000); // 30분마다 갱신
 })();
     </script>
+    <script>
+function showHoroscopeSection() {
+    document.getElementById('horoscope-section').style.display = '';
+    window.scrollTo({top: document.getElementById('horoscope-section').offsetTop-60, behavior:'smooth'});
+}
+// Horoscope JS
+(function() {
+    const connectBtn = document.getElementById('connect-wallet-btn-horoscope');
+    const connectSection = document.getElementById('connect-wallet-section-horoscope');
+    const resultSection = document.getElementById('horoscope-result-section');
+    const loadingState = document.getElementById('loading-state-horoscope');
+    const errorState = document.getElementById('error-state-horoscope');
+    const errorMsg = document.getElementById('error-message-horoscope');
+    const fortuneState = document.getElementById('fortune-state-horoscope');
+    const walletAddressEl = document.getElementById('wallet-address');
+    const fateVariableEl = document.getElementById('fate-variable');
+    const simVarEl = document.getElementById('simulation-variable');
+    const reasonEl = document.getElementById('reason');
+    const boostBtn = document.getElementById('boost-fortune-btn');
+    const boostMsg = document.getElementById('boost-message');
+    const recColorEl = document.getElementById('rec-color');
+    const recNumbersEl = document.getElementById('rec-numbers');
+    const recPlaceEl = document.getElementById('rec-place');
+    const recFoodEl = document.getElementById('rec-food');
+    let connectedWallet = null;
+    let currentFortune = null;
+    let dailyHoroscopes = null;
+    connectBtn.addEventListener('click', async () => {
+        connectBtn.textContent = 'Connecting...';
+        connectBtn.disabled = true;
+        try {
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            const chars = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+            let address = '';
+            for (let i = 0; i < 43; i++) {
+                address += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            connectedWallet = 'Sim' + address;
+            connectSection.style.display = 'none';
+            resultSection.style.display = '';
+            await displayFortuneForWallet();
+        } catch (err) {
+            errorMsg.textContent = 'Failed to connect wallet. Please ensure pop-ups are allowed.';
+            errorState.style.display = '';
+            loadingState.style.display = 'none';
+            connectBtn.textContent = 'Connect Wallet & See Fortune';
+            connectBtn.disabled = false;
+        }
+    });
+    boostBtn.addEventListener('click', async () => {
+        boostBtn.disabled = true;
+        boostMsg.textContent = "Awaiting Mark's whim... Please approve the transaction in your wallet.";
+        boostMsg.style.color = '#ff0';
+        try {
+            await new Promise(resolve => setTimeout(resolve, 2000));
+            boostScores();
+            currentFortune.boostUsed = true;
+            const today = new Date().toISOString().split('T')[0];
+            localStorage.setItem(`fortune_${connectedWallet}_${today}`, JSON.stringify(currentFortune));
+            displayFortune(currentFortune);
+            boostMsg.textContent = "Intervention successful! Mark has heard your request.";
+            boostMsg.style.color = '#00ffc3';
+        } catch (error) {
+            boostMsg.textContent = "Intervention failed. Mark ignored your request.";
+            boostMsg.style.color = '#ff6b35';
+            boostBtn.disabled = false;
+        }
+    });
+    async function displayFortuneForWallet() {
+        const today = new Date().toISOString().split('T')[0];
+        const storedFortune = localStorage.getItem(`fortune_${connectedWallet}_${today}`);
+        loadingState.style.display = '';
+        errorState.style.display = 'none';
+        fortuneState.style.display = 'none';
+        if (storedFortune) {
+            currentFortune = JSON.parse(storedFortune);
+            displayFortune(currentFortune);
+            return;
+        }
+        if (!dailyHoroscopes) {
+            try {
+                dailyHoroscopes = await fetchHoroscopeData();
+            } catch (error) {
+                dailyHoroscopes = generateFallbackData();
+            }
+        }
+        const lastChar = connectedWallet.slice(-1);
+        walletAddressEl.textContent = connectedWallet;
+        fateVariableEl.textContent = lastChar;
+        const fortuneData = dailyHoroscopes[lastChar];
+        if (fortuneData) {
+            currentFortune = { ...fortuneData, boostUsed: false };
+            localStorage.setItem(`fortune_${connectedWallet}_${today}`, JSON.stringify(currentFortune));
+            displayFortune(currentFortune);
+        } else {
+            errorMsg.textContent = `Could not find a fate for the variable '${lastChar}'.`;
+            errorState.style.display = '';
+            loadingState.style.display = 'none';
+        }
+    }
+    async function fetchHoroscopeData() {
+        const HOROSCOPE_JSON_URL = 'https://gist.githubusercontent.com/markgod42/434a97acfb2d4c6d71137c7d4051511c/raw/058e4c5a918666c805e4f6f1a2d8e525ebc72a38/horoscope.json';
+        const response = await fetch(HOROSCOPE_JSON_URL, { cache: 'no-cache' });
+        if (!response.ok) throw new Error('Failed to connect to the Tablet of Fate (DB)');
+        return await response.json();
+    }
+    function displayFortune(data) {
+        simVarEl.textContent = data.simulation_variable;
+        reasonEl.textContent = `(Reason: ${data.reason})`;
+        updateScoreAndGraph('overall', data.overall_score, data.overall_text);
+        updateScoreAndGraph('money', data.money_score, data.money_text);
+        updateScoreAndGraph('love', data.love_score, data.love_text);
+        updateScoreAndGraph('health', data.health_score, data.health_text);
+        recColorEl.textContent = data.recommended_color;
+        recNumbersEl.textContent = generateRecommendedNumbers();
+        recPlaceEl.textContent = data.recommended_place;
+        recFoodEl.textContent = data.recommended_food;
+        if (data.boostUsed) {
+            boostBtn.textContent = "Mark has heard your request";
+            boostBtn.disabled = true;
+            boostMsg.textContent = 'You have already made a request today.';
+            boostMsg.style.color = '#aaa';
+        } else {
+            boostBtn.textContent = 'Nudge Mark (100 $MARK)';
+            boostBtn.disabled = false;
+            boostMsg.textContent = '';
+        }
+        loadingState.style.display = 'none';
+        errorState.style.display = 'none';
+        fortuneState.style.display = '';
+    }
+    function updateScoreAndGraph(type, score, text) {
+        document.getElementById(`${type}-score`).textContent = `${score} / 100`;
+        document.getElementById(`${type}-bar`).style.width = `${score}%`;
+        document.getElementById(`${type}-text`).textContent = text;
+    }
+    function boostScores() {
+        const boostValue = (score) => {
+            const boostMultiplier = 1 + (Math.random() * 0.2 + 0.1);
+            const newScore = Math.floor(score * boostMultiplier);
+            return Math.min(100, newScore);
+        };
+        currentFortune.overall_score = boostValue(currentFortune.overall_score);
+        currentFortune.money_score = boostValue(currentFortune.money_score);
+        currentFortune.love_score = boostValue(currentFortune.love_score);
+        currentFortune.health_score = boostValue(currentFortune.health_score);
+    }
+    function generateRecommendedNumbers() {
+        const num1 = Math.floor(Math.random() * 100) + 1;
+        let num2 = Math.floor(Math.random() * 100) + 1;
+        while (num1 === num2) {
+            num2 = Math.floor(Math.random() * 100) + 1;
+        }
+        return `${num1}, ${num2}`;
+    }
+    function generateFallbackData() {
+        const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+        const fallbackData = {};
+        characters.forEach(char => {
+            fallbackData[char] = {
+                "simulation_variable": "Data Sync Failed",
+                "reason": "Displaying fallback data because the Gist URL is not set. Real data is much more fun.",
+                "overall_score": Math.floor(Math.random() * 70) + 20,
+                "overall_text": "Everything is at a baseline level. It's a day that's neither good nor bad, like lukewarm coffee on a Monday morning. At least it's not terrible, so take comfort in that.",
+                "money_score": Math.floor(Math.random() * 70) + 20,
+                "money_text": "No unexpected income, but no unexpected expenses either. Your wallet is safe in cosmic indifference, but also quite bored. If you see a coin on the street, it might be a bug Mark planted, so just walk past.",
+                "love_score": Math.floor(Math.random() * 70) + 20,
+                "love_text": "It's better to maintain existing relationships than to seek new ones. Mark has set your social interaction parameters to 'minimum upkeep' mode. Don't create new bugs.",
+                "health_score": Math.floor(Math.random() * 70) + 20,
+                "health_text": "A light stretch to start the day is recommended. Your avatar was not designed to sit for long periods. Occasionally utilizing the physics engine properly helps with system stability.",
+                "recommended_color": "Transparent",
+                "recommended_place": "In front of your monitor",
+                "recommended_food": "Lukewarm water"
+            };
+        });
+        return fallbackData;
+    }
+})();
+</script>
 </body>
 </html>
