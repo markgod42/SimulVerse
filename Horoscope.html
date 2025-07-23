@@ -157,6 +157,7 @@
         </div>
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@latest/lib/index.iife.min.js"></script>
     <script>
 let connectedWalletType = null;
 let connectedAddress = null;
@@ -619,43 +620,31 @@ document.getElementById('boost-fortune-btn').onclick = async function() {
         const fromPubkey = new solanaWeb3.PublicKey(connectedAddress);
         const toPubkey = new solanaWeb3.PublicKey(PROJECT_WALLET_ADDRESS);
         const mintPubkey = new solanaWeb3.PublicKey(MARK_MINT_ADDRESS);
-        // Associated Token Account 찾기
-        const fromTokenAccount = await solanaWeb3.Token.getAssociatedTokenAddress(
-            solanaWeb3.ASSOCIATED_TOKEN_PROGRAM_ID,
-            solanaWeb3.TOKEN_PROGRAM_ID,
+        // splToken 네임스페이스 사용
+        const fromTokenAccount = await splToken.getAssociatedTokenAddress(
             mintPubkey,
             fromPubkey
         );
-        const toTokenAccount = await solanaWeb3.Token.getAssociatedTokenAddress(
-            solanaWeb3.ASSOCIATED_TOKEN_PROGRAM_ID,
-            solanaWeb3.TOKEN_PROGRAM_ID,
+        const toTokenAccount = await splToken.getAssociatedTokenAddress(
             mintPubkey,
             toPubkey
         );
-        // 100 $MARK (소수점 반영)
         const amount = 100 * (10 ** MARK_DECIMALS);
-        // 트랜잭션 생성
         const transaction = new solanaWeb3.Transaction().add(
-            solanaWeb3.Token.createTransferInstruction(
-                solanaWeb3.TOKEN_PROGRAM_ID,
+            splToken.createTransferInstruction(
                 fromTokenAccount,
                 toTokenAccount,
                 fromPubkey,
-                [],
                 amount
             )
         );
         transaction.feePayer = fromPubkey;
         let { blockhash } = await connection.getRecentBlockhash();
         transaction.recentBlockhash = blockhash;
-        // 지갑으로 서명 요청
         let signed = await provider.signTransaction(transaction);
-        // 트랜잭션 전송
         let txid = await connection.sendRawTransaction(signed.serialize());
         msg.textContent = "거래 확인 중...";
-        // 컨펌 대기
         await connection.confirmTransaction(txid, 'confirmed');
-        // 운세 부스트
         boostHoroscopeUI();
         msg.textContent = "마크가 당신의 요청을 들었습니다! 운세가 상승했습니다.";
         btn.disabled = true;
