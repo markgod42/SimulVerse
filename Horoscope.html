@@ -159,6 +159,17 @@
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@latest/lib/index.iife.min.js"></script>
     <script>
+// Little Endian 변환 함수 (전역 선언)
+function numberToLEBuffer(number, bytes = 8) {
+    const buffer = new ArrayBuffer(bytes);
+    const view = new DataView(buffer);
+    let big = BigInt(number);
+    for (let i = 0; i < bytes; i++) {
+        view.setUint8(i, Number(big & 0xffn));
+        big >>= 8n;
+    }
+    return new Uint8Array(buffer);
+}
 let connectedWalletType = null;
 let connectedAddress = null;
 
