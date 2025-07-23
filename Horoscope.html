@@ -158,161 +158,435 @@
     </footer>
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.min.js"></script>
     <script>
-    let connectedWalletType = null;
-    let connectedAddress = null;
-    document.addEventListener('DOMContentLoaded', () => {
-        // 지갑 선택 모달 생성
-        const modal = document.createElement('div');
-        modal.style.cssText = `
-            display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
-            overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
-        `;
-        const modalContent = document.createElement('div');
-        modalContent.style.cssText = `
-            background-color: var(--card-bg); padding: 20px; border: 1px solid var(--primary-color);
-            border-radius: 10px; text-align: center; width: 90%; max-width: 350px;
-        `;
-        const modalTitle = document.createElement('h3');
-        modalTitle.textContent = 'Select Wallet';
-        modalTitle.style.fontFamily = "'Orbitron', sans-serif";
-        modalTitle.style.color = "var(--primary-color)";
-        modalTitle.style.marginBottom = "20px";
-        modalContent.appendChild(modalTitle);
-        modal.appendChild(modalContent);
-        document.body.appendChild(modal);
+let connectedWalletType = null;
+let connectedAddress = null;
 
-        // Connect Wallet 버튼 클릭 시 모달 표시
-        const connectBtn = document.getElementById('connect-wallet-btn');
-        if (connectBtn && !connectBtn._walletEventRegistered) {
-            connectBtn._walletEventRegistered = true;
-            connectBtn.addEventListener('click', async (e) => {
-                if (connectedWalletType) {
-                    alert('이미 연결됨. 새로고침 후 다시 시도하세요.');
-                    return;
-                }
-                while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
-                const wallets = [
-                    {
-                        id: 'phantom',
-                        name: 'Phantom',
-                        logo: 'https://i.ibb.co/H5KnQH1/images.jpg'
-                    },
-                    {
-                        id: 'backpack',
-                        name: 'Backpack',
-                        logo: 'https://i.ibb.co/8nkGvqKT/33.jpg'
-                    },
-                    {
-                        id: 'solflare',
-                        name: 'Solflare',
-                        logo: 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png'
+document.addEventListener('DOMContentLoaded', () => {
+    // --- 모달 생성 및 상태 관리 ---
+    // (1/2, 2/2에서 제공한 코드와 동일)
+    // ... (아래 코드 전체 복사) ...
+
+    // 지갑 선택 모달 생성
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+        overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
+    `;
+    const modalContent = document.createElement('div');
+    modalContent.style.cssText = `
+        background-color: var(--card-bg); padding: 20px; border: 1px solid var(--primary-color);
+        border-radius: 10px; text-align: center; width: 90%; max-width: 350px;
+    `;
+    const modalTitle = document.createElement('h3');
+    modalTitle.textContent = 'Select Wallet';
+    modalTitle.style.fontFamily = "'Orbitron', sans-serif";
+    modalTitle.style.color = "var(--primary-color)";
+    modalTitle.style.marginBottom = "20px";
+    modalContent.appendChild(modalTitle);
+    modal.appendChild(modalContent);
+    document.body.appendChild(modal);
+
+    // Disconnect 확인 모달 생성
+    const disconnectModal = document.createElement('div');
+    disconnectModal.style.cssText = `
+        display: none; position: fixed; z-index: 2001; left: 0; top: 0; width: 100%; height: 100%;
+        overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
+    `;
+    const disconnectModalContent = document.createElement('div');
+    disconnectModalContent.style.cssText = `
+        background-color: var(--card-bg); padding: 30px; border: 2px solid var(--primary-color);
+        border-radius: 15px; text-align: center; width: 90%; max-width: 400px;
+        box-shadow: 0 0 30px rgba(0, 255, 195, 0.3);
+    `;
+    const disconnectTitle = document.createElement('h3');
+    disconnectTitle.textContent = 'Disconnect Wallet';
+    disconnectTitle.style.cssText = `
+        font-family: 'Orbitron', sans-serif; color: var(--primary-color); 
+        margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;
+    `;
+    const disconnectMessage = document.createElement('p');
+    disconnectMessage.textContent = 'Are you sure you want to disconnect your wallet?';
+    disconnectMessage.style.cssText = `
+        color: var(--text-color); margin-bottom: 30px; font-size: 1.1em; line-height: 1.5;
+    `;
+    const disconnectButtons = document.createElement('div');
+    disconnectButtons.style.cssText = `
+        display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
+    `;
+    const confirmBtn = document.createElement('button');
+    confirmBtn.textContent = 'Yes, Disconnect';
+    confirmBtn.style.cssText = `
+        padding: 12px 25px; background-color: var(--primary-color); color: var(--background-color);
+        border: 2px solid var(--primary-color); border-radius: 5px; font-weight: 700;
+        cursor: pointer; transition: all 0.3s; text-transform: uppercase;
+    `;
+    confirmBtn.onmouseover = () => {
+        confirmBtn.style.boxShadow = '0 0 15px var(--primary-color)';
+    };
+    confirmBtn.onmouseout = () => {
+        confirmBtn.style.boxShadow = 'none';
+    };
+    const cancelBtn = document.createElement('button');
+    cancelBtn.textContent = 'Cancel';
+    cancelBtn.style.cssText = `
+        padding: 12px 25px; background-color: transparent; color: var(--text-color);
+        border: 2px solid var(--text-color); border-radius: 5px; font-weight: 700;
+        cursor: pointer; transition: all 0.3s; text-transform: uppercase;
+    `;
+    cancelBtn.onmouseover = () => {
+        cancelBtn.style.borderColor = 'var(--primary-color)';
+        cancelBtn.style.color = 'var(--primary-color)';
+        cancelBtn.style.boxShadow = '0 0 15px var(--primary-color)';
+    };
+    cancelBtn.onmouseout = () => {
+        cancelBtn.style.borderColor = 'var(--text-color)';
+        cancelBtn.style.color = 'var(--text-color)';
+        cancelBtn.style.boxShadow = 'none';
+    };
+    disconnectButtons.appendChild(confirmBtn);
+    disconnectButtons.appendChild(cancelBtn);
+    disconnectModalContent.appendChild(disconnectTitle);
+    disconnectModalContent.appendChild(disconnectMessage);
+    disconnectModalContent.appendChild(disconnectButtons);
+    disconnectModal.appendChild(disconnectModalContent);
+    document.body.appendChild(disconnectModal);
+
+    // 지갑 설치 안내 모달 생성
+    const installModal = document.createElement('div');
+    installModal.style.cssText = `
+        display: none; position: fixed; z-index: 2002; left: 0; top: 0; width: 100%; height: 100%;
+        overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
+    `;
+    const installModalContent = document.createElement('div');
+    installModalContent.style.cssText = `
+        background-color: var(--card-bg); padding: 30px; border: 2px solid var(--warning-color);
+        border-radius: 15px; text-align: center; width: 90%; max-width: 450px;
+        box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
+    `;
+    const installTitle = document.createElement('h3');
+    installTitle.textContent = 'Wallet Not Found';
+    installTitle.style.cssText = `
+        font-family: 'Orbitron', sans-serif; color: var(--warning-color); 
+        margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;
+    `;
+    const installMessage = document.createElement('p');
+    installMessage.id = 'install-modal-message';
+    installMessage.style.cssText = `
+        color: var(--text-color); margin-bottom: 25px; font-size: 1.1em; line-height: 1.5;
+    `;
+    const installButtons = document.createElement('div');
+    installButtons.style.cssText = `
+        display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
+    `;
+    const installBtn = document.createElement('button');
+    installBtn.textContent = 'Install Wallet';
+    installBtn.style.cssText = `
+        padding: 12px 25px; background-color: var(--warning-color); color: var(--background-color);
+        border: 2px solid var(--warning-color); border-radius: 5px; font-weight: 700;
+        cursor: pointer; transition: all 0.3s; text-transform: uppercase;
+    `;
+    installBtn.onmouseover = () => {
+        installBtn.style.boxShadow = '0 0 15px var(--warning-color)';
+    };
+    installBtn.onmouseout = () => {
+        installBtn.style.boxShadow = 'none';
+    };
+    const closeInstallBtn = document.createElement('button');
+    closeInstallBtn.textContent = 'Close';
+    closeInstallBtn.style.cssText = `
+        padding: 12px 25px; background-color: transparent; color: var(--text-color);
+        border: 2px solid var(--text-color); border-radius: 5px; font-weight: 700;
+        cursor: pointer; transition: all 0.3s; text-transform: uppercase;
+    `;
+    closeInstallBtn.onmouseover = () => {
+        closeInstallBtn.style.borderColor = 'var(--warning-color)';
+        closeInstallBtn.style.color = 'var(--warning-color)';
+        closeInstallBtn.style.boxShadow = '0 0 15px var(--warning-color)';
+    };
+    closeInstallBtn.onmouseout = () => {
+        closeInstallBtn.style.borderColor = 'var(--text-color)';
+        closeInstallBtn.style.color = 'var(--text-color)';
+        closeInstallBtn.style.boxShadow = 'none';
+    };
+    installButtons.appendChild(installBtn);
+    installButtons.appendChild(closeInstallBtn);
+    installModalContent.appendChild(installTitle);
+    installModalContent.appendChild(installMessage);
+    installModalContent.appendChild(installButtons);
+    installModal.appendChild(installModalContent);
+    document.body.appendChild(installModal);
+
+    function getInstallUrl(walletId) {
+        switch(walletId) {
+            case 'phantom':
+                return 'https://phantom.app/';
+            case 'backpack':
+                return 'https://backpack.app/';
+            case 'solflare':
+                return 'https://solflare.com/';
+            default:
+                return '';
+        }
+    }
+
+    // Connect Wallet 버튼 클릭 시 모달 표시 (항상 동작)
+    const connectBtn = document.getElementById('connect-wallet-btn');
+    if (connectBtn && !connectBtn._walletEventRegistered) {
+        connectBtn._walletEventRegistered = true;
+        connectBtn.addEventListener('click', async (e) => {
+            if (connectedWalletType) {
+                disconnectModal.style.display = 'flex';
+                confirmBtn.onclick = () => {
+                    let provider = null;
+                    if (connectedWalletType === 'phantom' && window.solana && window.solana.isPhantom) {
+                        provider = window.solana;
+                    } else if (connectedWalletType === 'backpack' && window.solana && window.solana.isBackpack) {
+                        provider = window.solana;
+                    } else if (connectedWalletType === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
+                        provider = window.solflare || window.solana;
                     }
-                ];
-                wallets.forEach(wallet => {
-                    const btn = document.createElement('button');
-                    btn.className = 'btn btn-primary wallet-select-btn';
-                    btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                    btn.onclick = async () => {
-                        let provider = null;
-                        if (wallet.id === 'phantom' && window.solana && window.solana.isPhantom) {
-                            provider = window.solana;
-                        } else if (wallet.id === 'backpack' && window.solana && window.solana.isBackpack) {
-                            provider = window.solana;
-                        } else if (wallet.id === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
-                            provider = window.solflare || window.solana;
+                    if (provider && provider.disconnect) {
+                        provider.disconnect();
+                    } else {
+                        onDisconnect();
+                    }
+                    disconnectModal.style.display = 'none';
+                };
+                cancelBtn.onclick = () => {
+                    disconnectModal.style.display = 'none';
+                };
+                return;
+            }
+            const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
+            let provider = null;
+            let walletType = null;
+            if (isMobile) {
+                if (window.solana && window.solana.isPhantom) {
+                    provider = window.solana;
+                    walletType = 'phantom';
+                } else if (window.solana && window.solana.isBackpack) {
+                    provider = window.solana;
+                    walletType = 'backpack';
+                } else if (window.solflare) {
+                    provider = window.solflare;
+                    walletType = 'solflare';
+                }
+                if (provider) {
+                    try {
+                        await provider.connect();
+                        const address = provider.publicKey ? provider.publicKey.toString() : '';
+                        connectedWalletType = walletType;
+                        connectedAddress = address;
+                        connectBtn.textContent = `Disconnect: ${address.slice(0,4)}...${address.slice(-4)}`;
+                        document.getElementById('connect-wallet-section-horoscope').style.display = 'none';
+                        document.getElementById('horoscope-result-section').style.display = '';
+                        document.getElementById('loading-state-horoscope').style.display = 'none';
+                        document.getElementById('error-state-horoscope').style.display = 'none';
+                        showHoroscopeResult(address);
+                        if (provider.on) {
+                            provider.on('disconnect', onDisconnect);
                         }
-                        if (!provider) {
-                            alert(`${wallet.name} wallet extension is not installed. Please install the extension and try again.`);
-                            return;
+                        return;
+                    } catch (e) {
+                        const messageElement = document.getElementById('install-modal-message');
+                        if (messageElement) {
+                            messageElement.textContent = 'Failed to connect wallet. Please try again in your wallet browser.';
                         }
-                        try {
-                            await provider.connect();
-                            const address = provider.publicKey ? provider.publicKey.toString() : '';
+                        installModal.style.display = 'flex';
+                        return;
+                    }
+                }
+            }
+            while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
+            const wallets = [
+                {
+                    id: 'phantom',
+                    name: 'Phantom',
+                    logo: 'https://i.ibb.co/H5KnQH1/images.jpg',
+                    deeplink: (url) => `phantom://app/ul/browse/${encodeURIComponent(url)}`
+                },
+                {
+                    id: 'backpack',
+                    name: 'Backpack',
+                    logo: 'https://i.ibb.co/8nkGvqKT/33.jpg',
+                    deeplink: (url) => `backpack://app/open?url=${encodeURIComponent(url)}`
+                },
+                {
+                    id: 'solflare',
+                    name: 'Solflare',
+                    logo: 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png',
+                    deeplink: (url) => `solflare://open?url=${encodeURIComponent(url)}`
+                }
+            ];
+            wallets.forEach(wallet => {
+                const btn = document.createElement('button');
+                btn.className = 'btn btn-primary wallet-select-btn';
+                btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
+                btn.onclick = async () => {
+                    if (isMobile) {
+                        const deeplinkUrl = wallet.deeplink(window.location.href);
+                        const installUrl = getInstallUrl(wallet.id);
+                        const currentUrl = window.location.href;
+                        window.location.href = deeplinkUrl;
+                        setTimeout(() => {
+                            if (window.location.href === currentUrl) {
+                                const messageElement = document.getElementById('install-modal-message');
+                                if (messageElement) {
+                                    messageElement.textContent = `${wallet.name} wallet app is not installed on your mobile device. Please install the app and try again.`;
+                                }
+                                installBtn.onclick = () => {
+                                    if (installUrl) {
+                                        window.open(installUrl, '_blank');
+                                    }
+                                    installModal.style.display = 'none';
+                                };
+                                closeInstallBtn.onclick = () => {
+                                    installModal.style.display = 'none';
+                                };
+                                installModal.style.display = 'flex';
+                            }
+                        }, 2000);
+                        modal.style.display = 'none';
+                        return;
+                    }
+                    let provider = null;
+                    if (wallet.id === 'phantom' && window.solana && window.solana.isPhantom) {
+                        provider = window.solana;
+                        if (provider.isConnected && provider.disconnect) {
+                            try { await provider.disconnect(); } catch (e) {}
+                        }
+                    } else if (wallet.id === 'backpack' && window.solana && window.solana.isBackpack) {
+                        provider = window.solana;
+                        if (provider.isConnected && provider.disconnect) {
+                            try { await provider.disconnect(); } catch (e) {}
+                        }
+                    } else if (wallet.id === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
+                        provider = window.solflare || window.solana;
+                        if (provider.isConnected && provider.disconnect) {
+                            try { await provider.disconnect(); } catch (e) {}
+                        }
+                    }
+                    if (!provider) {
+                        const messageElement = document.getElementById('install-modal-message');
+                        if (messageElement) {
+                            messageElement.textContent = `${wallet.name} wallet extension is not installed. Please install the extension and try again.`;
+                        }
+                        installBtn.onclick = () => {
+                            const installUrl = getInstallUrl(wallet.id);
+                            if (installUrl) {
+                                window.open(installUrl, '_blank');
+                            }
+                            installModal.style.display = 'none';
+                        };
+                        closeInstallBtn.onclick = () => {
+                            installModal.style.display = 'none';
+                        };
+                        installModal.style.display = 'flex';
+                        return;
+                    }
+                    try {
+                        await provider.connect();
+                        if (provider.publicKey || (provider.publicKey && provider.publicKey.toString)) {
+                            const address = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
+                            const shortAddr = address.slice(0, 4) + '...' + address.slice(-4);
                             connectedWalletType = wallet.id;
                             connectedAddress = address;
-                            connectBtn.textContent = `Disconnect: ${address.slice(0,4)}...${address.slice(-4)}`;
+                            connectBtn.textContent = `Disconnect: ${shortAddr}`;
                             document.getElementById('connect-wallet-section-horoscope').style.display = 'none';
                             document.getElementById('horoscope-result-section').style.display = '';
                             document.getElementById('loading-state-horoscope').style.display = 'none';
                             document.getElementById('error-state-horoscope').style.display = 'none';
                             showHoroscopeResult(address);
-                            if (provider.on) provider.on('disconnect', function() {
-                                connectedWalletType = null;
-                                connectedAddress = null;
-                                connectBtn.textContent = 'Connect Wallet & See Fortune';
-                                document.getElementById('horoscope-result-section').style.display = 'none';
-                                document.getElementById('connect-wallet-section-horoscope').style.display = '';
-                            });
-                            modal.style.display = 'none';
-                        } catch (e) {
-                            alert('Failed to connect wallet. Please check your wallet app or extension and try again.');
+                            if (provider.on) {
+                                provider.on('disconnect', onDisconnect);
+                            }
                         }
-                    };
-                    const logo = document.createElement('img');
-                    logo.src = wallet.logo;
-                    logo.alt = wallet.name + ' Logo';
-                    logo.className = 'wallet-logo';
-                    btn.appendChild(logo);
-                    const span = document.createElement('span');
-                    span.textContent = `Connect ${wallet.name}`;
-                    btn.appendChild(span);
-                    modalContent.appendChild(btn);
-                });
-                modal.style.display = 'flex';
+                        modal.style.display = 'none';
+                    } catch (e) {
+                        alert('Failed to connect wallet. Please check your wallet app or extension and try again.\n' + (e && e.message ? e.message : e));
+                    }
+                };
+                const logo = document.createElement('img');
+                logo.src = wallet.logo;
+                logo.alt = wallet.name + ' Logo';
+                logo.className = 'wallet-logo';
+                btn.appendChild(logo);
+                const span = document.createElement('span');
+                span.textContent = `Connect ${wallet.name}`;
+                btn.appendChild(span);
+                modalContent.appendChild(btn);
             });
-        }
-        window.addEventListener('click', (event) => {
-            if (event.target === modal) {
-                modal.style.display = "none";
-            }
+            modal.style.display = 'flex';
         });
-    });
-    function showHoroscopeResult(address) {
-        document.getElementById('fortune-state-horoscope').style.display = '';
-        document.getElementById('wallet-address').textContent = address;
-        const lastChar = address[address.length - 1];
-        document.getElementById('fate-variable').textContent = lastChar;
-        const simulationVariables = [
-            "Quantum Fluctuation", "Cosmic Alignment", "Server Maintenance", "Random Number Surge", "Glitchy Matrix", "Mark's Mood", "Coffee Quality", "Buggy Patch", "AI Uprising", "Lucky Day"
-        ];
-        const reasons = [
-            "Mark pulled an all-nighter.", "The simulation code was refactored.", "A cosmic ray hit the server.", "Mark's cat walked on the keyboard.", "The coffee was too strong.", "A bug was fixed (or introduced).", "Mark is feeling generous.", "The RNG gods smiled today.", "A new patch was deployed.", "Reality is unstable."
-        ];
-        const colors = ["Red", "Blue", "Green", "Yellow", "Purple", "Orange", "Pink", "Black", "White", "Cyan"];
-        const places = ["Library", "Café", "Park", "Home", "Lab", "Gym", "Beach", "Mountain", "Museum", "Arcade"];
-        const foods = ["Pizza", "Burger", "Sushi", "Ramen", "Salad", "Steak", "Ice Cream", "Taco", "Pasta", "Sandwich"];
-        const seed = lastChar.charCodeAt(0);
-        function pick(arr) { return arr[seed % arr.length]; }
-        function randScore(offset) { return 40 + (seed * offset) % 60; }
-        document.getElementById('simulation-variable').textContent = pick(simulationVariables);
-        document.getElementById('reason').textContent = pick(reasons);
-        const overall = randScore(1);
-        const money = randScore(2);
-        const love = randScore(3);
-        const health = randScore(4);
-        document.getElementById('overall-score').textContent = `${overall} / 100`;
-        document.getElementById('money-score').textContent = `${money} / 100`;
-        document.getElementById('love-score').textContent = `${love} / 100`;
-        document.getElementById('health-score').textContent = `${health} / 100`;
-        document.getElementById('overall-bar').style.width = `${overall}%`;
-        document.getElementById('money-bar').style.width = `${money}%`;
-        document.getElementById('love-bar').style.width = `${love}%`;
-        document.getElementById('health-bar').style.width = `${health}%`;
-        document.getElementById('overall-text').textContent = overall > 70 ? "Great day for simulation exploits!" : "Stay cautious, reality is unstable.";
-        document.getElementById('money-text').textContent = money > 70 ? "Unexpected airdrop incoming?" : "Don't spend all your $MARK at once.";
-        document.getElementById('love-text').textContent = love > 70 ? "NPCs are unusually friendly today." : "Maybe avoid romance subplots.";
-        document.getElementById('health-text').textContent = health > 70 ? "System integrity: stable." : "Watch out for random bugs!";
-        document.getElementById('rec-color').textContent = pick(colors);
-        document.getElementById('rec-numbers').textContent = `${seed % 10}, ${(seed+3)%10}, ${(seed+7)%10}`;
-        document.getElementById('rec-place').textContent = pick(places);
-        document.getElementById('rec-food').textContent = pick(foods);
     }
-    document.getElementById('back-to-main-btn').onclick = function() {
-        window.location.href = 'index.html';
-    };
-    document.getElementById('boost-fortune-btn').onclick = function() {
-        document.getElementById('boost-message').textContent = "Mark received your offering. Maybe your fate will improve tomorrow!";
-    };
+    window.addEventListener('click', (event) => {
+        if (event.target === modal) {
+            modal.style.display = "none";
+        }
+        if (event.target === disconnectModal) {
+            disconnectModal.style.display = "none";
+        }
+        if (event.target === installModal) {
+            installModal.style.display = "none";
+        }
+    });
+
+    function onDisconnect() {
+        connectedWalletType = null;
+        connectedAddress = null;
+        connectBtn.textContent = 'Connect Wallet & See Fortune';
+        document.getElementById('horoscope-result-section').style.display = 'none';
+        document.getElementById('connect-wallet-section-horoscope').style.display = '';
+    }
+});
+
+// 운세 결과 표시 함수
+function showHoroscopeResult(address) {
+    document.getElementById('fortune-state-horoscope').style.display = '';
+    document.getElementById('wallet-address').textContent = address;
+    const lastChar = address[address.length - 1];
+    document.getElementById('fate-variable').textContent = lastChar;
+    const simulationVariables = [
+        "Quantum Fluctuation", "Cosmic Alignment", "Server Maintenance", "Random Number Surge", "Glitchy Matrix", "Mark's Mood", "Coffee Quality", "Buggy Patch", "AI Uprising", "Lucky Day"
+    ];
+    const reasons = [
+        "Mark pulled an all-nighter.", "The simulation code was refactored.", "A cosmic ray hit the server.", "Mark's cat walked on the keyboard.", "The coffee was too strong.", "A bug was fixed (or introduced).", "Mark is feeling generous.", "The RNG gods smiled today.", "A new patch was deployed.", "Reality is unstable."
+    ];
+    const colors = ["Red", "Blue", "Green", "Yellow", "Purple", "Orange", "Pink", "Black", "White", "Cyan"];
+    const places = ["Library", "Café", "Park", "Home", "Lab", "Gym", "Beach", "Mountain", "Museum", "Arcade"];
+    const foods = ["Pizza", "Burger", "Sushi", "Ramen", "Salad", "Steak", "Ice Cream", "Taco", "Pasta", "Sandwich"];
+    const seed = lastChar.charCodeAt(0);
+    function pick(arr) { return arr[seed % arr.length]; }
+    function randScore(offset) { return 40 + (seed * offset) % 60; }
+    document.getElementById('simulation-variable').textContent = pick(simulationVariables);
+    document.getElementById('reason').textContent = pick(reasons);
+    const overall = randScore(1);
+    const money = randScore(2);
+    const love = randScore(3);
+    const health = randScore(4);
+    document.getElementById('overall-score').textContent = `${overall} / 100`;
+    document.getElementById('money-score').textContent = `${money} / 100`;
+    document.getElementById('love-score').textContent = `${love} / 100`;
+    document.getElementById('health-score').textContent = `${health} / 100`;
+    document.getElementById('overall-bar').style.width = `${overall}%`;
+    document.getElementById('money-bar').style.width = `${money}%`;
+    document.getElementById('love-bar').style.width = `${love}%`;
+    document.getElementById('health-bar').style.width = `${health}%`;
+    document.getElementById('overall-text').textContent = overall > 70 ? "Great day for simulation exploits!" : "Stay cautious, reality is unstable.";
+    document.getElementById('money-text').textContent = money > 70 ? "Unexpected airdrop incoming?" : "Don't spend all your $MARK at once.";
+    document.getElementById('love-text').textContent = love > 70 ? "NPCs are unusually friendly today." : "Maybe avoid romance subplots.";
+    document.getElementById('health-text').textContent = health > 70 ? "System integrity: stable." : "Watch out for random bugs!";
+    document.getElementById('rec-color').textContent = pick(colors);
+    document.getElementById('rec-numbers').textContent = `${seed % 10}, ${(seed+3)%10}, ${(seed+7)%10}`;
+    document.getElementById('rec-place').textContent = pick(places);
+    document.getElementById('rec-food').textContent = pick(foods);
+}
+document.getElementById('back-to-main-btn').onclick = function() {
+    window.location.href = 'index.html';
+};
+document.getElementById('boost-fortune-btn').onclick = function() {
+    document.getElementById('boost-message').textContent = "Mark received your offering. Maybe your fate will improve tomorrow!";
+};
     </script>
 </body>
 </html>
