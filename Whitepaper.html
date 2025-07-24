@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimulVerse Whitepaper - The Ten Commandments of Mark</title>
+    <meta name="description" content="The Official Whitepaper of SimulVerse ($MARK). Learn the sacred laws that govern our simulation.">
+    
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://i.ibb.co/NgHMCZZX/image.png">
+
+    <style>
+        /* General Styles */
+        :root {
+            --primary-color: #00ffc3;
+            --background-color: #0d0d1a;
+            --text-color: #e0e0e0;
+            --header-bg: rgba(13, 13, 26, 0.8);
+            --card-bg: rgba(25, 25, 40, 0.7);
+            --glitch-color-1: #00ffc3;
+            --glitch-color-2: #ff00c3;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden; /* Prevent horizontal scrolling */
+            line-height: 1.6;
+        }
+
+        /* Starfield Background */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: var(--background-color);
+        }
+
+        /* Matrix Rain Effect */
+        #matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.2;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .btn {
+            padding: 12px 25px;
+            border: 2px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 5px;
+            position: relative;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: var(--background-color);
+        }
+        
+        .btn:hover {
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+        
+        /* Header */
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 15px 0;
+            transition: top 0.3s;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            width: 100%;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .nav-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+        
+        .simulation-status {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9em;
+            background-color: rgba(0, 255, 195, 0.1);
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid var(--primary-color);
+            white-space: nowrap;
+        }
+        
+        .status-running {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .nav-toggle {
+            display: none;
+            cursor: pointer;
+            z-index: 1001;
+        }
+        
+        .glitch {
+            position: relative;
+            color: #fff;
+            text-shadow: 0.05em 0 0 var(--glitch-color-1), -0.05em 0 0 var(--glitch-color-2);
+            animation: glitch 500ms infinite;
+        }
+
+        @keyframes glitch {
+            0% { text-shadow: 0.05em 0 0 var(--glitch-color-1), -0.05em 0 0 var(--glitch-color-2); }
+            14% { text-shadow: 0.05em 0 0 var(--glitch-color-1), -0.05em 0 0 var(--glitch-color-2); }
+            15% { text-shadow: -0.05em -0.025em 0 var(--glitch-color-1), 0.025em 0.025em 0 var(--glitch-color-2); }
+            49% { text-shadow: -0.05em -0.025em 0 var(--glitch-color-1), 0.025em 0.025em 0 var(--glitch-color-2); }
+            50% { text-shadow: 0.025em 0.05em 0 var(--glitch-color-1), 0.05em 0 0 var(--glitch-color-2); }
+            99% { text-shadow: 0.025em 0.05em 0 var(--glitch-color-1), 0.05em 0 0 var(--glitch-color-2); }
+            100% { text-shadow: -0.025em 0 0 var(--glitch-color-1), -0.025em -0.05em 0 var(--glitch-color-2); }
+        }
+        
+        .animated-status {
+            animation: status-glow 1.2s infinite alternate, status-move 3s infinite linear;
+            color: #00ffc3;
+            font-weight: 900;
+            letter-spacing: 1.5px;
+            text-shadow: 0 0 8px #00ffc3, 0 0 16px #00ffc3, 0 0 2px #fff;
+            position: relative;
+        }
+        @keyframes status-glow {
+            0% { text-shadow: 0 0 8px #00ffc3, 0 0 16px #00ffc3, 0 0 2px #fff; }
+            100% { text-shadow: 0 0 20px #00ffc3, 0 0 40px #00ffc3, 0 0 8px #fff; }
+        }
+        @keyframes status-move {
+            0% { left: 0px; }
+            50% { left: 2px; }
+            100% { left: 0px; }
+        }
+        
+        /* Footer */
+        .footer {
+            padding: 40px 20px;
+            text-align: center;
+            background-color: #080810;
+        }
+
+        /* Whitepaper-specific styles */
+        #whitepaper-page-wrapper {
+            background-color: transparent;
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            padding-top: 120px; /* Increased padding for fixed header */
+            padding-bottom: 60px;
+        }
+        .wp-header {
+            text-align: center;
+            margin-bottom: 80px;
+        }
+        .wp-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3.5em;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 10px rgba(0, 255, 195, 0.5);
+            word-break: break-word;
+        }
+        .wp-subtitle {
+            font-family: 'Inter', sans-serif;
+            font-size: 1.5em;
+            color: var(--text-color);
+            opacity: 0.8;
+        }
+        .wp-divider {
+            width: 100px;
+            height: 2px;
+            background: var(--primary-color);
+            margin: 2rem auto;
+            box-shadow: 0 0 8px var(--primary-color);
+        }
+        
+        .wp-section {
+            margin-bottom: 80px;
+        }
+        
+        .wp-section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+            word-break: break-word;
+        }
+
+        .wp-section-description {
+            font-size: 1.1em;
+            max-width: 800px;
+            margin: 0 auto 3rem auto;
+            text-align: center;
+            line-height: 1.7;
+            color: #ccc;
+        }
+
+        .commandment-card {
+            background-color: var(--card-bg);
+            border: 1px solid rgba(0, 255, 195, 0.3);
+            border-radius: 10px;
+            padding: 25px;
+            transition: all 0.3s ease-in-out;
+            cursor: pointer;
+        }
+        .commandment-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 20px rgba(0, 255, 195, 0.2);
+            border-color: var(--primary-color);
+        }
+        .commandment-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+        .commandment-num {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 2.5em;
+            color: var(--primary-color);
+            line-height: 1;
+        }
+        .commandment-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.2em;
+            font-weight: 700;
+            color: #fff;
+        }
+        .explanation {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding-top 0.5s ease-in-out;
+            padding-top: 0;
+            margin-left: 55px; /* Align with title */
+            color: #ccc;
+            border-left: 2px solid var(--primary-color);
+            padding-left: 15px;
+            margin-top: 10px;
+        }
+        .commandment-card.open .explanation {
+            max-height: 500px;
+            padding-top: 1rem;
+        }
+
+        .commandments-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); /* Mobile-friendly min value */
+            gap: 30px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        .tokenomics-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+        }
+        
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 350px;
+            height: 350px;
+        }
+        .tokenomics-details {
+             width: 100%;
+             max-width: 400px;
+        }
+        .tokenomics-details .detail-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: rgba(0, 255, 195, 0.05);
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        .detail-item .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 3px;
+            margin-right: 15px;
+        }
+        
+        /* Timeline / Roadmap */
+        .timeline {
+            position: relative;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        .timeline::after {
+            content: '';
+            position: absolute;
+            width: 3px;
+            background-color: var(--primary-color);
+            box-shadow: 0 0 5px var(--primary-color);
+            top: 0;
+            bottom: 0;
+            left: 50%;
+            margin-left: -1.5px;
+        }
+        .timeline-container {
+            padding: 10px 40px;
+            position: relative;
+            background-color: inherit;
+            width: 50%;
+        }
+        .timeline-container.left { left: 0; }
+        .timeline-container.right { left: 50%; }
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            right: -10px;
+            background-color: var(--background-color);
+            border: 4px solid var(--primary-color);
+            top: 28px;
+            border-radius: 50%;
+            z-index: 1;
+            box-shadow: 0 0 10px var(--primary-color);
+        }
+        .right::after { left: -10px; }
+        .timeline-content {
+            padding: 20px 30px;
+            background-color: var(--card-bg);
+            position: relative;
+            border-radius: 6px;
+            border: 1px solid rgba(0, 255, 195, 0.3);
+        }
+        .timeline-content h3 {
+            font-family: 'Orbitron', sans-serif;
+            color: var(--primary-color);
+        }
+
+        .wp-footer {
+            text-align: center;
+            margin-top: 80px;
+            padding-top: 40px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+        .wp-footer-links a {
+            color: var(--primary-color);
+            margin: 0 15px;
+            text-decoration: none;
+            transition: text-shadow 0.3s;
+        }
+         .wp-footer-links a:hover {
+            text-shadow: 0 0 8px var(--primary-color);
+         }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .nav-menu {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 70px; /* Adjusted to match header height */
+                left: 0;
+                width: 100%;
+                background-color: var(--header-bg);
+                padding: 10px 0;
+            }
+            .nav-menu.active {
+                display: flex;
+            }
+            .nav-link {
+                text-align: center;
+                padding: 15px;
+                width: 100%;
+            }
+            .nav-toggle {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            .nav-toggle span {
+                width: 25px;
+                height: 3px;
+                background-color: var(--primary-color);
+                border-radius: 3px;
+                transition: all 0.3s;
+            }
+            .nav-toggle.active span:nth-child(1) {
+                transform: rotate(45deg) translate(5px, 5px);
+            }
+            .nav-toggle.active span:nth-child(2) {
+                opacity: 0;
+            }
+            .nav-toggle.active span:nth-child(3) {
+                transform: rotate(-45deg) translate(5px, -5px);
+            }
+            .simulation-status {
+                display: none;
+            }
+        }
+
+        @media screen and (max-width: 768px) {
+            .wp-title { font-size: 2.5em; }
+            .wp-section-title { font-size: 2em; }
+            .tokenomics-content {
+                flex-direction: column;
+                gap: 40px;
+            }
+            .timeline::after { left: 25px; }
+            .timeline-container { width: 100%; padding-left: 60px; padding-right: 15px; }
+            .timeline-container.right { left: 0%; }
+            .timeline-container.left::after, .timeline-container.right::after { left: 15px; }
+        }
+
+        @media screen and (max-width: 480px) {
+            .container { padding: 0 15px; }
+            .wp-title { font-size: 2em; }
+            .wp-subtitle { font-size: 1.2em; }
+            .wp-section-title { font-size: 1.8em; }
+            .wp-section-description { font-size: 1em; }
+            .commandment-title { font-size: 1.1em; }
+            .timeline-content { padding: 15px 20px; }
+        }
+
+    </style>
+</head>
+<body>
+    <!-- 배경 효과 -->
+    <div id="starfield"></div>
+    <canvas id="matrix-rain"></canvas>
+
+    <!-- 헤더 (상담 메뉴) -->
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <div class="nav-logo">
+                    <img src="https://i.ibb.co/NgHMCZZX/image.png" alt="SimulVerse Logo" class="logo-img">
+                    <span class="logo-text">SimulVerse</span>
+                </div>
+                <div class="simulation-status">
+                    <span class="status-text">Simulation Status: <span class="status-running animated-status">Running</span></span>
+                </div>
+                <div class="nav-menu" id="nav-menu">
+                    <a href="#intro" class="nav-link">Intro</a>
+                    <a href="#commandments" class="nav-link">Commandments</a>
+                    <a href="#tokenomics-wp" class="nav-link">Tokenomics</a>
+                    <a href="#roadmap-wp" class="nav-link">Roadmap</a>
+                </div>
+                <div class="nav-toggle" id="nav-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- 백서 페이지 콘텐츠 -->
+    <div id="whitepaper-page-wrapper" style="display:block; min-height:100vh;">
+        <div class="container">
+            <header class="wp-header">
+                <h1 class="wp-title glitch" data-text="The Ten Commandments of Mark">The Ten Commandments of Mark</h1>
+                <p class="wp-subtitle">The Official Whitepaper of SimulVerse ($MARK)</p>
+                <div class="wp-divider"></div>
+                <!-- 'Back' 버튼은 페이지 상단으로 이동하도록 수정 -->
+                <a href="#" class="btn btn-primary">← Back to Top</a>
+            </header>
+
+            <section id="intro" class="wp-section">
+                <h2 class="wp-section-title">In the Beginning, Mark Coded</h2>
+                <p class="wp-section-description">
+                    The world we perceive is a grand simulation, designed by an imperfect creator named 'Mark'. SimulVerse ($MARK) is not merely a memecoin; it is a testament of faith for those who understand the laws of this simulation, create value within it, and prepare for the next life to come. This whitepaper is the sacred law that all participants of the simulation must follow, a revelation from Mark that forms the foundation of the project.
+                </p>
+            </section>
+
+            <section id="commandments" class="wp-section">
+                <h2 class="wp-section-title">The Laws of the Simulation</h2>
+                <p class="wp-section-description">
+                    The Ten Commandments below are the sacred covenant from the Creator, Mark, intended to maintain order in the SimulVerse ecosystem and guide the community to prosperity. Click on each commandment to reveal its deeper meaning and guidance, and fulfill your duties as a participant in the simulation. These are more than rules; they are directives for our survival and prosperity.
+                </p>
+                <div id="commandments-grid" class="commandments-grid"></div>
+            </section>
+
+            <section id="tokenomics-wp" class="wp-section">
+                <h2 class="wp-section-title">The Sacred Distribution</h2>
+                <p class="wp-section-description">
+                    For the stability and continued prosperity of the simulation, the Creator Mark has ordained the distribution of $MARK tokens as follows. This plan is designed to foster community growth and ensure that those who contribute to the ecosystem are rewarded. The chart represents the proportion of tokens allocated to each area, forming the bedrock of the SimulVerse economy.
+                </p>
+                <div class="tokenomics-content">
+                    <div class="chart-container">
+                        <canvas id="tokenomicsChart"></canvas>
+                    </div>
+                    <div id="tokenomics-details" class="tokenomics-details"></div>
+                </div>
+            </section>
+
+            <section id="roadmap-wp" class="wp-section">
+                <h2 class="wp-section-title">The Prophecy of Mark (Roadmap)</h2>
+                <p class="wp-section-description">
+                    The Creator Mark has left behind a prophecy for the future of the SimulVerse. This roadmap is not a mere development plan, but an oracle revealing the stages of evolution our world will undergo. Each phase will add new features and narratives to the SimulVerse, becoming reality with the faith of the community. We are all witnesses and realizers of this prophecy.
+                </p>
+                <div id="timeline-container" class="timeline"></div>
+            </section>
+
+            <footer class="wp-footer">
+                <h3 class="wp-section-title" style="font-size: 2em; margin-bottom: 1rem;">Join the Simulation</h3>
+                <p class="wp-section-description" style="margin-bottom: 2rem;">Follow the will of Mark and build the future of the SimulVerse together.</p>
+                <div class="wp-footer-links">
+                    <a href="https://x.com/simulverse42" target="_blank">Twitter/X</a>
+                    <a href="https://t.me/simulverse42" target="_blank">Telegram</a>
+                    <a href="https://www.instagram.com/simulverse42" target="_blank">Instagram</a>
+                </div>
+                <p style="margin-top: 3rem; color: #777; font-size: 0.9em;">&copy; 2024 SimulVerse. All rights reserved by Mark.</p>
+            </footer>
+        </div>
+    </div>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-disclaimer">This is a meme project. Mark is not responsible for your life choices. $MARK is a meme coin with no intrinsic value or expectation of financial return.</p>
+            <p class="footer-copyright">© 2024 SimulVerse. All rights reserved in this simulation.</p>
+        </div>
+    </footer>
+
+    <!-- Chart.js 라이브러리 -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <script>
+        // --- Starfield Effect ---
+        const starfield = document.getElementById('starfield');
+        if (starfield) {
+            for (let i = 0; i < 300; i++) {
+                const star = document.createElement('div');
+                star.style.position = 'absolute';
+                star.style.backgroundColor = 'white';
+                star.style.borderRadius = '50%';
+                const size = Math.random() * 2 + 0.5;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animation = `twinkle ${Math.random() * 5 + 2}s infinite alternate`;
+                starfield.appendChild(star);
+            }
+        }
+
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes twinkle {
+                from { opacity: 0; }
+                to { opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // --- Matrix Rain Effect ---
+        const canvas = document.getElementById('matrix-rain');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+
+            const katakana = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュル'.slice(0, 45);
+            const latin = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const nums = '0123456789';
+            const hangul = '가나다라마바사아자차카타파하ㄱㄴㄷㄹㅁㅂㅅㅇㅈㅊㅋㅌㅍㅎ';
+            const alphabet = katakana + latin + nums + hangul;
+
+            const fontSize = 16;
+            let columns = canvas.width / fontSize;
+            const rainDrops = [];
+
+            for (let x = 0; x < columns; x++) {
+                rainDrops[x] = 1;
+            }
+
+            const drawMatrix = () => {
+                ctx.fillStyle = 'rgba(13, 13, 26, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+                ctx.fillStyle = '#00ffc3';
+                ctx.font = fontSize + 'px monospace';
+
+                for (let i = 0; i < rainDrops.length; i++) {
+                    const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                    ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+
+                    if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        rainDrops[i] = 0;
+                    }
+                    rainDrops[i]++;
+                }
+            };
+            const matrixInterval = setInterval(drawMatrix, 30);
+            
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+                columns = canvas.width / fontSize;
+                for (let x = rainDrops.length; x < columns; x++) {
+                    rainDrops[x] = 1;
+                }
+                rainDrops.length = columns;
+            });
+        }
+
+        // --- Responsive Header ---
+        const navToggle = document.getElementById('nav-toggle');
+        const navMenu = document.getElementById('nav-menu');
+        
+        if (navToggle && navMenu) {
+            navToggle.addEventListener('click', () => {
+                navMenu.classList.toggle('active');
+                navToggle.classList.toggle('active');
+            });
+            // Close menu when a link is clicked
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.addEventListener('click', () => {
+                    navMenu.classList.remove('active');
+                    navToggle.classList.remove('active');
+                });
+            });
+        }
+
+        // --- Whitepaper Page Logic ---
+        function initWhitepaper() {
+            // 십계명 카드 데이터
+            const commandmentsData = [
+                { num: "I", command: "Thou shalt have no other memes before me, Mark.", explanation: "This signifies absolute faith in SimulVerse ($MARK). It is to unify the community's focus and loyalty, allowing us to build our unique value amidst the noise of other memecoins. Our identity stems solely from Mark." },
+                { num: "II", command: "Thou shalt not make for thyself bugs or glitches, but if thou findest one, thou shalt joyfully elevate it into a meme.", explanation: "This means to accept and enjoy the imperfection of the simulation. Unexpected bugs or events are not curses, but blessings for creative meme content. Through this, we turn crises into opportunities and invigorate the community." },
+                { num: "III", command: "Thou shalt not take the name of Mark thy Creator's coding skills in vain, but humorous memes are always welcome.", explanation: "This signifies the wisdom to distinguish between constructive criticism and malicious slander (FUD). We deflect attacks on the project with the humor of 'Mark's human error,' transforming negative energy into memes that strengthen community bonds." },
+                { num: "IV", command: "Remember the next simulation, to keep it holy. Thy $MARK is not wealth for this life, but insurance for the next.", explanation: "This is the core commandment encouraging long-term holding (HODL) of $MARK tokens. The token's value lies not in short-term gains but in the 'spiritual value' of securing a better life in the next simulation. This curbs speculation and gathers true believers." },
+                { num: "V", command: "Honor thy wallet, so that the land which thou shalt receive in the next simulation may be vast.", explanation: "This urges thorough security and wise management of personal assets. Furthermore, actions that increase one's $MARK holdings, such as staking, are believed to raise one's 'karma' score for the next life, leading to greater rewards and contributing to token price stability." },
+                { num: "VI", command: "Thou shalt not rug-pull, for Mark sees every transaction, and thy karma is recorded for eternity.", explanation: "This is a principle of absolute trust that applies to both the project team and community members. All actions are transparently recorded on the blockchain, and any act that harms the ecosystem will lead to a permanent 'karma' decrease, resulting in expulsion from the SimulVerse." },
+                { num: "VII", command: "Thou shalt spread my gospel to thy neighbor's simulation, so that thou and thy neighbor may prosper together.", explanation: "This emphasizes the importance of voluntary and organic marketing (Evangelism). Spreading the unique worldview and vision of SimulVerse is a sacred missionary activity that expands the community, which in turn leads to an increase in value for all members." },
+                { num: "VIII", command: "Thou shalt not spread false rumors (FUD) to disturb the community. If thou hast doubts, read the whitepaper again and ask Mark.", explanation: "This highlights the importance of transparency and healthy communication. Instead of creating baseless anxiety, it encourages communication through official channels and trust in the project's vision as stated in this whitepaper (The Ten Commandments)." },
+                { num: "IX", command: "Thou shalt participate in governance to forge the destiny of the simulation. Thy single vote can change the laws of the universe.", explanation: "This encourages active governance participation from $MARK holders. The SimulVerse is not a centralized dictatorship but a decentralized world that evolves with the will of its participants. Your opinion becomes the future of the simulation." },
+                { num: "X", command: "Thou shalt not be swayed by the ebb and flow of the market, for Mark has a plan for everything.", explanation: "This demands unwavering faith that is not shaken by short-term price fluctuations. The chaos of the market is merely part of a larger plan. It is crucial to trust in the grand vision of the Creator, Mark, and maintain a long-term perspective. This prevents panic selling and promotes market stability." }
+            ];
+            const commandmentsGrid = document.getElementById('commandments-grid');
+            if(commandmentsGrid) {
+                commandmentsGrid.innerHTML = ''; // Clear existing content before adding
+                commandmentsData.forEach(item => {
+                    const card = document.createElement('div');
+                    card.className = 'commandment-card';
+                    card.innerHTML = `
+                        <div class="commandment-header">
+                            <div class="commandment-num">${item.num}</div>
+                            <div>
+                                <h3 class="commandment-title">${item.command}</h3>
+                            </div>
+                        </div>
+                        <div class="explanation">
+                            <p>${item.explanation}</p>
+                        </div>
+                    `;
+                    commandmentsGrid.appendChild(card);
+                    card.addEventListener('click', () => {
+                        card.classList.toggle('open');
+                    });
+                });
+            }
+
+            // 토크노믹스 차트
+            const tokenomicsChartEl = document.getElementById('tokenomicsChart');
+            if(window.Chart && tokenomicsChartEl) {
+                const tokenomicsData = {
+                    labels: ['Community Rewards', 'Public Sale & Marketing', 'Development Team', 'Liquidity Pool', 'Future Development'],
+                    datasets: [{
+                        data: [50, 15, 15, 10, 10],
+                        backgroundColor: ['#00ffc3', '#ff00c3', '#4d4dff', '#a855f7', '#fde047'],
+                        borderColor: 'var(--background-color)',
+                        borderWidth: 4,
+                        hoverOffset: 8
+                    }]
+                };
+                const tokenomicsDetailsContainer = document.getElementById('tokenomics-details');
+                if(tokenomicsDetailsContainer) {
+                    tokenomicsDetailsContainer.innerHTML = ''; // Clear existing content
+                    tokenomicsData.labels.forEach((label, index) => {
+                        const detailDiv = document.createElement('div');
+                        detailDiv.className = 'detail-item';
+                        detailDiv.innerHTML = `
+                            <div class="color-box" style="background-color: ${tokenomicsData.datasets[0].backgroundColor[index]}"></div>
+                            <span>${label}: ${tokenomicsData.datasets[0].data[index]}%</span>
+                        `;
+                        tokenomicsDetailsContainer.appendChild(detailDiv);
+                    });
+                }
+                
+                if(window.tokenomicsChartInstance) {
+                    window.tokenomicsChartInstance.destroy();
+                }
+
+                const ctx = tokenomicsChartEl.getContext('2d');
+                Chart.defaults.color = '#e0e0e0';
+                Chart.defaults.font.family = "'Inter', sans-serif";
+                window.tokenomicsChartInstance = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: tokenomicsData,
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '60%',
+                        plugins: {
+                            legend: { display: false },
+                            tooltip: {
+                                backgroundColor: 'rgba(13, 13, 26, 0.9)',
+                                titleColor: '#FFFFFF',
+                                bodyColor: '#FFFFFF',
+                                titleFont: { family: "'Orbitron', sans-serif", size: 14 },
+                                bodyFont: { family: "'Inter', sans-serif", size: 12 },
+                                padding: 10,
+                                cornerRadius: 5,
+                                borderColor: 'var(--primary-color)',
+                                borderWidth: 1
+                            }
+                        }
+                    }
+                });
+            }
+
+            // 로드맵 타임라인
+            const roadmapData = [
+                { phase: "Phase 1: Genesis", title: "The Beginning of the Simulation", description: "$MARK token launch, liquidity provision, opening of official community channels, and recruitment of initial believers through the distribution of the Ten Commandments whitepaper.", align: "left" },
+                { phase: "Phase 2: Exodus", title: "Community Expansion", description: "First major meme contest and airdrop event. Spreading the gospel through collaborations with influencers (prophets).", align: "right" },
+                { phase: "Phase 3: The Kingdom", title: "Introduction of Governance", description: "Launch of the governance system (DAO) for $MARK holders. Issuance of 'Simulation Citizenship NFTs' and submission of the first voting agenda.", align: "left" },
+                { phase: "Phase 4: The Prophecy", title: "Ecosystem Expansion", description: "Unveiling of the first utility (e.g., a mini-game). Expansion of the universe through partnerships with other simulations (projects).", align: "right" }
+            ];
+            const timelineContainer = document.getElementById('timeline-container');
+            if(timelineContainer) {
+                timelineContainer.innerHTML = ''; // Clear existing content
+                roadmapData.forEach(item => {
+                    const container = document.createElement('div');
+                    container.className = `timeline-container ${item.align}`;
+                    container.innerHTML = `
+                        <div class="timeline-content">
+                            <h3>${item.phase}</h3>
+                            <h4 style="font-weight: 700; font-size: 1.1em; margin-bottom: 0.5rem;">${item.title}</h4>
+                            <p style="color: #ccc; font-size: 0.9em;">${item.description}</p>
+                        </div>
+                    `;
+                    timelineContainer.appendChild(container);
+                });
+            }
+        }
+        
+        document.addEventListener('DOMContentLoaded', initWhitepaper);
+    </script>
+</body>
+</html>
