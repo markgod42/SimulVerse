@@ -21,16 +21,29 @@
     <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@latest/lib/index.iife.min.js"></script>
 
     <style>
+        /* index.html과의 호환성을 위한 CSS 변수 */
+        :root {
+            --primary-color: #00ffc3;
+            --background-color: #0d0d1a;
+            --text-color: #e0e0e0;
+            --header-bg: rgba(13, 13, 26, 0.8);
+            --card-bg: rgba(25, 25, 40, 0.7);
+            --glitch-color-1: #00ffc3;
+            --glitch-color-2: #ff00c3;
+            --warning-color: #ff6b35;
+            --success-color: #00ff88;
+        }
+
         /* 기본 스타일 및 커스텀 클래스 */
         body { font-family: 'Inter', sans-serif; background-color: #0d0d1a; color: #e0e0e0; }
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
-        .text-primary { color: #00ffc3; }
+        .text-primary { color: var(--primary-color); }
         .bg-card { background-color: rgba(25, 25, 40, 0.85); }
-        .border-primary { border-color: #00ffc3; }
+        .border-primary { border-color: var(--primary-color); }
         .shadow-primary { box-shadow: 0 0 25px rgba(0, 255, 195, 0.3); }
-        .btn-primary { background-color: #00ffc3; color: #0d0d1a; transition: all 0.3s; }
+        .btn-primary { background-color: var(--primary-color); color: #0d0d1a; transition: all 0.3s; }
         .btn-primary:hover:not(:disabled) { box-shadow: 0 0 15px rgba(0, 255, 195, 0.5); transform: translateY(-2px); }
-        .btn-secondary { background-color: transparent; color: #00ffc3; border: 2px solid #00ffc3; }
+        .btn-secondary { background-color: transparent; color: var(--primary-color); border: 2px solid var(--primary-color); }
         .btn-secondary:hover:not(:disabled) { background-color: rgba(0, 255, 195, 0.1); box-shadow: 0 0 15px rgba(0, 255, 195, 0.3); }
         .btn-claimed { background-color: #2a7a6a; color: #a0e0d5; cursor: default; }
         .btn-disabled { background-color: #555; color: #999; cursor: not-allowed; }
@@ -40,19 +53,19 @@
         .table-header { background-color: rgba(0, 255, 195, 0.1); }
         .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s; }
         .modal-backdrop.visible { display: flex; opacity: 1; }
-        .modal-content { background-color: #191928; padding: 2rem; border-radius: 1rem; border: 1px solid #00ffc3; box-shadow: 0 0 25px rgba(0, 255, 195, 0.3); text-align: center; max-width: 90%; width: 500px; transform: scale(0.9); transition: transform 0.3s; }
+        .modal-content { background-color: #191928; padding: 2rem; border-radius: 1rem; border: 1px solid var(--primary-color); box-shadow: 0 0 25px rgba(0, 255, 195, 0.3); text-align: center; max-width: 90%; width: 500px; transform: scale(0.9); transition: transform 0.3s; }
         .modal-backdrop.visible .modal-content { transform: scale(1); }
         .tier-highlight-1 { color: #9ca3af; } .tier-highlight-2 { color: #6ee7b7; } .tier-highlight-3 { color: #38bdf8; } .tier-highlight-4 { color: #c084fc; } .tier-highlight-5 { color: #facc15; }
         .tier-highlight-10 { background: linear-gradient(90deg, #ff00c3, #00ffc3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
         .tab-btn { background-color: transparent; border-bottom: 3px solid transparent; transition: all 0.3s; }
-        .tab-btn.active { color: #00ffc3; border-bottom-color: #00ffc3; }
+        .tab-btn.active { color: var(--primary-color); border-bottom-color: var(--primary-color); }
         .tab-content { display: none; }
         .tab-content.active { display: block; }
         .staking-option { border: 2px solid #555; transition: all 0.3s; }
-        .staking-option:hover { border-color: #00ffc3; transform: translateY(-5px); }
-        .staking-option.selected { border-color: #00ffc3; box-shadow: 0 0 15px rgba(0, 255, 195, 0.3); }
+        .staking-option:hover { border-color: var(--primary-color); transform: translateY(-5px); }
+        .staking-option.selected { border-color: var(--primary-color); box-shadow: 0 0 15px rgba(0, 255, 195, 0.3); }
         .tooltip { position: relative; display: inline-block; }
-        .tooltip .tooltiptext { visibility: hidden; width: 220px; background-color: #191928; color: #fff; text-align: center; border-radius: 6px; padding: 5px 10px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; border: 1px solid #00ffc3; font-size: 0.8rem; }
+        .tooltip .tooltiptext { visibility: hidden; width: 220px; background-color: #191928; color: #fff; text-align: center; border-radius: 6px; padding: 5px 10px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; border: 1px solid var(--primary-color); font-size: 0.8rem; }
         .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
         .wallet-select-btn { display: flex; align-items: center; gap: 12px; justify-content: center; font-weight: 700; font-size: 1.1em; width: 100%; margin-bottom: 10px;}
         .wallet-logo { width: 28px; height: 28px; border-radius: 6px; }
@@ -245,14 +258,12 @@
                 const modal = document.getElementById(id);
                 if (modal) {
                     modal.classList.remove('visible');
-                    // Optional: remove modal from DOM after transition
-                    // setTimeout(() => modal.remove(), 300);
                 }
             }
 
             // --- 초기화 ---
             function init() {
-                connectWalletBtn.addEventListener('click', handleConnectWallet);
+                // connectWalletBtn.addEventListener('click', handleConnectWallet); // 기존 리스너 제거
                 document.querySelectorAll('.tab-btn').forEach(button => button.addEventListener('click', handleTabSwitch));
                 document.getElementById('stake-btn').addEventListener('click', handleStaking);
                 document.getElementById('consecrate-btn').addEventListener('click', handleConsecration);
@@ -261,105 +272,288 @@
                 updateRelicUI();
             }
 
-            // --- 지갑 연동 로직 (Horoscope.html 참조) ---
+            // --- NEW: index.html에서 가져온 지갑 연동 로직 ---
+            // 지갑 선택 모달 생성
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+                overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
+            `;
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background-color: var(--card-bg); padding: 20px; border: 1px solid var(--primary-color);
+                border-radius: 10px; text-align: center; width: 90%; max-width: 350px;
+            `;
+            const modalTitle = document.createElement('h3');
+            modalTitle.textContent = 'Select Wallet';
+            modalTitle.style.fontFamily = "'Orbitron', sans-serif";
+            modalTitle.style.color = "var(--primary-color)";
+            modalTitle.style.marginBottom = "20px";
+            modalContent.appendChild(modalTitle);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            // Disconnect 확인 모달 생성
+            const disconnectModal = document.createElement('div');
+            disconnectModal.style.cssText = `
+                display: none; position: fixed; z-index: 2001; left: 0; top: 0; width: 100%; height: 100%;
+                overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
+            `;
+            const disconnectModalContent = document.createElement('div');
+            disconnectModalContent.style.cssText = `
+                background-color: var(--card-bg); padding: 30px; border: 2px solid var(--primary-color);
+                border-radius: 15px; text-align: center; width: 90%; max-width: 400px;
+                box-shadow: 0 0 30px rgba(0, 255, 195, 0.3);
+            `;
+            
+            const disconnectTitle = document.createElement('h3');
+            disconnectTitle.textContent = 'Disconnect Wallet';
+            disconnectTitle.style.cssText = `
+                font-family: 'Orbitron', sans-serif; color: var(--primary-color); 
+                margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;
+            `;
+            
+            const disconnectMessage = document.createElement('p');
+            disconnectMessage.textContent = 'Are you sure you want to disconnect your wallet?';
+            disconnectMessage.style.cssText = `
+                color: var(--text-color); margin-bottom: 30px; font-size: 1.1em; line-height: 1.5;
+            `;
+            
+            const disconnectButtons = document.createElement('div');
+            disconnectButtons.style.cssText = `
+                display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
+            `;
+            
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'Yes, Disconnect';
+            confirmBtn.className = 'btn-primary';
+            confirmBtn.style.cssText = `
+                padding: 12px 25px; border-radius: 5px; font-weight: 700;
+                cursor: pointer; transition: all 0.3s; text-transform: uppercase;
+            `;
+            
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.className = 'btn-secondary';
+            cancelBtn.style.cssText = `
+                padding: 12px 25px; border-radius: 5px; font-weight: 700;
+                cursor: pointer; transition: all 0.3s; text-transform: uppercase;
+            `;
+            
+            disconnectButtons.appendChild(confirmBtn);
+            disconnectButtons.appendChild(cancelBtn);
+            disconnectModalContent.appendChild(disconnectTitle);
+            disconnectModalContent.appendChild(disconnectMessage);
+            disconnectModalContent.appendChild(disconnectButtons);
+            disconnectModal.appendChild(disconnectModalContent);
+            document.body.appendChild(disconnectModal);
+
+            // 지갑 설치 안내 모달 생성
+            const installModal = document.createElement('div');
+            installModal.style.cssText = `
+                display: none; position: fixed; z-index: 2002; left: 0; top: 0; width: 100%; height: 100%;
+                overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
+            `;
+            const installModalContent = document.createElement('div');
+            installModalContent.style.cssText = `
+                background-color: var(--card-bg); padding: 30px; border: 2px solid var(--warning-color);
+                border-radius: 15px; text-align: center; width: 90%; max-width: 450px;
+                box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
+            `;
+            
+            const installTitle = document.createElement('h3');
+            installTitle.textContent = 'Wallet Not Found';
+            installTitle.style.cssText = `
+                font-family: 'Orbitron', sans-serif; color: var(--warning-color); 
+                margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;
+            `;
+            
+            const installMessage = document.createElement('p');
+            installMessage.id = 'install-modal-message';
+            installMessage.style.cssText = `
+                color: var(--text-color); margin-bottom: 25px; font-size: 1.1em; line-height: 1.5;
+            `;
+            
+            const installButtons = document.createElement('div');
+            installButtons.style.cssText = `
+                display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
+            `;
+            
+            const installBtn = document.createElement('button');
+            installBtn.textContent = 'Install Wallet';
+            installBtn.className = 'btn-primary';
+            installBtn.style.cssText = `
+                padding: 12px 25px; background-color: var(--warning-color); border-color: var(--warning-color);
+                border-radius: 5px; font-weight: 700; cursor: pointer; transition: all 0.3s; text-transform: uppercase;
+            `;
+            
+            const closeInstallBtn = document.createElement('button');
+            closeInstallBtn.textContent = 'Close';
+            closeInstallBtn.className = 'btn-secondary';
+            closeInstallBtn.style.cssText = `
+                padding: 12px 25px; border-radius: 5px; font-weight: 700;
+                cursor: pointer; transition: all 0.3s; text-transform: uppercase;
+            `;
+            
+            installButtons.appendChild(installBtn);
+            installButtons.appendChild(closeInstallBtn);
+            installModalContent.appendChild(installTitle);
+            installModalContent.appendChild(installMessage);
+            installModalContent.appendChild(installButtons);
+            installModal.appendChild(installModalContent);
+            document.body.appendChild(installModal);
+
+            function getInstallUrl(walletId) {
+                switch(walletId) {
+                    case 'phantom': return 'https://phantom.app/';
+                    case 'backpack': return 'https://backpack.app/';
+                    case 'solflare': return 'https://solflare.com/';
+                    default: return '';
+                }
+            }
+            
             function onDisconnect() {
                 connectedWalletType = null;
                 userWalletAddress = null;
-                connectWalletBtn.textContent = '지갑 연결하여 등급 확인';
-                connectWalletBtn.classList.remove('btn-secondary');
-                connectWalletBtn.classList.add('btn-primary');
-                
-                // Reset UI to initial state
                 connectWalletSection.classList.remove('hidden');
                 dashboardSection.classList.add('hidden');
-                
                 if (lottoCountdownInterval) clearInterval(lottoCountdownInterval);
+                const connectBtn = document.getElementById('connect-wallet-btn');
+                if (connectBtn) {
+                    connectBtn.textContent = '지갑 연결하여 등급 확인';
+                }
             }
 
-            async function handleConnectWallet() {
-                if (userWalletAddress) { // 연결된 상태면 연결 해제 모달
-                    const modal = showModal('disconnect-modal', `
-                        <div class="modal-content">
-                            <h3 class="font-orbitron text-2xl font-bold text-primary mb-4">지갑 연결 해제</h3>
-                            <p class="text-gray-300 mb-6">정말로 지갑 연결을 해제하시겠습니까?</p>
-                            <div class="flex gap-4 justify-center">
-                                <button id="disconnect-confirm-btn" class="font-orbitron font-bold btn-primary px-6 py-2 rounded-lg">해제</button>
-                                <button id="disconnect-cancel-btn" class="font-orbitron font-bold btn-secondary px-6 py-2 rounded-lg">취소</button>
-                            </div>
-                        </div>
-                    `);
-                    modal.querySelector('#disconnect-confirm-btn').onclick = () => {
-                        // 실제 지갑 Provider의 disconnect 호출 (예시)
-                        // if (window.solana && window.solana.disconnect) window.solana.disconnect();
-                        onDisconnect();
-                        hideModal('disconnect-modal');
-                    };
-                    modal.querySelector('#disconnect-cancel-btn').onclick = () => hideModal('disconnect-modal');
-                    return;
-                }
-
-                const wallets = [
-                    { id: 'phantom', name: 'Phantom', logo: 'https://phantom.app/img/logo.png' },
-                    { id: 'solflare', name: 'Solflare', logo: 'https://solflare.com/img/logo-white.svg' },
-                    { id: 'backpack', name: 'Backpack', logo: 'https://backpack.app/logo.svg' }
-                ];
-
-                const walletButtons = wallets.map(wallet => `
-                    <button class="btn btn-primary wallet-select-btn" data-wallet="${wallet.id}">
-                        <img src="${wallet.logo}" alt="${wallet.name}" class="wallet-logo bg-white p-1">
-                        <span>${wallet.name}으로 연결</span>
-                    </button>
-                `).join('');
-
-                const modal = showModal('wallet-select-modal', `
-                    <div class="modal-content">
-                        <h3 class="font-orbitron text-2xl font-bold text-primary mb-6">지갑 선택</h3>
-                        ${walletButtons}
-                    </div>
-                `);
-
-                modal.querySelectorAll('.wallet-select-btn').forEach(button => {
-                    button.onclick = async () => {
-                        const walletId = button.dataset.wallet;
-                        let provider;
-                        if (walletId === 'phantom' && 'phantom' in window) provider = window.phantom?.solana;
-                        else if (walletId === 'solflare' && 'solflare' in window) provider = window.solflare;
-                        else if (walletId === 'backpack' && 'backpack' in window) provider = window.backpack;
-
-                        if (provider && provider.isSolana) {
+            if (connectWalletBtn && !connectWalletBtn._walletEventRegistered) {
+                connectWalletBtn._walletEventRegistered = true;
+                connectWalletBtn.addEventListener('click', async (e) => {
+                    if (userWalletAddress) {
+                        disconnectModal.style.display = 'flex';
+                        confirmBtn.onclick = () => {
+                            let provider = null;
+                            if (connectedWalletType === 'phantom' && window.solana && window.solana.isPhantom) provider = window.solana;
+                            else if (connectedWalletType === 'backpack' && window.solana && window.solana.isBackpack) provider = window.solana;
+                            else if (connectedWalletType === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) provider = window.solflare || window.solana;
+                            
+                            if (provider && provider.disconnect) provider.disconnect();
+                            else onDisconnect();
+                            disconnectModal.style.display = 'none';
+                        };
+                        cancelBtn.onclick = () => { disconnectModal.style.display = 'none'; };
+                        return;
+                    }
+                    
+                    const isMobile = /Mobi|Android|iPhone/i.test(navigator.userAgent);
+                    let provider = null;
+                    let walletType = null;
+                    
+                    if (isMobile) {
+                        if (window.solana && window.solana.isPhantom) { provider = window.solana; walletType = 'phantom'; }
+                        else if (window.solana && window.solana.isBackpack) { provider = window.solana; walletType = 'backpack'; }
+                        else if (window.solflare) { provider = window.solflare; walletType = 'solflare'; }
+                        
+                        if (provider) {
                             try {
-                                const resp = await provider.connect();
-                                const address = resp.publicKey.toString();
+                                await provider.connect();
+                                const address = provider.publicKey.toString();
+                                // --- ApostolicProtocol Success Logic ---
                                 userWalletAddress = address;
-                                connectedWalletType = walletId;
-                                
-                                // UI 업데이트
+                                connectedWalletType = walletType;
                                 connectWalletSection.classList.add('hidden');
                                 dashboardSection.classList.remove('hidden');
                                 walletAddressEl.textContent = address;
-                                connectWalletBtn.textContent = `${address.slice(0, 4)}...${address.slice(-4)} (해제)`;
-                                connectWalletBtn.classList.remove('btn-primary');
-                                connectWalletBtn.classList.add('btn-secondary');
-
-                                // 데이터 로딩 시뮬레이션
                                 const referredWallets = Math.floor(Math.random() * 5500);
                                 updateDashboardUI(referredWallets);
                                 if (lottoCountdownInterval) clearInterval(lottoCountdownInterval);
                                 lottoCountdownInterval = setInterval(updateLottoUI, 1000);
-
-                                provider.on('disconnect', onDisconnect);
-                                hideModal('wallet-select-modal');
+                                if (provider.on) provider.on('disconnect', onDisconnect);
+                                // --- End Success Logic ---
+                                return;
                             } catch (err) {
-                                showModal('error-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-red-500 mb-4">연결 실패</h3><p>${err.message}</p><button class="btn btn-primary mt-4" onclick="document.getElementById('error-modal').remove()">확인</button></div>`);
+                                installMessage.textContent = 'Failed to connect wallet. Please try again in your wallet browser.';
+                                installModal.style.display = 'flex';
+                                return;
                             }
-                        } else {
-                            window.open(`https://phantom.app/`, '_blank');
-                            showModal('install-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-yellow-400 mb-4">지갑 설치 필요</h3><p>${walletId} 지갑이 설치되지 않았습니다. 설치 후 페이지를 새로고침 해주세요.</p><button class="btn btn-primary mt-4" onclick="document.getElementById('install-modal').remove()">확인</button></div>`);
                         }
-                    };
+                    }
+                    
+                    while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
+                    const wallets = [
+                        { id: 'phantom', name: 'Phantom', logo: 'https://i.ibb.co/H5KnQH1/images.jpg', deeplink: (url) => `phantom://app/ul/browse/${encodeURIComponent(url)}` },
+                        { id: 'backpack', name: 'Backpack', logo: 'https://i.ibb.co/8nkGvqKT/33.jpg', deeplink: (url) => `backpack://app/open?url=${encodeURIComponent(url)}` },
+                        { id: 'solflare', name: 'Solflare', logo: 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png', deeplink: (url) => `solflare://open?url=${encodeURIComponent(url)}` }
+                    ];
+                    wallets.forEach(wallet => {
+                        const btn = document.createElement('button');
+                        btn.className = 'btn btn-primary wallet-select-btn';
+                        btn.onclick = async () => {
+                            if (isMobile) {
+                                const deeplinkUrl = wallet.deeplink(window.location.href);
+                                const installUrl = getInstallUrl(wallet.id);
+                                const currentUrl = window.location.href;
+                                window.location.href = deeplinkUrl;
+                                setTimeout(() => {
+                                    if (window.location.href === currentUrl) {
+                                        installMessage.textContent = `${wallet.name} wallet app is not installed. Please install the app and try again.`;
+                                        installBtn.onclick = () => { if (installUrl) window.open(installUrl, '_blank'); installModal.style.display = 'none'; };
+                                        closeInstallBtn.onclick = () => { installModal.style.display = 'none'; };
+                                        installModal.style.display = 'flex';
+                                    }
+                                }, 2000);
+                                modal.style.display = 'none';
+                                return;
+                            }
+                            
+                            let provider = null;
+                            if (wallet.id === 'phantom' && window.solana && window.solana.isPhantom) provider = window.solana;
+                            else if (wallet.id === 'backpack' && window.solana && window.solana.isBackpack) provider = window.solana;
+                            else if (wallet.id === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) provider = window.solflare || window.solana;
+                            
+                            if (!provider) {
+                                installMessage.textContent = `${wallet.name} wallet extension is not installed. Please install the extension and try again.`;
+                                installBtn.onclick = () => { const url = getInstallUrl(wallet.id); if(url) window.open(url, '_blank'); installModal.style.display = 'none'; };
+                                closeInstallBtn.onclick = () => { installModal.style.display = 'none'; };
+                                installModal.style.display = 'flex';
+                                return;
+                            }
+                            try {
+                                await provider.connect();
+                                const address = provider.publicKey.toString();
+                                // --- ApostolicProtocol Success Logic ---
+                                userWalletAddress = address;
+                                connectedWalletType = wallet.id;
+                                connectWalletSection.classList.add('hidden');
+                                dashboardSection.classList.remove('hidden');
+                                walletAddressEl.textContent = address;
+                                const referredWallets = Math.floor(Math.random() * 5500);
+                                updateDashboardUI(referredWallets);
+                                if (lottoCountdownInterval) clearInterval(lottoCountdownInterval);
+                                lottoCountdownInterval = setInterval(updateLottoUI, 1000);
+                                if (provider.on) provider.on('disconnect', onDisconnect);
+                                // --- End Success Logic ---
+                                modal.style.display = 'none';
+                            } catch (err) {
+                                alert('Failed to connect wallet: ' + (err.message || err));
+                            }
+                        };
+                        const logo = document.createElement('img');
+                        logo.src = wallet.logo; logo.alt = wallet.name; logo.className = 'wallet-logo';
+                        btn.appendChild(logo);
+                        const span = document.createElement('span');
+                        span.textContent = `Connect ${wallet.name}`;
+                        btn.appendChild(span);
+                        modalContent.appendChild(btn);
+                    });
+                    modal.style.display = 'flex';
                 });
             }
             
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) modal.style.display = "none";
+                if (event.target === disconnectModal) disconnectModal.style.display = "none";
+                if (event.target === installModal) installModal.style.display = "none";
+            });
+
             // --- 나머지 핸들러 및 UI 업데이트 함수들 ---
             function handleTabSwitch(event) {
                 const tabId = event.currentTarget.dataset.tab;
@@ -369,17 +563,9 @@
                 document.getElementById(tabId).classList.add('active');
             }
 
-            async function handleStaking() {
-                // ... (기존 로직과 동일)
-            }
-            
-            async function handleClaimClick(event) {
-                // ... (기존 로직과 동일)
-            }
-            
-            async function handleConsecration() {
-                // ... (기존 로직과 동일)
-            }
+            async function handleStaking() { /* ... (기존 로직과 동일) ... */ }
+            async function handleClaimClick(event) { /* ... (기존 로직과 동일) ... */ }
+            async function handleConsecration() { /* ... (기존 로직과 동일) ... */ }
 
             function updateDashboardUI(referredWallets) {
                 let currentRank = { tier: 0, title: '방랑자', required: 0 };
@@ -394,7 +580,7 @@
                 document.getElementById('progress-bar').style.width = `${progress}%`;
                 document.getElementById('next-rank-info').textContent = (currentRank.tier === nextRank.tier && currentRank.tier > 0) ? '최고 등급에 도달했습니다!' : `다음 등급 '${nextRank.title}'까지 ${Math.max(0, nextRank.required - referredWallets)}명 남았습니다.`;
                 populateMainGuideTable(referredWallets);
-                updateStakingUI(); // 등급이 바뀌면 스테이킹 UI도 업데이트
+                updateStakingUI();
             }
 
             function populateMainGuideTable(referredWallets) {
