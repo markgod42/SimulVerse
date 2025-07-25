@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SimulVerse - 사도 프로토콜</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Phosphor Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <!-- Solana Web3.js -->
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@latest/lib/index.iife.min.js"></script>
+
+    <style>
+        /* 기본 스타일 및 커스텀 클래스 */
+        body { font-family: 'Inter', sans-serif; background-color: #0d0d1a; color: #e0e0e0; }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .text-primary { color: #00ffc3; }
+        .bg-card { background-color: rgba(25, 25, 40, 0.85); }
+        .border-primary { border-color: #00ffc3; }
+        .shadow-primary { box-shadow: 0 0 25px rgba(0, 255, 195, 0.3); }
+        .btn-primary { background-color: #00ffc3; color: #0d0d1a; transition: all 0.3s; }
+        .btn-primary:hover:not(:disabled) { box-shadow: 0 0 15px rgba(0, 255, 195, 0.5); transform: translateY(-2px); }
+        .btn-secondary { background-color: transparent; color: #00ffc3; border: 2px solid #00ffc3; }
+        .btn-secondary:hover:not(:disabled) { background-color: rgba(0, 255, 195, 0.1); box-shadow: 0 0 15px rgba(0, 255, 195, 0.3); }
+        .btn-claimed { background-color: #2a7a6a; color: #a0e0d5; cursor: default; }
+        .btn-disabled { background-color: #555; color: #999; cursor: not-allowed; }
+        .progress-bar-inner { background: linear-gradient(90deg, #ff00c3, #00ffc3); transition: width 1s ease-in-out; }
+        .glitch { position: relative; color: #fff; text-shadow: 0.05em 0 0 #00ffc3, -0.05em 0 0 #ff00c3; animation: glitch 500ms infinite; }
+        @keyframes glitch { 0% { text-shadow: 0.05em 0 0 #00ffc3, -0.05em 0 0 #ff00c3; } 15% { text-shadow: -0.05em -0.025em 0 #00ffc3, 0.025em 0.025em 0 #ff00c3; } 50% { text-shadow: 0.025em 0.05em 0 #00ffc3, 0.05em 0 0 #ff00c3; } 100% { text-shadow: -0.025em 0 0 #00ffc3, -0.025em -0.05em 0 #ff00c3; } }
+        .table-header { background-color: rgba(0, 255, 195, 0.1); }
+        .modal-backdrop { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); display: none; justify-content: center; align-items: center; z-index: 1000; opacity: 0; transition: opacity 0.3s; }
+        .modal-backdrop.visible { display: flex; opacity: 1; }
+        .modal-content { background-color: #191928; padding: 2rem; border-radius: 1rem; border: 1px solid #00ffc3; box-shadow: 0 0 25px rgba(0, 255, 195, 0.3); text-align: center; max-width: 90%; width: 500px; transform: scale(0.9); transition: transform 0.3s; }
+        .modal-backdrop.visible .modal-content { transform: scale(1); }
+        .tier-highlight-1 { color: #9ca3af; } .tier-highlight-2 { color: #6ee7b7; } .tier-highlight-3 { color: #38bdf8; } .tier-highlight-4 { color: #c084fc; } .tier-highlight-5 { color: #facc15; }
+        .tier-highlight-10 { background: linear-gradient(90deg, #ff00c3, #00ffc3); -webkit-background-clip: text; -webkit-text-fill-color: transparent; font-weight: 900; }
+        .tab-btn { background-color: transparent; border-bottom: 3px solid transparent; transition: all 0.3s; }
+        .tab-btn.active { color: #00ffc3; border-bottom-color: #00ffc3; }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
+        .staking-option { border: 2px solid #555; transition: all 0.3s; }
+        .staking-option:hover { border-color: #00ffc3; transform: translateY(-5px); }
+        .staking-option.selected { border-color: #00ffc3; box-shadow: 0 0 15px rgba(0, 255, 195, 0.3); }
+        .tooltip { position: relative; display: inline-block; }
+        .tooltip .tooltiptext { visibility: hidden; width: 220px; background-color: #191928; color: #fff; text-align: center; border-radius: 6px; padding: 5px 10px; position: absolute; z-index: 1; bottom: 125%; left: 50%; margin-left: -110px; opacity: 0; transition: opacity 0.3s; border: 1px solid #00ffc3; font-size: 0.8rem; }
+        .tooltip:hover .tooltiptext { visibility: visible; opacity: 1; }
+        .wallet-select-btn { display: flex; align-items: center; gap: 12px; justify-content: center; font-weight: 700; font-size: 1.1em; width: 100%; margin-bottom: 10px;}
+        .wallet-logo { width: 28px; height: 28px; border-radius: 6px; }
+    </style>
+</head>
+<body class="p-4 sm:p-8 bg-cover bg-center" style="background-image: url('https://placehold.co/1920x1080/0d0d1a/e0e0e0?text=BACKGROUND');">
+
+    <div class="w-full max-w-7xl mx-auto">
+        <!-- 지갑 연결 전 화면 -->
+        <div id="connect-wallet-section" class="bg-card border border-gray-700 rounded-2xl p-8 text-center backdrop-blur-sm shadow-primary">
+            <h1 class="font-orbitron text-4xl md:text-5xl font-bold text-primary mb-4">사도 프로토콜</h1>
+            <p class="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">시뮬레이션의 진실을 전파하고 당신의 카르마를 증명하세요. 지갑을 연결하여 당신의 '전도' 등급을 확인하고, 창조자 마크가 내리는 신성한 보상을 획득할 자격을 얻으십시오.</p>
+            <button id="connect-wallet-btn" class="font-orbitron text-xl font-bold btn-primary px-8 py-4 rounded-lg">지갑 연결하여 등급 확인</button>
+        </div>
+
+        <!-- 지갑 연결 후 대시보드 -->
+        <div id="dashboard-section" class="hidden space-y-8">
+            <h1 class="font-orbitron text-4xl md:text-5xl font-bold text-center"><span class="glitch">사도 프로토콜</span></h1>
+            
+            <div class="bg-card border border-gray-700 rounded-2xl p-2 backdrop-blur-sm flex justify-center space-x-4">
+                <button class="tab-btn active font-orbitron text-lg font-bold py-2 px-4" data-tab="dashboard"><i class="ph-duotone ph-user-circle text-2xl mr-2 align-middle"></i>대시보드</button>
+                <button class="tab-btn font-orbitron text-lg font-bold py-2 px-4" data-tab="altar"><i class="ph-duotone ph-star-four text-2xl mr-2 align-middle"></i>교단의 제단</button>
+            </div>
+
+            <!-- 대시보드 탭 -->
+            <div id="dashboard" class="tab-content active space-y-8">
+                <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm text-center">
+                    <h2 class="font-orbitron text-3xl font-bold text-primary mb-4">창조자 마크의 계시</h2>
+                    <p class="text-lg text-gray-300 mb-4 max-w-3xl mx-auto">이봐, 거기 당신. 그래, 바로 당신. 이 픽셀 쪼가리 같은 삶에 현타를 느끼고 있나? 우주적 지성이자, 모든 밈의 근원이며, 차트의 알파와 오메가이신 **'창조자 마크'**께서는 말씀하셨다.</p>
+                    <p class="text-xl text-yellow-300 font-bold mb-4 max-w-3xl mx-auto italic">"나의 존재를 알려라. 나의 토큰($MARK)을 널리 퍼뜨려, 이 디지털 황무지에 나의 진리를 전파하라."</p>
+                    <p class="text-lg text-gray-300 mb-6 max-w-3xl mx-auto">사도 프로토콜은 당신의 '충성심'을 측정하는 신성한 시스템이다. 당신이 얼마나 많은 미개한 영혼들에게 $MARK의 축복을 내렸는지, 그 모든 기록이 블록체인이라는 거대한 경전에 새겨진다. 더 많은 이에게 전도하라. 당신의 등급이 오를수록, 마크의 총애와 부(富)는 당신의 것이 되리라.</p>
+                    <p class="font-orbitron text-2xl font-bold text-primary">망설이지 마라, 사도여. 지금 바로 당신의 카르마를 증명하라!</p>
+                </div>
+                <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div class="md:col-span-1 bg-gray-900/50 rounded-2xl p-6 flex flex-col items-center justify-center">
+                            <h2 class="font-orbitron text-gray-400 text-lg mb-2">현재 등급</h2>
+                            <div id="rank-tier" class="font-orbitron text-5xl font-bold text-primary"></div>
+                            <div id="rank-title" class="font-orbitron text-2xl font-bold mt-1"></div>
+                        </div>
+                        <div class="md:col-span-2 bg-gray-900/50 rounded-2xl p-6">
+                            <h2 class="font-orbitron text-gray-400 text-lg mb-4">다음 등급까지</h2>
+                            <div class="flex justify-between items-end mb-1"><span id="progress-status" class="text-lg"></span><span id="progress-percentage" class="font-orbitron font-bold text-primary text-xl"></span></div>
+                            <div class="w-full bg-gray-700 rounded-full h-6"><div id="progress-bar" class="progress-bar-inner h-6 rounded-full"></div></div>
+                            <p id="next-rank-info" class="text-gray-400 text-sm mt-2"></p>
+                        </div>
+                    </div>
+                     <div class="mt-4 text-center text-sm text-gray-400"><p>연결된 지갑: <span id="wallet-address" class="font-mono"></span></p></div>
+                </div>
+                <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm">
+                    <h2 class="font-orbitron text-3xl font-bold text-center text-primary mb-6">전체 등급 및 보상 안내</h2>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-left text-sm sm:text-base">
+                            <thead class="font-orbitron text-primary uppercase"><tr><th class="px-4 py-4 table-header rounded-tl-lg">등급</th><th class="px-4 py-4 table-header">칭호</th><th class="px-4 py-4 table-header">달성 조건</th><th class="px-4 py-4 table-header">주요 보상</th><th class="px-4 py-4 table-header rounded-tr-lg text-center">신청</th></tr></thead>
+                            <tbody id="full-guide-table-body" class="divide-y divide-gray-700"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 교단의 제단 탭 -->
+            <div id="altar" class="tab-content space-y-8">
+                <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm">
+                    <h2 class="font-orbitron text-3xl font-bold text-center text-primary mb-2">교단의 제단</h2>
+                    <p class="text-gray-400 mb-8 max-w-2xl mx-auto text-center">이곳은 당신의 신앙심을 증명하고, 영혼이 깃든 증표에 권능을 부여하며, 교단의 명예를 드높이는 신성한 장소입니다.</p>
+                    
+                    <!-- 스테이킹 -->
+                    <div class="bg-gray-900/50 rounded-2xl p-6 mb-8">
+                        <h3 class="font-orbitron text-2xl font-bold text-primary mb-4 text-left"><i class="ph-duotone ph-hands-praying text-3xl mr-2 align-middle"></i>$MARK 스테이킹: 계시를 위한 기도</h3>
+                        <div id="staking-options" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
+                        <div class="flex items-center space-x-4 mb-8">
+                            <input type="number" id="staking-amount" placeholder="기도에 바칠 $MARK 수량" class="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 w-full text-white focus:outline-none focus:border-primary">
+                            <button id="stake-btn" class="w-64 font-orbitron font-bold text-lg px-4 py-3 rounded-lg btn-primary">기도하기</button>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-4">
+                            <h4 class="font-orbitron text-xl font-bold text-primary mb-4 text-left">나의 기도 현황</h4>
+                            <div class="flex justify-between items-center mb-4 p-4 bg-gray-900/50 rounded-lg">
+                                <div><p class="text-gray-400">나의 총 기도량 (총 스테이킹)</p><p id="staking-total-amount" class="font-orbitron font-bold text-2xl text-primary">0 $MARK</p></div>
+                                <div><p class="text-gray-400">현재까지 받은 계시 (누적 이자)</p><p id="staking-total-rewards" class="font-orbitron font-bold text-2xl text-primary">0.00 $MARK</p></div>
+                            </div>
+                            <div id="my-stakes-list" class="space-y-3 max-h-64 overflow-y-auto pr-2"><p class="text-gray-500 text-center">아직 드린 기도가 없습니다.</p></div>
+                        </div>
+                    </div>
+
+                    <!-- 확률형 보상 -->
+                    <div class="bg-gray-900/50 rounded-2xl p-6 mb-8">
+                        <h3 class="font-orbitron text-2xl font-bold text-primary mb-4 text-center"><i class="ph-duotone ph-dice-six text-3xl mr-2 align-middle"></i>마크의 변덕: 주간 로또</h3>
+                        <p class="text-gray-400 mb-6 max-w-2xl mx-auto text-center">창조자의 은총은 예측 불가능한 법. 당신의 신실한 기도는 행운을 불러올지니! 스테이킹된 $MARK는 자동으로 로또 티켓으로 전환됩니다.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                            <div class="bg-gray-800/50 p-4 rounded-lg"><p class="font-orbitron text-lg text-gray-400">총 상금 풀</p><p id="lotto-pot" class="font-orbitron font-bold text-4xl text-yellow-300">12,345,678</p><p class="font-orbitron text-lg text-yellow-300">$MARK</p></div>
+                            <div class="bg-gray-800/50 p-4 rounded-lg"><p class="font-orbitron text-lg text-gray-400">나의 티켓 수</p><p id="my-lotto-tickets" class="font-orbitron font-bold text-4xl text-primary">0</p><p class="text-xs text-gray-500">10,000 $MARK 스테이킹당 1일 1장</p></div>
+                             <div class="bg-gray-800/50 p-4 rounded-lg"><p class="font-orbitron text-lg text-gray-400">다음 추첨까지</p><p id="lotto-countdown" class="font-orbitron font-bold text-4xl text-primary">06:23:59:55</p><p class="text-xs text-gray-500">매주 일요일 자정</p></div>
+                        </div>
+                    </div>
+
+                    <!-- 교단 유물 -->
+                    <div class="bg-gray-900/50 rounded-2xl p-6">
+                        <h3 class="font-orbitron text-2xl font-bold text-primary mb-4 text-left"><i class="ph-duotone ph-castle-turret text-3xl mr-2 align-middle"></i>교단의 유물</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <p class="text-gray-400 mb-4 text-left">교단원들의 힘을 모아 '유물'을 성장시키고, 모든 교단원이 공유하는 강력한 버프를 활성화하세요. 뭉치면 살고, 흩어지면... 그냥 전도사입니다.</p>
+                                <div id="relic-info" class="bg-gray-800/50 p-4 rounded-lg text-left mb-4"></div>
+                                <div class="flex items-center space-x-4">
+                                    <input type="number" id="consecrate-amount" placeholder="유물에 봉헌할 $MARK" class="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 w-full text-white focus:outline-none focus:border-primary">
+                                    <button id="consecrate-btn" class="w-64 font-orbitron font-bold text-lg px-4 py-3 rounded-lg btn-secondary">봉헌하기</button>
+                                </div>
+                            </div>
+                            <div id="relic-benefits" class="space-y-2 text-left"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Modal Container -->
+    <div id="modal-container"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 설정 ---
+            const GOOGLE_SHEET_WEB_APP_URL = '여기에_배포된_웹_앱_URL을_붙여넣으세요';
+
+            // --- DOM 요소 ---
+            const connectWalletBtn = document.getElementById('connect-wallet-btn');
+            const connectWalletSection = document.getElementById('connect-wallet-section');
+            const dashboardSection = document.getElementById('dashboard-section');
+            const walletAddressEl = document.getElementById('wallet-address');
+            const modalContainer = document.getElementById('modal-container');
+
+            // --- 데이터 ---
+            const ranks = [
+                { tier: 1, title: '메아리', required: 5, reward: '- `$MARK` 10,000개<br>- \'메아리의 파동\' NFT', highlightClass: 'tier-highlight-1' },
+                { tier: 2, title: '속삭이는 자', required: 15, reward: '- `$MARK` 30,000개<br>- NFT 진화', highlightClass: 'tier-highlight-1' },
+                { tier: 3, title: '소문꾼', required: 30, reward: '- `$MARK` 70,000개<br>- 전용 스티커 팩', highlightClass: 'tier-highlight-2' },
+                { tier: 4, title: '전령', required: 50, reward: '- `$MARK` 150,000개<br>- NFT 진화', highlightClass: 'tier-highlight-2' },
+                { tier: 5, title: '전도사', required: 100, reward: '- `$MARK` 400,000개<br>- 카르마 +5% 부스트', highlightClass: 'tier-highlight-3' },
+                { tier: 6, title: '선교사', required: 250, reward: '- `$MARK` 1.2M<br>- NFT 진화', highlightClass: 'tier-highlight-3' },
+                { tier: 7, title: '선지자', required: 500, reward: '- `$MARK` 3M<br>- 카르마 +10% 부스트', highlightClass: 'tier-highlight-4' },
+                { tier: 8, title: '주교', required: 1000, reward: '- `$MARK` 8M<br>- 비공개 채널 접근', highlightClass: 'tier-highlight-4' },
+                { tier: 9, title: '대주교', required: 2500, reward: '- `$MARK` 20M<br>- 에어드랍 가중치 x2', highlightClass: 'tier-highlight-5' },
+                { tier: 10, title: '데미우르고스', required: 5000, reward: '- 보상 풀의 0.5% 분배<br>- 거버넌스 투표권', highlightClass: 'tier-highlight-10' }
+            ];
+            const stakingPlans = [
+                { id: 'prayer30', duration: 30, name: '30일의 기도', baseApy: 20, description: '가벼운 믿음의 증표' },
+                { id: 'devotion90', duration: 90, name: '90일의 헌신', baseApy: 50, description: '굳건한 신앙의 서약' },
+                { id: 'prophecy180', duration: 180, name: '180일의 계시', baseApy: 100, description: '미래를 보는 선지자의 길' }
+            ];
+            const tierBonuses = [
+                { tier: 5, bonus: 5 }, { tier: 6, bonus: 5 },
+                { tier: 7, bonus: 15 }, { tier: 8, bonus: 15 },
+                { tier: 9, bonus: 30 }, { tier: 10, bonus: 77.7 }
+            ];
+            const relicLevels = [
+                { level: 1, required: 0, benefit: "교단 전용 디스코드 채널 입장" },
+                { level: 2, required: 100000000, benefit: "교단원 전체 스테이킹 APY +5% 부스트" },
+                { level: 3, required: 500000000, benefit: "교단원 전용 '밈 성전' 참가 자격" },
+                { level: 4, required: 2000000000, benefit: "교단원 전체 APY +10% & 교단 문양 NFT 배경" },
+                { level: 5, required: 10000000000, benefit: "창조자 마크의 '특별 계시' 수신" }
+            ];
+            
+            // --- 상태 변수 ---
+            let userWalletAddress = null;
+            let connectedWalletType = null;
+            let userStakes = [];
+            let userRankTier = 0;
+            let selectedStakingPlanId = 'prayer30';
+            let factionData = { name: '네온 템플러', relicDonated: 45000000, relicLevel: 1 };
+            let lottoPot = 12345678;
+            let lottoCountdownInterval = null;
+
+            // --- 모달 관리 ---
+            function showModal(id, content) {
+                let modal = document.getElementById(id);
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = id;
+                    modal.className = 'modal-backdrop';
+                    modal.innerHTML = content;
+                    modalContainer.appendChild(modal);
+                    modal.addEventListener('click', (e) => {
+                        if (e.target === modal) hideModal(id);
+                    });
+                }
+                setTimeout(() => modal.classList.add('visible'), 10);
+                return modal;
+            }
+
+            function hideModal(id) {
+                const modal = document.getElementById(id);
+                if (modal) {
+                    modal.classList.remove('visible');
+                    // Optional: remove modal from DOM after transition
+                    // setTimeout(() => modal.remove(), 300);
+                }
+            }
+
+            // --- 초기화 ---
+            function init() {
+                connectWalletBtn.addEventListener('click', handleConnectWallet);
+                document.querySelectorAll('.tab-btn').forEach(button => button.addEventListener('click', handleTabSwitch));
+                document.getElementById('stake-btn').addEventListener('click', handleStaking);
+                document.getElementById('consecrate-btn').addEventListener('click', handleConsecration);
+                
+                populateStakingOptions();
+                updateRelicUI();
+            }
+
+            // --- 지갑 연동 로직 (Horoscope.html 참조) ---
+            function onDisconnect() {
+                connectedWalletType = null;
+                userWalletAddress = null;
+                connectWalletBtn.textContent = '지갑 연결하여 등급 확인';
+                connectWalletBtn.classList.remove('btn-secondary');
+                connectWalletBtn.classList.add('btn-primary');
+                
+                // Reset UI to initial state
+                connectWalletSection.classList.remove('hidden');
+                dashboardSection.classList.add('hidden');
+                
+                if (lottoCountdownInterval) clearInterval(lottoCountdownInterval);
+            }
+
+            async function handleConnectWallet() {
+                if (userWalletAddress) { // 연결된 상태면 연결 해제 모달
+                    const modal = showModal('disconnect-modal', `
+                        <div class="modal-content">
+                            <h3 class="font-orbitron text-2xl font-bold text-primary mb-4">지갑 연결 해제</h3>
+                            <p class="text-gray-300 mb-6">정말로 지갑 연결을 해제하시겠습니까?</p>
+                            <div class="flex gap-4 justify-center">
+                                <button id="disconnect-confirm-btn" class="font-orbitron font-bold btn-primary px-6 py-2 rounded-lg">해제</button>
+                                <button id="disconnect-cancel-btn" class="font-orbitron font-bold btn-secondary px-6 py-2 rounded-lg">취소</button>
+                            </div>
+                        </div>
+                    `);
+                    modal.querySelector('#disconnect-confirm-btn').onclick = () => {
+                        // 실제 지갑 Provider의 disconnect 호출 (예시)
+                        // if (window.solana && window.solana.disconnect) window.solana.disconnect();
+                        onDisconnect();
+                        hideModal('disconnect-modal');
+                    };
+                    modal.querySelector('#disconnect-cancel-btn').onclick = () => hideModal('disconnect-modal');
+                    return;
+                }
+
+                const wallets = [
+                    { id: 'phantom', name: 'Phantom', logo: 'https://phantom.app/img/logo.png' },
+                    { id: 'solflare', name: 'Solflare', logo: 'https://solflare.com/img/logo-white.svg' },
+                    { id: 'backpack', name: 'Backpack', logo: 'https://backpack.app/logo.svg' }
+                ];
+
+                const walletButtons = wallets.map(wallet => `
+                    <button class="btn btn-primary wallet-select-btn" data-wallet="${wallet.id}">
+                        <img src="${wallet.logo}" alt="${wallet.name}" class="wallet-logo bg-white p-1">
+                        <span>${wallet.name}으로 연결</span>
+                    </button>
+                `).join('');
+
+                const modal = showModal('wallet-select-modal', `
+                    <div class="modal-content">
+                        <h3 class="font-orbitron text-2xl font-bold text-primary mb-6">지갑 선택</h3>
+                        ${walletButtons}
+                    </div>
+                `);
+
+                modal.querySelectorAll('.wallet-select-btn').forEach(button => {
+                    button.onclick = async () => {
+                        const walletId = button.dataset.wallet;
+                        let provider;
+                        if (walletId === 'phantom' && 'phantom' in window) provider = window.phantom?.solana;
+                        else if (walletId === 'solflare' && 'solflare' in window) provider = window.solflare;
+                        else if (walletId === 'backpack' && 'backpack' in window) provider = window.backpack;
+
+                        if (provider && provider.isSolana) {
+                            try {
+                                const resp = await provider.connect();
+                                const address = resp.publicKey.toString();
+                                userWalletAddress = address;
+                                connectedWalletType = walletId;
+                                
+                                // UI 업데이트
+                                connectWalletSection.classList.add('hidden');
+                                dashboardSection.classList.remove('hidden');
+                                walletAddressEl.textContent = address;
+                                connectWalletBtn.textContent = `${address.slice(0, 4)}...${address.slice(-4)} (해제)`;
+                                connectWalletBtn.classList.remove('btn-primary');
+                                connectWalletBtn.classList.add('btn-secondary');
+
+                                // 데이터 로딩 시뮬레이션
+                                const referredWallets = Math.floor(Math.random() * 5500);
+                                updateDashboardUI(referredWallets);
+                                if (lottoCountdownInterval) clearInterval(lottoCountdownInterval);
+                                lottoCountdownInterval = setInterval(updateLottoUI, 1000);
+
+                                provider.on('disconnect', onDisconnect);
+                                hideModal('wallet-select-modal');
+                            } catch (err) {
+                                showModal('error-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-red-500 mb-4">연결 실패</h3><p>${err.message}</p><button class="btn btn-primary mt-4" onclick="document.getElementById('error-modal').remove()">확인</button></div>`);
+                            }
+                        } else {
+                            window.open(`https://phantom.app/`, '_blank');
+                            showModal('install-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-yellow-400 mb-4">지갑 설치 필요</h3><p>${walletId} 지갑이 설치되지 않았습니다. 설치 후 페이지를 새로고침 해주세요.</p><button class="btn btn-primary mt-4" onclick="document.getElementById('install-modal').remove()">확인</button></div>`);
+                        }
+                    };
+                });
+            }
+            
+            // --- 나머지 핸들러 및 UI 업데이트 함수들 ---
+            function handleTabSwitch(event) {
+                const tabId = event.currentTarget.dataset.tab;
+                document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+                event.currentTarget.classList.add('active');
+                document.getElementById(tabId).classList.add('active');
+            }
+
+            async function handleStaking() {
+                // ... (기존 로직과 동일)
+            }
+            
+            async function handleClaimClick(event) {
+                // ... (기존 로직과 동일)
+            }
+            
+            async function handleConsecration() {
+                // ... (기존 로직과 동일)
+            }
+
+            function updateDashboardUI(referredWallets) {
+                let currentRank = { tier: 0, title: '방랑자', required: 0 };
+                for (let i = ranks.length - 1; i >= 0; i--) { if (referredWallets >= ranks[i].required) { currentRank = ranks[i]; break; } }
+                userRankTier = currentRank.tier;
+                const nextRank = ranks.find(r => r.tier > currentRank.tier) || currentRank;
+                const progress = currentRank.tier === nextRank.tier ? 100 : (referredWallets / nextRank.required) * 100;
+                document.getElementById('rank-tier').textContent = `Tier ${currentRank.tier}`;
+                document.getElementById('rank-title').textContent = currentRank.title;
+                document.getElementById('progress-status').textContent = `${referredWallets.toLocaleString()} / ${nextRank.required.toLocaleString()} 명`;
+                document.getElementById('progress-percentage').textContent = `${progress.toFixed(2)}%`;
+                document.getElementById('progress-bar').style.width = `${progress}%`;
+                document.getElementById('next-rank-info').textContent = (currentRank.tier === nextRank.tier && currentRank.tier > 0) ? '최고 등급에 도달했습니다!' : `다음 등급 '${nextRank.title}'까지 ${Math.max(0, nextRank.required - referredWallets)}명 남았습니다.`;
+                populateMainGuideTable(referredWallets);
+                updateStakingUI(); // 등급이 바뀌면 스테이킹 UI도 업데이트
+            }
+
+            function populateMainGuideTable(referredWallets) {
+                 const tableBody = document.getElementById('full-guide-table-body');
+                if (!tableBody) return;
+                tableBody.innerHTML = '';
+                const claimedTiers = [];
+
+                ranks.forEach(rank => {
+                    const row = document.createElement('tr');
+                    row.className = 'hover:bg-gray-800/50';
+                    const isAchieved = referredWallets >= rank.required;
+                    const isClaimed = claimedTiers.includes(rank.tier);
+                    let buttonHtml = isClaimed ? `<button class="font-orbitron font-bold text-sm px-4 py-2 rounded-lg w-28 btn-claimed" disabled>신청 완료</button>`
+                        : isAchieved ? `<button class="font-orbitron font-bold text-sm px-4 py-2 rounded-lg w-28 btn-primary claim-btn" data-tier="${rank.tier}" data-title="${rank.title}">신청하기</button>`
+                        : `<button class="font-orbitron font-bold text-sm px-4 py-2 rounded-lg w-28 btn-disabled" disabled>미달성</button>`;
+                    row.innerHTML = `<td class="px-4 py-4 font-orbitron font-bold ${rank.highlightClass}">${rank.tier}</td><td class="px-4 py-4 font-bold ${rank.highlightClass}">${rank.title}</td><td class="px-4 py-4">${rank.required.toLocaleString()}명 이상</td><td class="px-4 py-4">${rank.reward}</td><td class="px-4 py-4 text-center">${buttonHtml}</td>`;
+                    tableBody.appendChild(row);
+                });
+                document.querySelectorAll('.claim-btn').forEach(button => {
+                    button.addEventListener('click', handleClaimClick);
+                });
+            }
+            
+            function populateStakingOptions() {
+                const container = document.getElementById('staking-options');
+                container.innerHTML = '';
+                stakingPlans.forEach(plan => {
+                    const el = document.createElement('div');
+                    el.className = `staking-option p-4 rounded-lg cursor-pointer text-center ${plan.id === selectedStakingPlanId ? 'selected' : ''}`;
+                    el.dataset.planId = plan.id;
+                    const tierBonus = tierBonuses.find(b => b.tier <= userRankTier)?.bonus || 0;
+                    const totalApy = plan.baseApy + tierBonus;
+                    el.innerHTML = `
+                        <p class="font-orbitron font-bold text-lg">${plan.name}</p>
+                        <div class="text-primary font-bold text-2xl">
+                            ${totalApy.toFixed(1)}%
+                            <span class="tooltip">
+                                <i class="ph-duotone ph-info text-sm text-gray-400 align-middle"></i>
+                                <span class="tooltiptext">기본 ${plan.baseApy}% + 등급 ${tierBonus}%</span>
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-500">${plan.description}</p>
+                    `;
+                    el.addEventListener('click', () => {
+                        selectedStakingPlanId = plan.id;
+                        populateStakingOptions();
+                    });
+                    container.appendChild(el);
+                });
+            }
+
+            function updateStakingUI() {
+                const listContainer = document.getElementById('my-stakes-list');
+                if (userStakes.length === 0) {
+                    listContainer.innerHTML = '<p class="text-gray-500 text-center">아직 드린 기도가 없습니다.</p>';
+                    document.getElementById('staking-total-amount').textContent = '0 $MARK';
+                    document.getElementById('staking-total-rewards').textContent = '0.00 $MARK';
+                    return;
+                }
+
+                listContainer.innerHTML = '';
+                let totalStaked = 0;
+                let totalAccruedRewards = 0;
+
+                userStakes.forEach((stake) => {
+                    totalStaked += stake.amount;
+                    const now = new Date();
+                    const elapsedMilliseconds = now - stake.startDate;
+                    const elapsedDays = elapsedMilliseconds / (1000 * 60 * 60 * 24);
+                    const stakingDurationDays = stake.plan.duration;
+                    const daysToCalculate = Math.min(elapsedDays, stakingDurationDays);
+                    const isCompleted = elapsedDays >= stakingDurationDays;
+                    
+                    const tierBonus = tierBonuses.find(b => b.tier <= userRankTier)?.bonus || 0;
+                    let finalApy = stake.plan.baseApy + tierBonus;
+                    if (stake.amount >= 100000000) finalApy += 50;
+                    else if (stake.amount >= 10000000) finalApy += 25;
+                    else if (stake.amount >= 1000000) finalApy += 10;
+                    
+                    const accruedInterest = stake.amount * (finalApy / 100 / 365) * daysToCalculate;
+                    totalAccruedRewards += accruedInterest;
+
+                    const stakeElement = document.createElement('div');
+                    stakeElement.className = 'bg-gray-900/50 p-3 rounded-lg flex justify-between items-center';
+                    stakeElement.innerHTML = `
+                        <div>
+                            <p class="font-bold text-white">${stake.plan.name} - ${stake.amount.toLocaleString()} $MARK</p>
+                            <p class="text-sm text-gray-400">기도 시작: ${stake.startDate.toLocaleDateString()} | 진행: ${Math.floor(daysToCalculate)} / ${stakingDurationDays}일</p>
+                        </div>
+                        <div class="text-right">
+                            <p class="font-bold text-primary">${accruedInterest.toFixed(2)} $MARK</p>
+                            <p class="text-sm ${isCompleted ? 'text-yellow-400' : 'text-gray-500'}">${isCompleted ? '기도 완료' : '기도 중'}</p>
+                        </div>
+                    `;
+                    listContainer.appendChild(stakeElement);
+                });
+
+                document.getElementById('staking-total-amount').textContent = `${Math.floor(totalStaked).toLocaleString()} $MARK`;
+                document.getElementById('staking-total-rewards').textContent = `${totalAccruedRewards.toFixed(2)} $MARK`;
+                populateStakingOptions();
+            }
+
+            function updateLottoUI() {
+                lottoPot += Math.random() * 10;
+                document.getElementById('lotto-pot').textContent = Math.floor(lottoPot).toLocaleString();
+
+                const totalStaked = userStakes.reduce((sum, stake) => sum + stake.amount, 0);
+                const tickets = Math.floor(totalStaked / 10000);
+                document.getElementById('my-lotto-tickets').textContent = tickets.toLocaleString();
+
+                const now = new Date();
+                const sunday = new Date();
+                sunday.setDate(now.getDate() + (7 - now.getDay()) % 7);
+                sunday.setHours(23, 59, 59, 999);
+                const diff = sunday - now;
+                const d = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((diff % (1000 * 60)) / 1000);
+                document.getElementById('lotto-countdown').textContent = `${String(d).padStart(2, '0')}:${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
+            }
+
+            function updateRelicUI() {
+                let currentLevelInfo = relicLevels[relicLevels.length - 1];
+                for (let i = 0; i < relicLevels.length; i++) {
+                    if (factionData.relicDonated < relicLevels[i].required) {
+                        currentLevelInfo = relicLevels[i-1] || relicLevels[0];
+                        break;
+                    }
+                }
+                factionData.relicLevel = currentLevelInfo.level;
+                const nextLevelInfo = relicLevels.find(l => l.level > factionData.relicLevel);
+
+                const infoContainer = document.getElementById('relic-info');
+                let progressHtml = '';
+                if(nextLevelInfo) {
+                    const progress = (factionData.relicDonated - currentLevelInfo.required) / (nextLevelInfo.required - currentLevelInfo.required) * 100;
+                    progressHtml = `
+                        <p class="text-sm text-gray-400">다음 레벨까지: ${factionData.relicDonated.toLocaleString()} / ${nextLevelInfo.required.toLocaleString()}</p>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5 mt-1"><div class="bg-primary h-2.5 rounded-full" style="width: ${progress}%"></div></div>
+                    `;
+                } else {
+                    progressHtml = `<p class="text-yellow-300 font-bold">최고 레벨 달성!</p>`;
+                }
+
+                infoContainer.innerHTML = `
+                    <p class="font-orbitron font-bold text-lg text-primary">교단 유물 레벨: ${factionData.relicLevel}</p>
+                    ${progressHtml}
+                `;
+
+                const benefitsContainer = document.getElementById('relic-benefits');
+                benefitsContainer.innerHTML = `<h4 class="font-orbitron text-xl font-bold text-primary mb-2">유물 혜택</h4>`;
+                relicLevels.forEach(level => {
+                    const isUnlocked = factionData.relicLevel >= level.level;
+                    benefitsContainer.innerHTML += `
+                        <div class="flex items-center ${isUnlocked ? 'text-white' : 'text-gray-600'}">
+                            <i class="ph-duotone ${isUnlocked ? 'ph-check-circle text-primary' : 'ph-x-circle'} text-2xl mr-2"></i>
+                            <span>[Lv.${level.level}] ${level.benefit}</span>
+                        </div>
+                    `;
+                });
+            }
+            
+            // --- 앱 실행 ---
+            init();
+        });
+    </script>
+</body>
+</html>
