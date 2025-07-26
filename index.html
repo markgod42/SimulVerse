@@ -796,6 +796,11 @@
         .faq-item.active .faq-toggle {
             transform: rotate(45deg);
         }
+
+        .faq-more-button-container {
+            text-align: center;
+            margin-top: 40px;
+        }
         
         /* Community Section */
         .community-links {
@@ -1360,7 +1365,7 @@
                         <a href="#nfts" class="nav-link">NFTs</a>
                         <a href="#tokenomics" class="nav-link">Tokenomics</a>
                         <a href="#lore" class="nav-link">Lore</a>
-                        <a href="#faq" class="nav-link">FAQ</a>
+                        <a href="faq.html" class="nav-link">FAQ</a>
                         <a href="#community" class="nav-link">Community</a>
                     </div>
                     <div class="simulation-status">
@@ -1777,6 +1782,10 @@
                             <div class="faq-answer"><p>When Mark finishes debugging the economy.exe module. He's been putting it off because macroeconomics is hard and he'd rather work on the physics engine.</p></div>
                         </div>
                     </div>
+                    <!-- '더 보기' 버튼 추가 -->
+                    <div class="faq-more-button-container">
+                        <a href="faq.html" class="btn btn-primary">더 보기</a>
+                    </div>
                 </section>
 
                 <section id="community" class="community-section">
@@ -1878,9 +1887,11 @@
 
         document.querySelectorAll('.nav-link').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
-                if (navMenu.classList.contains('active')) {
+                // If the link is for the current page, close the menu
+                if (this.getAttribute('href').startsWith('#') && navMenu.classList.contains('active')) {
                     navMenu.classList.remove('active');
                 }
+                // For external links like faq.html, the browser will navigate away, so no need to manually close.
             });
         });
 

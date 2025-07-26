@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - SimulVerse</title>
+    <meta name="description" content="Frequently Asked Questions about the SimulVerse project, $MARK token, NFTs, and the lore of our simulated reality.">
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/png" href="https://i.ibb.co/NgHMCZZX/image.png">
+
+    <style>
+        /* 기존 index.html의 스타일을 대부분 재사용합니다. */
+        :root {
+            --primary-color: #00ffc3;
+            --background-color: #0d0d1a;
+            --text-color: #e0e0e0;
+            --header-bg: rgba(13, 13, 26, 0.8);
+            --card-bg: rgba(25, 25, 40, 0.7);
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: var(--background-color);
+        }
+
+        #matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.2;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        .section-title {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 3em;
+            text-align: center;
+            margin-bottom: 40px;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+        
+        .header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 1000;
+            background-color: var(--header-bg);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            padding: 15px 0;
+            transition: top 0.3s;
+        }
+
+        .nav-container {
+            display: grid;
+            grid-template-columns: 1fr auto auto;
+            align-items: center;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+            gap: 10px;
+        }
+
+        .nav-logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+        }
+
+        .logo-img {
+            width: 40px;
+            height: 40px;
+        }
+
+        .logo-text {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 1.5em;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .nav-menu {
+            display: flex;
+            gap: 25px;
+        }
+        
+        .nav-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: color 0.3s;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary-color);
+        }
+        
+        .simulation-status {
+            font-family: 'Orbitron', sans-serif;
+            font-size: 0.9em;
+            background-color: rgba(0, 255, 195, 0.1);
+            padding: 8px 12px;
+            border-radius: 5px;
+            border: 1px solid var(--primary-color);
+        }
+        
+        .status-running {
+            color: var(--primary-color);
+            font-weight: 700;
+        }
+
+        .nav-toggle {
+            display: none;
+            cursor: pointer;
+        }
+
+        .footer {
+            padding: 40px 0;
+            text-align: center;
+            background-color: #080810;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* FAQ Page Specific Styles */
+        .faq-page-main {
+            padding-top: 120px; /* 헤더 높이만큼 패딩 */
+            padding-bottom: 80px;
+        }
+
+        .faq-category-nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 50px;
+        }
+
+        .category-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            font-weight: 700;
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 5px;
+        }
+
+        .category-btn.active, .category-btn:hover {
+            background-color: var(--primary-color);
+            color: var(--background-color);
+            box-shadow: 0 0 15px var(--primary-color);
+        }
+
+        .faq-list {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .faq-item {
+            background: var(--card-bg);
+            margin-bottom: 15px;
+            border-radius: 5px;
+            border-left: 3px solid transparent;
+            transition: border-left 0.3s;
+        }
+
+        .faq-item:hover {
+            border-left: 3px solid var(--primary-color);
+        }
+        
+        .faq-question {
+            padding: 20px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 1.1em;
+        }
+        
+        .faq-toggle {
+            font-size: 1.5em;
+            transition: transform 0.3s;
+        }
+
+        .faq-answer {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-in-out, padding 0.5s ease-in-out;
+            padding: 0 20px;
+            border-top: 1px solid rgba(0, 255, 195, 0); /* 초기에는 투명 */
+        }
+
+        .faq-answer p {
+            margin: 0;
+            padding: 0;
+            line-height: 1.7;
+            color: #ccc;
+        }
+        
+        .faq-item.active .faq-answer {
+            max-height: 500px; /* 충분한 높이 */
+            padding: 20px;
+            border-top: 1px solid rgba(0, 255, 195, 0.2);
+        }
+
+        .faq-item.active .faq-toggle {
+            transform: rotate(45deg);
+        }
+
+        /* Responsive */
+        @media (max-width: 992px) {
+            .nav-menu {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 70px;
+                left: 0;
+                width: 100%;
+                background-color: var(--header-bg);
+            }
+            .nav-menu.active {
+                display: flex;
+            }
+            .nav-link {
+                text-align: center;
+                padding: 15px;
+            }
+            .nav-toggle {
+                display: flex;
+                flex-direction: column;
+                gap: 5px;
+            }
+            .nav-toggle span {
+                width: 25px;
+                height: 3px;
+                background-color: var(--primary-color);
+                border-radius: 3px;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .section-title {
+                font-size: 2.2em;
+            }
+            .simulation-status {
+                display: none;
+            }
+            .faq-category-nav {
+                gap: 10px;
+            }
+            .category-btn {
+                padding: 8px 15px;
+                font-size: 0.9em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="starfield"></div>
+    <canvas id="matrix-rain"></canvas>
+
+    <header class="header">
+        <nav class="nav">
+            <div class="nav-container">
+                <a href="index.html" class="nav-logo">
+                    <img src="https://i.ibb.co/NgHMCZZX/image.png" alt="SimulVerse Logo" class="logo-img">
+                    <span class="logo-text">SimulVerse</span>
+                </a>
+                <div class="nav-menu" id="nav-menu">
+                    <a href="index.html#home" class="nav-link">Home</a>
+                    <a href="index.html#prayer" class="nav-link">Prayer Mining</a>
+                    <a href="index.html#bug-report" class="nav-link">Bug Report</a>
+                    <a href="index.html#nfts" class="nav-link">NFTs</a>
+                    <a href="index.html#tokenomics" class="nav-link">Tokenomics</a>
+                    <a href="index.html#lore" class="nav-link">Lore</a>
+                    <a href="faq.html" class="nav-link">FAQ</a>
+                    <a href="index.html#community" class="nav-link">Community</a>
+                </div>
+                <div class="simulation-status">
+                    <span class="status-text">Status: <span class="status-running">Running</span></span>
+                </div>
+                <div class="nav-toggle" id="nav-toggle">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main class="faq-page-main">
+        <div class="container">
+            <h1 class="section-title">Frequently Asked Questions</h1>
+
+            <nav class="faq-category-nav">
+                <button class="category-btn active" data-category="all">All</button>
+                <button class="category-btn" data-category="general">General</button>
+                <button class="category-btn" data-category="lore">SimulVerse & Lore</button>
+                <button class="category-btn" data-category="token">$MARK Token</button>
+                <button class="category-btn" data-category="nft">NFTs</button>
+                <button class="category-btn" data-category="technical">Technical</button>
+            </nav>
+
+            <div class="faq-list" id="faq-list">
+                <!-- 질문과 답변은 JavaScript로 동적 생성됩니다. -->
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p class="footer-disclaimer">This is a meme project. Mark is not responsible for your life choices. $MARK is a meme coin with no intrinsic value or expectation of financial return.</p>
+            <p class="footer-copyright">© 2024 SimulVerse. All rights reserved in this simulation.</p>
+        </div>
+    </footer>
+
+    <script>
+        // --- Starfield & Matrix Effect (from index.html) ---
+        (function() {
+            const starfield = document.getElementById('starfield');
+            for (let i = 0; i < 300; i++) {
+                const star = document.createElement('div');
+                star.style.position = 'absolute';
+                star.style.backgroundColor = 'white';
+                star.style.borderRadius = '50%';
+                const size = Math.random() * 2 + 0.5;
+                star.style.width = `${size}px`;
+                star.style.height = `${size}px`;
+                star.style.left = `${Math.random() * 100}%`;
+                star.style.top = `${Math.random() * 100}%`;
+                star.style.animation = `twinkle ${Math.random() * 5 + 2}s infinite alternate`;
+                starfield.appendChild(star);
+            }
+
+            const style = document.createElement('style');
+            style.textContent = `@keyframes twinkle { from { opacity: 0; } to { opacity: 1; } }`;
+            document.head.appendChild(style);
+
+            const canvas = document.getElementById('matrix-rain');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const alphabet = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789가나다라마바사아자차카타파하';
+            const fontSize = 16;
+            const columns = canvas.width / fontSize;
+            const rainDrops = Array.from({ length: columns }).fill(1);
+
+            const drawMatrix = () => {
+                ctx.fillStyle = 'rgba(13, 13, 26, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#00ffc3';
+                ctx.font = fontSize + 'px monospace';
+                for (let i = 0; i < rainDrops.length; i++) {
+                    const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                    ctx.fillText(text, i * fontSize, rainDrops[i] * fontSize);
+                    if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        rainDrops[i] = 0;
+                    }
+                    rainDrops[i]++;
+                }
+            };
+            setInterval(drawMatrix, 30);
+
+            window.addEventListener('resize', () => {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            });
+        })();
+
+        // --- Responsive Header ---
+        (function() {
+            const navToggle = document.getElementById('nav-toggle');
+            const navMenu = document.getElementById('nav-menu');
+            navToggle.addEventListener('click', () => {
+                navMenu.classList.toggle('active');
+            });
+        })();
+
+        // --- FAQ Page Logic ---
+        document.addEventListener('DOMContentLoaded', function() {
+            const faqData = [
+                {
+                    category: 'general',
+                    question: '이 프로젝트는 진지한 건가요?',
+                    answer: '대학원생의 논문 마감일처럼 진지합니다. 저희는 이 재미있는 컨셉을 중심으로 실제 커뮤니티를 구축하고 있습니다. 토큰은 진짜고, 웃음도 진짜지만, 마크는 허구일 수도 있습니다 (아니면 정말 있을까요?).'
+                },
+                {
+                    category: 'general',
+                    question: 'SimulVerse의 목표는 무엇인가요?',
+                    answer: '우리의 주요 목표는 현실의 부조리함을 즐기는 커뮤니티를 만드는 것입니다. 우리는 모두가 마크의 시뮬레이션 속 존재라는 사실을 받아들이고, 이 독특한 세계관을 통해 상호작용하며 즐거움을 찾는 것을 목표로 합니다.'
+                },
+                {
+                    category: 'lore',
+                    question: '창조주 마크는 실존 인물인가요?',
+                    answer: '시뮬레이션 안에서 "실제"를 어떻게 정의하느냐에 따라 다릅니다. 마크는 우리의 마음, 밈, 그리고 아마도 어딘가의 기숙사 방에서 라면을 먹으며 우주를 디버깅하고 있는 모습으로 존재합니다.'
+                },
+                {
+                    category: 'lore',
+                    question: '시뮬레이션이 끝나면 어떻게 되나요?',
+                    answer: '마크가 졸업하여 이 우주가 끝나면, 여러분이 보유한 $MARK 토큰의 양이 다음 시뮬레이션에서의 시작 조건을 결정합니다. 블록체인으로 검증되는 우주적 카르마라고 생각하세요.'
+                },
+                {
+                    category: 'lore',
+                    question: '왜 현실 세계에 버그가 이렇게 많죠?',
+                    answer: '양자물리학은 마크의 스파게티 코드일 뿐이고, 데자뷰는 복사-붙여넣기 오류입니다. 우주는 접착테이프와 카페인으로 돌아가고 있습니다. 여러분이 발견하는 버그는 마크가 그의 프로젝트를 개선하는 데 도움이 됩니다.'
+                },
+                {
+                    category: 'token',
+                    question: '$MARK 토큰은 어떻게 얻나요?',
+                    answer: '웹사이트의 기도 시스템을 통해 매일 마크에게 기도하거나, 커뮤니티 이벤트에 참여하거나, 시뮬레이션 버그를 보고하거나, 솔라나 DEX에서 직접 토큰을 구매할 수 있습니다. 창의적인 기도는 더 높은 보상을 받습니다!'
+                },
+                {
+                    category: 'token',
+                    question: '"다음 시뮬레이션 혜택"이 뭔가요?',
+                    answer: '보유한 $MARK 토큰은 다음 생의 시작 능력치(외모, 지능, 행운 등)를 결정합니다. 토큰이 많을수록 더 나은 삶을 살 수 있습니다. 어쩌면 당신이 도움이 되는 NPC가 될 수도 있습니다.'
+                },
+                {
+                    category: 'token',
+                    question: '토큰 가격은 언제 오르나요? (웬 문?)',
+                    answer: '마크가 economy.exe 모듈 디버깅을 끝내면요. 거시 경제학이 너무 어려워서 계속 미루고, 대신 물리 엔진을 개선하고 있다고 합니다.'
+                },
+                {
+                    category: 'nft',
+                    question: 'NFT는 어떤 기능이 있나요?',
+                    answer: 'NFT는 시뮬레이션 내에서 당신의 존재에 직접적인 영향을 미치는 강력한 아이템입니다. 데이터 오류(죄)를 수정하거나, 확률을 조작하거나, 다음 생의 운명을 선택할 수도 있습니다.'
+                },
+                {
+                    category: 'nft',
+                    question: 'Indulgence NFT와 Talisman NFT의 차이점은 무엇인가요?',
+                    answer: 'Indulgence NFT는 당신의 프로필에서 "오류 로그"(죄)를 삭제하여 카르마 점수를 회복시키는 데 사용됩니다. 반면, Talisman NFT는 당신 주변의 "확률장"을 조작하여 행운을 높이거나 시스템 글리치에 저항하는 데 사용됩니다.'
+                },
+                {
+                    category: 'technical',
+                    question: '지갑 연결에 실패했습니다. 어떻게 해야 하나요?',
+                    answer: '먼저 Phantom, Solflare 등 지원되는 솔라나 지갑 확장 프로그램이나 앱이 제대로 설치되고 활성화되었는지 확인해주세요. 브라우저를 새로고침한 후 다시 시도해보세요. 모바일 환경에서는 지갑 앱 내의 브라우저를 사용하면 더 안정적으로 연결될 수 있습니다.'
+                },
+                {
+                    category: 'technical',
+                    question: '기도/버그 리포트 제출이 안됩니다.',
+                    answer: '기도와 버그 리포트는 지갑 주소당 24시간에 한 번만 제출할 수 있습니다. 마지막 제출 이후 24시간이 지났는지 확인해주세요. 또한, 지갑이 연결되어 있는지 다시 한번 확인해주시기 바랍니다.'
+                }
+            ];
+
+            const faqList = document.getElementById('faq-list');
+            const categoryButtons = document.querySelectorAll('.category-btn');
+
+            function renderFaqs(category) {
+                faqList.innerHTML = '';
+                const filteredData = (category === 'all') 
+                    ? faqData 
+                    : faqData.filter(item => item.category === category);
+
+                if (filteredData.length === 0) {
+                    faqList.innerHTML = '<p style="text-align:center;">해당 카테고리에 질문이 없습니다.</p>';
+                    return;
+                }
+
+                filteredData.forEach(item => {
+                    const faqItem = document.createElement('div');
+                    faqItem.className = 'faq-item';
+                    faqItem.dataset.category = item.category;
+                    faqItem.innerHTML = `
+                        <div class="faq-question">
+                            <span>${item.question}</span>
+                            <span class="faq-toggle">+</span>
+                        </div>
+                        <div class="faq-answer">
+                            <p>${item.answer}</p>
+                        </div>
+                    `;
+                    faqList.appendChild(faqItem);
+                });
+
+                // 새로 렌더링된 아이템에 아코디언 이벤트 리스너 추가
+                addAccordionListeners();
+            }
+
+            function addAccordionListeners() {
+                const faqItems = document.querySelectorAll('.faq-item');
+                faqItems.forEach(item => {
+                    const question = item.querySelector('.faq-question');
+                    question.addEventListener('click', () => {
+                        // 현재 열려있는 다른 아이템을 닫지 않고, 개별적으로 토글합니다.
+                        item.classList.toggle('active');
+                    });
+                });
+            }
+
+            categoryButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    categoryButtons.forEach(btn => btn.classList.remove('active'));
+                    this.classList.add('active');
+                    const category = this.dataset.category;
+                    renderFaqs(category);
+                });
+            });
+
+            // 초기 로드
+            renderFaqs('all');
+        });
+    </script>
+</body>
+</html>
