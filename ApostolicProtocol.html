@@ -141,6 +141,44 @@
                     </div>
                      <div class="mt-4 text-center text-sm text-gray-400"><p>연결된 지갑: <span id="wallet-address" class="font-mono"></span></p></div>
                 </div>
+                <!-- 전도 시스템 -->
+                <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm">
+                    <h2 class="font-orbitron text-3xl font-bold text-center text-primary mb-6">전도 시스템 (Airdrop)</h2>
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <!-- 나눔 받기 -->
+                        <div class="bg-gray-900/50 rounded-2xl p-6">
+                            <h3 class="font-orbitron text-2xl font-bold text-primary mb-4 text-left"><i class="ph-duotone ph-hand-heart text-3xl mr-2 align-middle"></i>나눔 받기</h3>
+                            <p class="text-gray-400 mb-4">당신의 솔라나 지갑 주소를 등록하여 다른 사도들로부터 $MARK 토큰을 나눔받으세요. (최대 100개 주소 등록 가능)</p>
+                            <div class="flex items-center space-x-2 mb-2">
+                                <input type="text" id="donation-register-address" placeholder="Solana 지갑 주소 입력" class="bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 w-full text-white focus:outline-none focus:border-primary">
+                                <button id="register-address-btn" class="w-40 font-orbitron font-bold px-4 py-2 rounded-lg btn-secondary">수동 등록</button>
+                            </div>
+                            <button id="register-connected-wallet-btn" class="w-full font-orbitron font-bold px-4 py-2 rounded-lg btn-primary mb-4">현재 연결된 지갑으로 등록</button>
+                            <p class="text-xs text-gray-500 text-center">* 등록된 지갑은 반드시 $MARK 토큰의 ATA(Associated Token Account)가 생성되어 있어야 합니다.</p>
+                        </div>
+                        <!-- 나눔 보내기 -->
+                        <div class="bg-gray-900/50 rounded-2xl p-6">
+                            <h3 class="font-orbitron text-2xl font-bold text-primary mb-4 text-left"><i class="ph-duotone ph-paper-plane-tilt text-3xl mr-2 align-middle"></i>나눔 보내기 (전도)</h3>
+                            <p class="text-gray-400 mb-4">아래 목록의 지갑들에게 $MARK를 전송하여 당신의 등급 상승에 필요한 '전도' 활동을 완수하세요.</p>
+                            <div class="bg-gray-800 border border-gray-600 rounded-lg p-3 max-h-48 overflow-y-auto mb-4">
+                                <div class="flex justify-between items-center mb-2 px-1">
+                                    <span id="donation-list-count" class="text-sm text-gray-400">0 / 100</span>
+                                    <div class="flex items-center">
+                                        <label for="select-all-donations" class="text-sm mr-2">전체 선택</label>
+                                        <input type="checkbox" id="select-all-donations" class="form-checkbox h-4 w-4 text-primary bg-gray-700 border-gray-600 rounded focus:ring-primary">
+                                    </div>
+                                </div>
+                                <ul id="donation-list" class="space-y-1">
+                                    <li class="text-center text-gray-500">등록된 지갑이 없습니다.</li>
+                                </ul>
+                            </div>
+                            <div class="flex items-center space-x-2">
+                                <input type="number" id="donation-send-amount" placeholder="보낼 $MARK 수량 (각 지갑당)" class="bg-gray-800 border border-gray-600 rounded-lg px-4 py-2 w-full text-white focus:outline-none focus:border-primary">
+                                <button id="send-donation-btn" class="w-48 font-orbitron font-bold px-4 py-2 rounded-lg btn-primary">전도하기</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm">
                     <h2 class="font-orbitron text-3xl font-bold text-center text-primary mb-6">전체 등급 및 보상 안내</h2>
                     <div class="overflow-x-auto">
@@ -315,6 +353,7 @@
             let lottoPot = 12345678;
             let lottoCountdownInterval = null;
             let userFaction = null;
+            let donationList = Array.from({length: 25}, (_, i) => `DummyWallet${i+1}Address...${i.toString().padStart(4,'0')}`);
             
             let warState = {
                 week: 1,
@@ -372,6 +411,7 @@
                 populateMainGuideTable(referredWallets);
                 updateStakingUI();
                 updateLottoUI();
+                renderDonationList();
             }
 
             function populateMainGuideTable(referredWallets) {
@@ -668,6 +708,81 @@
                     event.target.className = 'font-orbitron font-bold text-sm px-4 py-2 rounded-lg w-28 btn-claimed';
                 }
             }
+            
+            function renderDonationList() {
+                const listEl = document.getElementById('donation-list');
+                const countEl = document.getElementById('donation-list-count');
+                if(!listEl || !countEl) return;
+
+                countEl.textContent = `${donationList.length} / 100`;
+
+                if(donationList.length === 0) {
+                    listEl.innerHTML = '<li class="text-center text-gray-500">등록된 지갑이 없습니다.</li>';
+                    return;
+                }
+
+                listEl.innerHTML = donationList.map(address => `
+                    <li class="flex items-center justify-between bg-gray-700/50 p-2 rounded">
+                        <span class="font-mono text-sm">${address.slice(0, 12)}...${address.slice(-4)}</span>
+                        <input type="checkbox" class="form-checkbox h-5 w-5 text-primary bg-gray-700 border-gray-600 rounded focus:ring-primary donation-checkbox" data-address="${address}">
+                    </li>
+                `).join('');
+            }
+
+            function handleRegisterAddress(address) {
+                if (!address || address.length < 32) { // Basic validation
+                    showModal('error-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-red-500 mb-4">오류</h3><p>올바른 솔라나 지갑 주소를 입력해주세요.</p><button class="btn btn-primary mt-4" onclick="hideModal('error-modal')">확인</button></div>`);
+                    return;
+                }
+                if (donationList.length >= 100) {
+                    showModal('error-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-yellow-400 mb-4">알림</h3><p>나눔 목록이 가득 찼습니다. 다음에 다시 시도해주세요.</p><button class="btn btn-primary mt-4" onclick="hideModal('error-modal')">확인</button></div>`);
+                    return;
+                }
+                if (donationList.includes(address)) {
+                    showModal('error-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-yellow-400 mb-4">알림</h3><p>이미 등록된 지갑 주소입니다.</p><button class="btn btn-primary mt-4" onclick="hideModal('error-modal')">확인</button></div>`);
+                    return;
+                }
+                donationList.push(address);
+                renderDonationList();
+                showModal('success-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-primary mb-4">등록 완료</h3><p>지갑 주소가 나눔 목록에 성공적으로 등록되었습니다.</p><button class="btn btn-primary mt-4" onclick="hideModal('success-modal')">확인</button></div>`);
+            }
+            
+            async function handleSendDonation() {
+                if (!userWalletAddress) { showModal('error-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-yellow-400 mb-4">지갑 연결 필요</h3><p>토큰을 보내려면 먼저 지갑을 연결해주세요.</p><button class="btn btn-primary mt-4" onclick="hideModal('error-modal')">확인</button></div>`); return; }
+
+                const amountInput = document.getElementById('donation-send-amount');
+                const amount = parseFloat(amountInput.value);
+                const selectedCheckboxes = document.querySelectorAll('.donation-checkbox:checked');
+                
+                if (isNaN(amount) || amount <= 0) { showModal('error-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-red-500 mb-4">오류</h3><p>보낼 수량을 정확히 입력해주세요.</p><button class="btn btn-primary mt-4" onclick="hideModal('error-modal')">확인</button></div>`); return; }
+                if (selectedCheckboxes.length === 0) { showModal('error-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-red-500 mb-4">오류</h3><p>토큰을 받을 지갑을 하나 이상 선택해주세요.</p><button class="btn btn-primary mt-4" onclick="hideModal('error-modal')">확인</button></div>`); return; }
+
+                const recipients = Array.from(selectedCheckboxes).map(cb => cb.dataset.address);
+                const totalAmount = amount * recipients.length;
+
+                const sendBtn = document.getElementById('send-donation-btn');
+                sendBtn.disabled = true;
+                sendBtn.textContent = '전송 중...';
+
+                try {
+                    // This is a simulation of a transaction.
+                    console.log(`Simulating sending ${amount} $MARK to ${recipients.length} addresses. Total: ${totalAmount} $MARK`);
+                    await new Promise(resolve => setTimeout(resolve, 2500));
+                    
+                    // Remove sent addresses from the list
+                    donationList = donationList.filter(address => !recipients.includes(address));
+                    renderDonationList();
+                    
+                    amountInput.value = '';
+                    document.getElementById('select-all-donations').checked = false;
+                    showModal('success-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-primary mb-4">전도 완료</h3><p>${recipients.length}개의 지갑에 각각 ${amount} $MARK를 성공적으로 전송했습니다.</p><button class="btn btn-primary mt-4" onclick="hideModal('success-modal')">확인</button></div>`);
+                } catch(error) {
+                    showModal('error-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-red-500 mb-4">전송 실패</h3><p>토큰 전송 중 오류가 발생했습니다. (${error.message})</p><button class="btn btn-primary mt-4" onclick="hideModal('error-modal')">확인</button></div>`);
+                } finally {
+                    sendBtn.disabled = false;
+                    sendBtn.textContent = '전도하기';
+                }
+            }
 
             // --- 지갑 연결 로직 ---
             const walletModal = document.createElement('div');
@@ -841,9 +956,28 @@
                 document.querySelectorAll('.tab-btn').forEach(button => button.addEventListener('click', handleTabSwitch));
                 document.getElementById('stake-btn').addEventListener('click', handleStaking);
                 document.getElementById('consecrate-btn').addEventListener('click', handleConsecration);
+                document.getElementById('register-address-btn').addEventListener('click', () => {
+                    const addressInput = document.getElementById('donation-register-address');
+                    handleRegisterAddress(addressInput.value);
+                    addressInput.value = '';
+                });
+                document.getElementById('register-connected-wallet-btn').addEventListener('click', () => {
+                    if(userWalletAddress) {
+                        handleRegisterAddress(userWalletAddress);
+                    } else {
+                        showModal('error-modal', `<div class="modal-content"><h3 class="font-orbitron text-xl font-bold text-yellow-400 mb-4">알림</h3><p>먼저 지갑을 연결해주세요.</p><button class="btn btn-primary mt-4" onclick="hideModal('error-modal')">확인</button></div>`);
+                    }
+                });
+                document.getElementById('send-donation-btn').addEventListener('click', handleSendDonation);
+                document.getElementById('select-all-donations').addEventListener('change', (e) => {
+                    document.querySelectorAll('.donation-checkbox').forEach(checkbox => {
+                        checkbox.checked = e.target.checked;
+                    });
+                });
                 
                 populateStakingOptions();
                 updateRelicUI();
+                renderDonationList();
             }
 
             // --- 앱 실행 ---
