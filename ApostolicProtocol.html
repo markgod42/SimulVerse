@@ -72,11 +72,33 @@
         .faction-card { border: 2px solid #4a5568; transition: all 0.3s ease; }
         .faction-card:hover { transform: translateY(-10px); border-color: var(--primary-color); box-shadow: 0 10px 25px rgba(0, 255, 195, 0.2); }
         .faction-bar { transition: width 0.5s ease-in-out; }
+
+        /* 배경 효과 스타일 */
+        #starfield {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: transparent;
+        }
+        #matrix-rain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.3;
+        }
     </style>
 </head>
-<body class="p-4 sm:p-8 bg-cover bg-center" style="background-image: url('https://placehold.co/1920x1080/0d0d1a/e0e0e0?text=BACKGROUND');">
+<body>
+    <div id="starfield"></div>
+    <canvas id="matrix-rain"></canvas>
 
-    <div class="w-full max-w-7xl mx-auto">
+    <div class="w-full max-w-7xl mx-auto relative z-10">
         <!-- 지갑 연결 전 화면 -->
         <div id="connect-wallet-section" class="bg-card border border-gray-700 rounded-2xl p-8 text-center backdrop-blur-sm shadow-primary">
             <h1 class="font-orbitron text-4xl md:text-5xl font-bold text-primary mb-4">사도 프로토콜</h1>
@@ -90,12 +112,12 @@
             
             <div class="bg-card border border-gray-700 rounded-2xl p-2 backdrop-blur-sm flex justify-center space-x-4">
                 <button class="tab-btn active font-orbitron text-lg font-bold py-2 px-4" data-tab="dashboard"><i class="ph-duotone ph-user-circle text-2xl mr-2 align-middle"></i>대시보드</button>
+                <button class="tab-btn font-orbitron text-lg font-bold py-2 px-4" data-tab="altar"><i class="ph-duotone ph-star-four text-2xl mr-2 align-middle"></i>교단의 제단</button>
                 <button class="tab-btn font-orbitron text-lg font-bold py-2 px-4" data-tab="holy-war"><i class="ph-duotone ph-swords text-2xl mr-2 align-middle"></i>주간 성전</button>
             </div>
 
             <!-- 대시보드 탭 -->
             <div id="dashboard" class="tab-content active space-y-8">
-                <!-- 기존 대시보드 내용 -->
                 <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm text-center">
                     <h2 class="font-orbitron text-3xl font-bold text-primary mb-4">창조자 마크의 계시</h2>
                     <p class="text-lg text-gray-300 mb-4 max-w-3xl mx-auto">이봐, 거기 당신. 그래, 바로 당신. 이 픽셀 쪼가리 같은 삶에 현타를 느끼고 있나? 우주적 지성이자, 모든 밈의 근원이며, 차트의 알파와 오메가이신 **'창조자 마크'**께서는 말씀하셨다.</p>
@@ -126,6 +148,45 @@
                             <thead class="font-orbitron text-primary uppercase"><tr><th class="px-4 py-4 table-header rounded-tl-lg">등급</th><th class="px-4 py-4 table-header">칭호</th><th class="px-4 py-4 table-header">달성 조건</th><th class="px-4 py-4 table-header">주요 보상</th><th class="px-4 py-4 table-header rounded-tr-lg text-center">신청</th></tr></thead>
                             <tbody id="full-guide-table-body" class="divide-y divide-gray-700"></tbody>
                         </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 교단의 제단 탭 -->
+            <div id="altar" class="tab-content space-y-8">
+                <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm">
+                    <h2 class="font-orbitron text-3xl font-bold text-center text-primary mb-2">교단의 제단</h2>
+                    <p class="text-gray-400 mb-8 max-w-2xl mx-auto text-center">이곳은 당신의 신앙심을 증명하고, 영혼이 깃든 증표에 권능을 부여하며, 교단의 명예를 드높이는 신성한 장소입니다.</p>
+                    
+                    <!-- 스테이킹 -->
+                    <div class="bg-gray-900/50 rounded-2xl p-6 mb-8">
+                        <h3 class="font-orbitron text-2xl font-bold text-primary mb-4 text-left"><i class="ph-duotone ph-hands-praying text-3xl mr-2 align-middle"></i>$MARK 스테이킹: 계시를 위한 기도</h3>
+                        <div id="staking-options" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
+                        <div class="flex items-center space-x-4 mb-8">
+                            <input type="number" id="staking-amount" placeholder="기도에 바칠 $MARK 수량" class="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 w-full text-white focus:outline-none focus:border-primary">
+                            <button id="stake-btn" class="w-64 font-orbitron font-bold text-lg px-4 py-3 rounded-lg btn-primary">기도하기</button>
+                        </div>
+                        <div class="bg-gray-800/50 rounded-lg p-4">
+                            <h4 class="font-orbitron text-xl font-bold text-primary mb-4 text-left">나의 기도 현황</h4>
+                            <div class="flex justify-between items-center mb-4 p-4 bg-gray-900/50 rounded-lg">
+                                <div><p class="text-gray-400">나의 총 기도량 (총 스테이킹)</p><p id="staking-total-amount" class="font-orbitron font-bold text-2xl text-primary">0 $MARK</p></div>
+                                <div><p class="text-gray-400">현재까지 받은 계시 (누적 이자)</p><p id="staking-total-rewards" class="font-orbitron font-bold text-2xl text-primary">0.00 $MARK</p></div>
+                            </div>
+                            <div id="apy-boost-info" class="text-center text-sm text-gray-400 mb-4 p-2 bg-gray-900/50 rounded-lg"></div>
+                            <div id="my-stakes-list" class="space-y-3 max-h-64 overflow-y-auto pr-2"><p class="text-gray-500 text-center">아직 드린 기도가 없습니다.</p></div>
+                        </div>
+                    </div>
+
+                    <!-- 확률형 보상 -->
+                    <div class="bg-gray-900/50 rounded-2xl p-6 mb-8">
+                        <h3 class="font-orbitron text-2xl font-bold text-primary mb-4 text-center"><i class="ph-duotone ph-dice-six text-3xl mr-2 align-middle"></i>마크의 변덕: 주간 로또</h3>
+                        <p class="text-gray-400 mb-6 max-w-2xl mx-auto text-center">창조자의 은총은 예측 불가능한 법. 당신의 신실한 기도는 행운을 불러올지니! 스테이킹된 $MARK는 자동으로 로또 티켓으로 전환됩니다.</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+                            <div class="bg-gray-800/50 p-4 rounded-lg"><p class="font-orbitron text-lg text-gray-400">총 상금 풀</p><p id="lotto-pot" class="font-orbitron font-bold text-4xl text-yellow-300">12,345,678</p><p class="font-orbitron text-lg text-yellow-300">$MARK</p></div>
+                            <div class="bg-gray-800/50 p-4 rounded-lg"><p class="font-orbitron text-lg text-gray-400">나의 티켓 수</p><p id="my-lotto-tickets" class="font-orbitron font-bold text-4xl text-primary">0</p><p class="text-xs text-gray-500">10,000 $MARK 스테이킹당 1일 1장</p></div>
+                             <div class="bg-gray-800/50 p-4 rounded-lg"><p class="font-orbitron text-lg text-gray-400">다음 추첨까지</p><p id="lotto-countdown" class="font-orbitron font-bold text-4xl text-primary">06:23:59:55</p><p class="text-xs text-gray-500">매주 일요일 자정</p></div>
+                        </div>
+                        <div id="ticket-boost-info" class="text-center text-sm text-gray-400 mt-6"></div>
                     </div>
                 </div>
             </div>
@@ -162,68 +223,25 @@
                         <h2 class="font-orbitron text-3xl font-bold text-center text-primary mb-6">지난 성전 기록</h2>
                         <div id="past-wars-log" class="text-center text-gray-500">아직 완료된 성전 기록이 없습니다.</div>
                     </div>
-                    <div id="altar-section">
-                        <!-- 기존 '교단의 제단' 컨텐츠가 여기에 동적으로 삽입됩니다. -->
+                    <!-- 교단 유물 -->
+                    <div class="bg-gray-900/50 rounded-2xl p-6">
+                        <h3 class="font-orbitron text-2xl font-bold text-primary mb-4 text-left"><i class="ph-duotone ph-castle-turret text-3xl mr-2 align-middle"></i>교단의 유물</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                            <div>
+                                <p class="text-gray-400 mb-4 text-left">교단원들의 힘을 모아 '유물'을 성장시키고, 모든 교단원이 공유하는 강력한 버프를 활성화하세요. 뭉치면 살고, 흩어지면... 그냥 전도사입니다.</p>
+                                <div id="relic-info" class="bg-gray-800/50 p-4 rounded-lg text-left mb-4"></div>
+                                <div class="flex items-center space-x-4">
+                                    <input type="number" id="consecrate-amount" placeholder="유물에 봉헌할 $MARK" class="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 w-full text-white focus:outline-none focus:border-primary">
+                                    <button id="consecrate-btn" class="w-64 font-orbitron font-bold text-lg px-4 py-3 rounded-lg btn-secondary">봉헌하기</button>
+                                </div>
+                            </div>
+                            <div id="relic-benefits" class="space-y-2 text-left"></div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    
-    <!-- 교단의 제단 컨텐츠 (템플릿) -->
-    <template id="altar-template">
-        <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm">
-            <h2 class="font-orbitron text-3xl font-bold text-center text-primary mb-2">교단의 제단</h2>
-            <p class="text-gray-400 mb-8 max-w-2xl mx-auto text-center">이곳은 당신의 신앙심을 증명하고, 영혼이 깃든 증표에 권능을 부여하며, 교단의 명예를 드높이는 신성한 장소입니다.</p>
-            
-            <!-- 스테이킹 -->
-            <div class="bg-gray-900/50 rounded-2xl p-6 mb-8">
-                <h3 class="font-orbitron text-2xl font-bold text-primary mb-4 text-left"><i class="ph-duotone ph-hands-praying text-3xl mr-2 align-middle"></i>$MARK 스테이킹: 계시를 위한 기도</h3>
-                <div id="staking-options" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6"></div>
-                <div class="flex items-center space-x-4 mb-8">
-                    <input type="number" id="staking-amount" placeholder="기도에 바칠 $MARK 수량" class="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 w-full text-white focus:outline-none focus:border-primary">
-                    <button id="stake-btn" class="w-64 font-orbitron font-bold text-lg px-4 py-3 rounded-lg btn-primary">기도하기</button>
-                </div>
-                <div class="bg-gray-800/50 rounded-lg p-4">
-                    <h4 class="font-orbitron text-xl font-bold text-primary mb-4 text-left">나의 기도 현황</h4>
-                    <div class="flex justify-between items-center mb-4 p-4 bg-gray-900/50 rounded-lg">
-                        <div><p class="text-gray-400">나의 총 기도량 (총 스테이킹)</p><p id="staking-total-amount" class="font-orbitron font-bold text-2xl text-primary">0 $MARK</p></div>
-                        <div><p class="text-gray-400">현재까지 받은 계시 (누적 이자)</p><p id="staking-total-rewards" class="font-orbitron font-bold text-2xl text-primary">0.00 $MARK</p></div>
-                    </div>
-                    <div id="apy-boost-info" class="text-center text-sm text-gray-400 mb-4 p-2 bg-gray-900/50 rounded-lg"></div>
-                    <div id="my-stakes-list" class="space-y-3 max-h-64 overflow-y-auto pr-2"><p class="text-gray-500 text-center">아직 드린 기도가 없습니다.</p></div>
-                </div>
-            </div>
-
-            <!-- 확률형 보상 -->
-            <div class="bg-gray-900/50 rounded-2xl p-6 mb-8">
-                <h3 class="font-orbitron text-2xl font-bold text-primary mb-4 text-center"><i class="ph-duotone ph-dice-six text-3xl mr-2 align-middle"></i>마크의 변덕: 주간 로또</h3>
-                <p class="text-gray-400 mb-6 max-w-2xl mx-auto text-center">창조자의 은총은 예측 불가능한 법. 당신의 신실한 기도는 행운을 불러올지니! 스테이킹된 $MARK는 자동으로 로또 티켓으로 전환됩니다.</p>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                    <div class="bg-gray-800/50 p-4 rounded-lg"><p class="font-orbitron text-lg text-gray-400">총 상금 풀</p><p id="lotto-pot" class="font-orbitron font-bold text-4xl text-yellow-300">12,345,678</p><p class="font-orbitron text-lg text-yellow-300">$MARK</p></div>
-                    <div class="bg-gray-800/50 p-4 rounded-lg"><p class="font-orbitron text-lg text-gray-400">나의 티켓 수</p><p id="my-lotto-tickets" class="font-orbitron font-bold text-4xl text-primary">0</p><p class="text-xs text-gray-500">10,000 $MARK 스테이킹당 1일 1장</p></div>
-                     <div class="bg-gray-800/50 p-4 rounded-lg"><p class="font-orbitron text-lg text-gray-400">다음 추첨까지</p><p id="lotto-countdown" class="font-orbitron font-bold text-4xl text-primary">06:23:59:55</p><p class="text-xs text-gray-500">매주 일요일 자정</p></div>
-                </div>
-                <div id="ticket-boost-info" class="text-center text-sm text-gray-400 mt-6"></div>
-            </div>
-
-            <!-- 교단 유물 -->
-            <div class="bg-gray-900/50 rounded-2xl p-6">
-                <h3 class="font-orbitron text-2xl font-bold text-primary mb-4 text-left"><i class="ph-duotone ph-castle-turret text-3xl mr-2 align-middle"></i>교단의 유물</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div>
-                        <p class="text-gray-400 mb-4 text-left">교단원들의 힘을 모아 '유물'을 성장시키고, 모든 교단원이 공유하는 강력한 버프를 활성화하세요. 뭉치면 살고, 흩어지면... 그냥 전도사입니다.</p>
-                        <div id="relic-info" class="bg-gray-800/50 p-4 rounded-lg text-left mb-4"></div>
-                        <div class="flex items-center space-x-4">
-                            <input type="number" id="consecrate-amount" placeholder="유물에 봉헌할 $MARK" class="bg-gray-800 border border-gray-600 rounded-lg px-4 py-3 w-full text-white focus:outline-none focus:border-primary">
-                            <button id="consecrate-btn" class="w-64 font-orbitron font-bold text-lg px-4 py-3 rounded-lg btn-secondary">봉헌하기</button>
-                        </div>
-                    </div>
-                    <div id="relic-benefits" class="space-y-2 text-left"></div>
-                </div>
-            </div>
-        </div>
-    </template>
     
     <!-- Modal Container -->
     <div id="modal-container"></div>
@@ -241,8 +259,6 @@
             const dashboardSection = document.getElementById('dashboard-section');
             const walletAddressEl = document.getElementById('wallet-address');
             const modalContainer = document.getElementById('modal-container');
-            const altarSection = document.getElementById('altar-section');
-            const altarTemplate = document.getElementById('altar-template');
             const holyWarTab = document.querySelector('[data-tab="holy-war"]');
             const holyWarDashboard = document.getElementById('holy-war-dashboard');
             const factionSelectionScreen = document.getElementById('faction-selection-screen');
@@ -491,8 +507,6 @@
             }
 
             function updateRelicUI() {
-                // This function requires factionData which is not available globally yet.
-                // For now, it will be a placeholder.
                 const infoContainer = document.getElementById('relic-info');
                 if (infoContainer) {
                     infoContainer.innerHTML = `<p class="font-orbitron font-bold text-lg text-primary">교단 유물 정보</p><p>교단을 선택하면 유물 정보를 볼 수 있습니다.</p>`;
@@ -574,7 +588,7 @@
                 listEl.querySelectorAll('.faction-card').forEach(card => {
                     card.addEventListener('click', () => {
                         userFaction = card.dataset.factionId;
-                        localStorage.setItem('userFaction', userFaction);
+                        localStorage.setItem(`userFaction_${userWalletAddress}`, userFaction);
                         showHolyWarDashboard();
                     });
                 });
@@ -824,9 +838,6 @@
             });
 
             function init() {
-                const altarContent = altarTemplate.content.cloneNode(true);
-                altarSection.appendChild(altarContent);
-
                 document.querySelectorAll('.tab-btn').forEach(button => button.addEventListener('click', handleTabSwitch));
                 document.getElementById('stake-btn').addEventListener('click', handleStaking);
                 document.getElementById('consecrate-btn').addEventListener('click', handleConsecration);
@@ -837,6 +848,84 @@
 
             // --- 앱 실행 ---
             init();
+        });
+        
+        // --- Background Effects Script ---
+        document.addEventListener('DOMContentLoaded', () => {
+            const starfield = document.getElementById('starfield');
+            if (starfield) {
+                for (let i = 0; i < 200; i++) {
+                    const star = document.createElement('div');
+                    star.style.position = 'absolute';
+                    star.style.backgroundColor = 'white';
+                    star.style.borderRadius = '50%';
+                    const size = Math.random() * 1.5 + 0.5;
+                    star.style.width = `${size}px`;
+                    star.style.height = `${size}px`;
+                    star.style.left = `${Math.random() * 100}%`;
+                    star.style.top = `${Math.random() * 100}%`;
+                    star.style.animation = `twinkle ${Math.random() * 6 + 3}s infinite alternate`;
+                    starfield.appendChild(star);
+                }
+                if (!document.querySelector('style#twinkle-animation')) {
+                    const style = document.createElement('style');
+                    style.id = 'twinkle-animation';
+                    style.textContent = `@keyframes twinkle { from { opacity: 0; } to { opacity: 0.8; } }`;
+                    document.head.appendChild(style);
+                }
+            }
+
+            const canvas = document.getElementById('matrix-rain');
+            if (canvas) {
+                const ctx = canvas.getContext('2d');
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+
+                const alphabet = 'アァカサタナハマヤャラワガザダバパイィキシチニヒミリヰギジヂビピウゥクスツヌフムユュルABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789가나다라마바사아자차카타파하';
+                const colors = ['#FFD700', '#C084FC', '#00ffc3', '#38bdf8'];
+
+                const fontSize = 16;
+                let columns = canvas.width / fontSize;
+                const rainDrops = [];
+
+                function initializeRainDrops() {
+                    rainDrops.length = 0;
+                    columns = canvas.width / fontSize;
+                    for (let x = 0; x < columns; x++) {
+                        rainDrops[x] = {
+                            y: Math.random() * canvas.height,
+                            color: colors[Math.floor(Math.random() * colors.length)]
+                        };
+                    }
+                }
+                initializeRainDrops();
+
+                const drawMatrix = () => {
+                    ctx.fillStyle = 'rgba(13, 13, 26, 0.06)';
+                    ctx.fillRect(0, 0, canvas.width, canvas.height);
+                    ctx.font = fontSize + 'px monospace';
+
+                    for (let i = 0; i < rainDrops.length; i++) {
+                        const text = alphabet.charAt(Math.floor(Math.random() * alphabet.length));
+                        ctx.fillStyle = rainDrops[i].color;
+                        ctx.fillText(text, i * fontSize, rainDrops[i].y);
+
+                        if (rainDrops[i].y > canvas.height && Math.random() > 0.98) {
+                            rainDrops[i].y = 0;
+                            rainDrops[i].color = colors[Math.floor(Math.random() * colors.length)];
+                        }
+                        rainDrops[i].y += fontSize;
+                    }
+                };
+                
+                setInterval(drawMatrix, 50);
+
+                window.addEventListener('resize', () => {
+                    canvas.width = window.innerWidth;
+                    canvas.height = window.innerHeight;
+                    initializeRainDrops();
+                });
+            }
         });
     </script>
 </body>
