@@ -92,13 +92,38 @@
             z-index: -1;
             opacity: 0.3;
         }
+        .category-banner {
+            height: 250px;
+            border-radius: 1rem;
+            background-size: cover;
+            background-position: center;
+            margin-bottom: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .category-banner::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(13, 13, 26, 0.6);
+            backdrop-filter: blur(2px);
+        }
+        .category-banner-title {
+            position: relative;
+            z-index: 1;
+            text-shadow: 0 0 15px rgba(0, 255, 195, 0.7);
+        }
     </style>
 </head>
 <body>
     <div id="starfield"></div>
     <canvas id="matrix-rain"></canvas>
 
-    <div class="w-full max-w-7xl mx-auto relative z-10">
+    <div class="w-full max-w-7xl mx-auto relative z-10 p-4 sm:p-0">
         <!-- 지갑 연결 전 화면 -->
         <div id="connect-wallet-section" class="bg-card border border-gray-700 rounded-2xl p-8 text-center backdrop-blur-sm shadow-primary">
             <h1 class="font-orbitron text-4xl md:text-5xl font-bold text-primary mb-4">사도 프로토콜</h1>
@@ -118,12 +143,8 @@
 
             <!-- 대시보드 탭 -->
             <div id="dashboard" class="tab-content active space-y-8">
-                <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm text-center">
-                    <h2 class="font-orbitron text-3xl font-bold text-primary mb-4">창조자 마크의 계시</h2>
-                    <p class="text-lg text-gray-300 mb-4 max-w-3xl mx-auto">이봐, 거기 당신. 그래, 바로 당신. 이 픽셀 쪼가리 같은 삶에 현타를 느끼고 있나? 우주적 지성이자, 모든 밈의 근원이며, 차트의 알파와 오메가이신 **'창조자 마크'**께서는 말씀하셨다.</p>
-                    <p class="text-xl text-yellow-300 font-bold mb-4 max-w-3xl mx-auto italic">"나의 존재를 알려라. 나의 토큰($MARK)을 널리 퍼뜨려, 이 디지털 황무지에 나의 진리를 전파하라."</p>
-                    <p class="text-lg text-gray-300 mb-6 max-w-3xl mx-auto">사도 프로토콜은 당신의 '충성심'을 측정하는 신성한 시스템이다. 당신이 얼마나 많은 미개한 영혼들에게 $MARK의 축복을 내렸는지, 그 모든 기록이 블록체인이라는 거대한 경전에 새겨진다. 더 많은 이에게 전도하라. 당신의 등급이 오를수록, 마크의 총애와 부(富)는 당신의 것이 되리라.</p>
-                    <p class="font-orbitron text-2xl font-bold text-primary">망설이지 마라, 사도여. 지금 바로 당신의 카르마를 증명하라!</p>
+                <div class="category-banner" style="background-image: url('http://googleusercontent.com/file_content/1');">
+                    <h2 class="category-banner-title font-orbitron text-5xl font-bold text-white">Dashboard</h2>
                 </div>
                 <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -192,10 +213,10 @@
 
             <!-- 교단의 제단 탭 -->
             <div id="altar" class="tab-content space-y-8">
+                <div class="category-banner" style="background-image: url('http://googleusercontent.com/file_content/2');">
+                    <h2 class="category-banner-title font-orbitron text-5xl font-bold text-white">Altar of the Order</h2>
+                </div>
                 <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm">
-                    <h2 class="font-orbitron text-3xl font-bold text-center text-primary mb-2">교단의 제단</h2>
-                    <p class="text-gray-400 mb-8 max-w-2xl mx-auto text-center">이곳은 당신의 신앙심을 증명하고, 영혼이 깃든 증표에 권능을 부여하며, 교단의 명예를 드높이는 신성한 장소입니다.</p>
-                    
                     <!-- 스테이킹 -->
                     <div class="bg-gray-900/50 rounded-2xl p-6 mb-8">
                         <h3 class="font-orbitron text-2xl font-bold text-primary mb-4 text-left"><i class="ph-duotone ph-hands-praying text-3xl mr-2 align-middle"></i>$MARK 스테이킹: 계시를 위한 기도</h3>
@@ -231,6 +252,9 @@
 
             <!-- 주간 성전 탭 -->
             <div id="holy-war" class="tab-content space-y-8">
+                 <div class="category-banner" style="background-image: url('http://googleusercontent.com/file_content/3');">
+                    <h2 class="category-banner-title font-orbitron text-5xl font-bold text-white">Weekly Holy War</h2>
+                </div>
                 <!-- 교단 선택 화면 -->
                 <div id="faction-selection-screen" class="hidden">
                     <div class="bg-card border border-gray-700 rounded-2xl p-6 sm:p-8 backdrop-blur-sm text-center">
