@@ -607,27 +607,8 @@
             }
         }
 
-        /**
-         * Robustly waits for necessary Solana libraries to be loaded on the window object.
-         * This prevents "is not defined" errors by ensuring that the app logic
-         * only runs after its dependencies are ready.
-         */
-        function waitForLibraries() {
-            const interval = setInterval(() => {
-                if (typeof window.solanaWeb3 !== 'undefined' && typeof window.splToken !== 'undefined') {
-                    clearInterval(interval);
-                    initializeApp();
-                }
-            }, 100); // Check every 100 milliseconds
-        }
-
-        // Start the process. If the document is already loaded, it will run immediately.
-        // Otherwise, it will wait for the DOM to be ready.
-        if (document.readyState === 'complete' || (document.readyState !== 'loading' && !document.documentElement.doScroll)) {
-            waitForLibraries();
-        } else {
-            document.addEventListener('DOMContentLoaded', waitForLibraries);
-        }
+        // FIX: Use window.onload for robust script initialization
+        window.onload = initializeApp;
     </script>
 </body>
 </html>
