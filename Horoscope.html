@@ -151,8 +151,7 @@
     </div>
 
     <script>
-        // FIX: Wrap all logic in window.onload to ensure scripts are loaded first
-        window.onload = function() {
+        function initializeApp() {
             // --- ✅ Configuration Complete: All provided information has been applied. ---
             
             // 1. Helius RPC URL
@@ -169,6 +168,7 @@
 
             // --- Global Variables ---
             const { Connection, PublicKey, SystemProgram, Transaction } = solanaWeb3;
+            // The splToken object is now guaranteed to be available from the global scope
             const SPL_TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
             let connection;
             let provider; // Wallet provider (Phantom, Solflare, etc.)
@@ -605,7 +605,29 @@
                 });
                 return fallbackData;
             }
-        };
+        }
+
+        /**
+         * Robustly waits for necessary Solana libraries to be loaded on the window object.
+         * This prevents "is not defined" errors by ensuring that the app logic
+         * only runs after its dependencies are ready.
+         */
+        function waitForLibraries() {
+            const interval = setInterval(() => {
+                if (typeof window.solanaWeb3 !== 'undefined' && typeof window.splToken !== 'undefined') {
+                    clearInterval(interval);
+                    initializeApp();
+                }
+            }, 100); // Check every 100 milliseconds
+        }
+
+        // Start the process. If the document is already loaded, it will run immediately.
+        // Otherwise, it will wait for the DOM to be ready.
+        if (document.readyState === 'complete' || (document.readyState !== 'loading' && !document.documentElement.doScroll)) {
+            waitForLibraries();
+        } else {
+            document.addEventListener('DOMContentLoaded', waitForLibraries);
+        }
     </script>
 </body>
 </html>
