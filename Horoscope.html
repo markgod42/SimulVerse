@@ -151,7 +151,8 @@
     </div>
 
     <script>
-        function initializeApp() {
+        // FIX: Use DOMContentLoaded for faster and more reliable script initialization
+        document.addEventListener('DOMContentLoaded', () => {
             // --- ✅ Configuration Complete: All provided information has been applied. ---
             
             // 1. Helius RPC URL
@@ -168,7 +169,6 @@
 
             // --- Global Variables ---
             const { Connection, PublicKey, SystemProgram, Transaction } = solanaWeb3;
-            // The splToken object is now guaranteed to be available from the global scope
             const SPL_TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
             let connection;
             let provider; // Wallet provider (Phantom, Solflare, etc.)
@@ -605,10 +605,7 @@
                 });
                 return fallbackData;
             }
-        }
-
-        // FIX: Use window.onload for robust script initialization
-        window.onload = initializeApp;
+        });
     </script>
 </body>
 </html>
