@@ -151,7 +151,8 @@
     </div>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
+        // FIX: Wrap all logic in window.onload to ensure scripts are loaded first
+        window.onload = function() {
             // --- ✅ Configuration Complete: All provided information has been applied. ---
             
             // 1. Helius RPC URL
@@ -193,9 +194,8 @@
             // --- Event Listeners ---
             boostBtn.addEventListener('click', sendMarkTokens);
 
-            // --- NEW: Wallet Connection Logic from index.html ---
+            // --- Wallet Connection Logic ---
             
-            // 지갑 선택 모달 생성
             const modal = document.createElement('div');
             modal.style.cssText = `
                 display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
@@ -215,7 +215,6 @@
             modal.appendChild(modalContent);
             document.body.appendChild(modal);
 
-            // Disconnect 확인 모달 생성
             const disconnectModal = document.createElement('div');
             disconnectModal.style.cssText = `
                 display: none; position: fixed; z-index: 2001; left: 0; top: 0; width: 100%; height: 100%;
@@ -249,7 +248,6 @@
             disconnectModal.appendChild(disconnectModalContent);
             document.body.appendChild(disconnectModal);
 
-            // 지갑 설치 안내 모달 생성
             const installModal = document.createElement('div');
             installModal.style.cssText = `
                 display: none; position: fixed; z-index: 2002; left: 0; top: 0; width: 100%; height: 100%;
@@ -306,7 +304,6 @@
                 horoscopeSection.classList.add('hidden');
                 connectWalletSection.classList.remove('hidden');
                 
-                // Reset fortune display to loading state for next connection
                 loadingState.style.display = 'flex';
                 fortuneState.classList.add('hidden');
                 errorState.classList.add('hidden');
@@ -320,7 +317,6 @@
                 try {
                     await provider.connect({ onlyIfTrusted: false });
                     
-                    // Add event listener for disconnection
                     if (provider.on) {
                         provider.on('disconnect', onDisconnect);
                     }
@@ -341,7 +337,7 @@
                 } catch (err) {
                     console.error("Wallet connection failed:", err);
                     showError("Wallet connection was rejected. Please try again.");
-                    onDisconnect(); // Reset state on failure
+                    onDisconnect();
                 } finally {
                      modal.style.display = 'none';
                 }
@@ -354,7 +350,7 @@
                         if (provider && provider.disconnect) {
                             provider.disconnect().catch(console.error);
                         }
-                        onDisconnect(); // Ensure UI resets even if disconnect throws
+                        onDisconnect();
                         disconnectModal.style.display = 'none';
                     };
                     cancelBtn.onclick = () => {
@@ -365,7 +361,6 @@
 
                 const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
                 
-                // Clear previous wallet options
                 while (modalContent.childNodes.length > 1) {
                     modalContent.removeChild(modalContent.lastChild);
                 }
@@ -404,16 +399,14 @@
                 modal.style.display = 'flex';
             });
 
-            // Close modals on outside click
             window.addEventListener('click', (event) => {
                 if (event.target === modal) modal.style.display = "none";
                 if (event.target === disconnectModal) disconnectModal.style.display = "none";
                 if (event.target === installModal) installModal.style.display = "none";
             });
 
-            // --- Original Horoscope Functions (Unchanged) ---
+            // --- Horoscope Functions ---
 
-            // 2. Boost Fortune (Send $MARK Tokens)
             async function sendMarkTokens() {
                 if (!provider || !connectedWalletKey || !connection) {
                     showError("Wallet not connected. Please connect your wallet first.");
@@ -441,7 +434,6 @@
                     const amount = 100 * Math.pow(10, decimals);
 
                     const transaction = new Transaction().add(
-                        // FIX: Use splToken global object directly
                         splToken.createTransferInstruction(
                             fromTokenAccount.address,
                             toTokenAccount.address,
@@ -481,7 +473,6 @@
                 }
             }
 
-            // 3. Display Horoscope Logic
             async function displayFortuneForWallet() {
                 loadingState.style.display = 'flex';
                 fortuneState.classList.add('hidden');
@@ -521,10 +512,7 @@
                 }
             }
             
-            // --- Utility & Helper Functions ---
-            
             async function getOrCreateAssociatedTokenAccount(owner, mint) {
-                // FIX: Use splToken global object directly
                 const associatedTokenAddress = await splToken.getAssociatedTokenAddress(
                     mint, 
                     owner, 
@@ -533,7 +521,6 @@
                 );
                 const accountInfo = await connection.getAccountInfo(associatedTokenAddress);
                 if (accountInfo === null) {
-                    // This error is intentional, guiding users to create an ATA first.
                     throw new Error(`The required token account for $MARK does not exist. Please create one first.`);
                 }
                 return { address: associatedTokenAddress };
@@ -618,7 +605,7 @@
                 });
                 return fallbackData;
             }
-        });
+        };
     </script>
 </body>
 </html>
