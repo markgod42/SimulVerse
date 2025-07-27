@@ -161,22 +161,10 @@
     </div>
 
     <script>
-        // Wait for all libraries to be loaded before initializing
-        function initializeApp() {
-            // Check if required libraries are loaded
-            if (typeof solanaWeb3 === 'undefined') {
-                console.error('Solana Web3 library not loaded');
-                setTimeout(initializeApp, 100);
-                return;
-            }
-            
-            if (typeof splToken === 'undefined') {
-                console.error('SPL Token library not loaded');
-                setTimeout(initializeApp, 100);
-                return;
-            }
+        // FIX: Removed the outer event listener wrapper. Since the script tag is at the end of the body,
+        // the DOM will be ready by the time the script executes. This simplifies the structure and avoids potential syntax errors.
 
-            // --- ✅ Configuration Complete: All provided information has been applied. ---
+        // --- ✅ Configuration Complete: All provided information has been applied. ---
         
         // 1. Helius RPC URL
         const HELIUS_RPC_URL = 'https://mainnet.helius-rpc.com/?api-key=ebc0620a-0038-421f-a8a0-83c551702d97'; 
@@ -542,11 +530,6 @@
         }
         
         async function getOrCreateAssociatedTokenAccount(owner, mint) {
-            // Check if splToken is available
-            if (typeof splToken === 'undefined') {
-                throw new Error("Token library not loaded. Please refresh the page and try again.");
-            }
-            
             const associatedTokenAddress = await splToken.getAssociatedTokenAddress(
                 mint, 
                 owner, 
@@ -639,11 +622,6 @@
             });
             return fallbackData;
         }
-        
-        } // Close initializeApp function
-        
-        // Start the application
-        initializeApp();
     </script>
 </body>
 </html>
