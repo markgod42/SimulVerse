@@ -17,21 +17,56 @@
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
 
     <style>
-        /* Styles are the same as before */
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #0d0d1a; color: #e0e0e0; }
+        /* 기본 스타일 */
+        :root {
+            --primary-color: #00ffc3;
+            --background-color: #0d0d1a;
+            --text-color: #e0e0e0;
+            --card-bg: rgba(25, 25, 40, 0.85);
+            --warning-color: #ff6b35;
+        }
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: var(--background-color); color: var(--text-color); }
         .font-orbitron { font-family: 'Orbitron', sans-serif; }
-        .text-primary { color: #00ffc3; }
-        .bg-card { background-color: rgba(25, 25, 40, 0.85); backdrop-filter: blur(10px); }
+        .text-primary { color: var(--primary-color); }
+        .bg-card { background-color: var(--card-bg); }
         .border-glow { border: 1px solid rgba(0, 255, 195, 0.3); }
         .shadow-primary { box-shadow: 0 0 25px rgba(0, 255, 195, 0.3); }
-        .btn-primary { background-color: #00ffc3; color: #0d0d1a; transition: all 0.3s ease; }
+        .btn-primary { background-color: var(--primary-color); color: var(--background-color); transition: all 0.3s ease; }
         .btn-primary:hover:not(:disabled) { box-shadow: 0 0 15px rgba(0, 255, 195, 0.5); transform: translateY(-2px); }
         .btn-primary:disabled { background-color: #4a5568; color: #a0aec0; cursor: not-allowed; }
-        .loader { border: 4px solid rgba(255, 255, 255, 0.2); border-top: 4px solid #00ffc3; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        .loader { border: 4px solid rgba(255, 255, 255, 0.2); border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .progress-bar-bg { background-color: rgba(0, 0, 0, 0.3); }
         .progress-bar-fill { background: linear-gradient(90deg, #ff00c3, #00ffc3); transition: width 1s ease-in-out; }
         .recommendation-item { background-color: rgba(0, 255, 195, 0.05); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(0, 255, 195, 0.1); }
+
+        /* 지갑 연결 모달 스타일 (index.html에서 가져옴) */
+        .wallet-select-btn {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1em;
+            padding: 12px 25px;
+            border: 2px solid var(--primary-color);
+            background: transparent;
+            color: var(--primary-color);
+            text-transform: uppercase;
+            cursor: pointer;
+            transition: all 0.3s;
+            border-radius: 5px;
+            position: relative;
+            text-align: center;
+            text-decoration: none;
+        }
+        .wallet-logo {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            background: #fff;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8 flex items-center justify-center min-h-screen">
@@ -133,7 +168,7 @@
             const { Connection, PublicKey, SystemProgram, Transaction } = solanaWeb3;
             const SPL_TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
             let connection;
-            let provider; // Phantom wallet provider
+            let provider; // Wallet provider (Phantom, Solflare, etc.)
             let connectedWalletKey; // PublicKey of the connected wallet
             let currentFortune = null;
             let dailyHoroscopes = null;
@@ -154,39 +189,227 @@
             const boostMessageEl = document.getElementById('boost-message');
 
             // --- Event Listeners ---
-            connectWalletBtn.addEventListener('click', connectWallet);
             boostBtn.addEventListener('click', sendMarkTokens);
 
-            // --- Functions ---
+            // --- NEW: Wallet Connection Logic from index.html ---
+            
+            // 지갑 선택 모달 생성
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+                overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
+            `;
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background-color: var(--card-bg); padding: 20px; border: 1px solid var(--primary-color);
+                border-radius: 10px; text-align: center; width: 90%; max-width: 350px;
+            `;
+            const modalTitle = document.createElement('h3');
+            modalTitle.textContent = 'Select Wallet';
+            modalTitle.style.fontFamily = "'Orbitron', sans-serif";
+            modalTitle.style.color = "var(--primary-color)";
+            modalTitle.style.marginBottom = "20px";
+            modalContent.appendChild(modalTitle);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
 
-            // 1. Connect Wallet
-            async function connectWallet() {
-                provider = getProvider();
-                if (!provider) {
-                    showError("Phantom wallet is not installed. Please install it to continue.");
-                    return;
-                }
+            // Disconnect 확인 모달 생성
+            const disconnectModal = document.createElement('div');
+            disconnectModal.style.cssText = `
+                display: none; position: fixed; z-index: 2001; left: 0; top: 0; width: 100%; height: 100%;
+                overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
+            `;
+            const disconnectModalContent = document.createElement('div');
+            disconnectModalContent.style.cssText = `
+                background-color: var(--card-bg); padding: 30px; border: 2px solid var(--primary-color);
+                border-radius: 15px; text-align: center; width: 90%; max-width: 400px;
+                box-shadow: 0 0 30px rgba(0, 255, 195, 0.3);
+            `;
+            const disconnectTitle = document.createElement('h3');
+            disconnectTitle.textContent = 'Disconnect Wallet';
+            disconnectTitle.style.cssText = `font-family: 'Orbitron', sans-serif; color: var(--primary-color); margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;`;
+            const disconnectMessage = document.createElement('p');
+            disconnectMessage.textContent = 'Are you sure you want to disconnect your wallet?';
+            disconnectMessage.style.cssText = `color: var(--text-color); margin-bottom: 30px; font-size: 1.1em; line-height: 1.5;`;
+            const disconnectButtons = document.createElement('div');
+            disconnectButtons.style.cssText = `display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;`;
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'Yes, Disconnect';
+            confirmBtn.className = 'btn-primary px-6 py-3 rounded-lg';
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.className = 'bg-gray-600 hover:bg-gray-700 text-white font-bold px-6 py-3 rounded-lg';
+            disconnectButtons.appendChild(confirmBtn);
+            disconnectButtons.appendChild(cancelBtn);
+            disconnectModalContent.appendChild(disconnectTitle);
+            disconnectModalContent.appendChild(disconnectMessage);
+            disconnectModalContent.appendChild(disconnectButtons);
+            disconnectModal.appendChild(disconnectModalContent);
+            document.body.appendChild(disconnectModal);
+
+            // 지갑 설치 안내 모달 생성
+            const installModal = document.createElement('div');
+            installModal.style.cssText = `
+                display: none; position: fixed; z-index: 2002; left: 0; top: 0; width: 100%; height: 100%;
+                overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
+            `;
+            const installModalContent = document.createElement('div');
+            installModalContent.style.cssText = `
+                background-color: var(--card-bg); padding: 30px; border: 2px solid var(--warning-color);
+                border-radius: 15px; text-align: center; width: 90%; max-width: 450px;
+                box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
+            `;
+            const installTitle = document.createElement('h3');
+            installTitle.textContent = 'Wallet Not Found';
+            installTitle.style.cssText = `font-family: 'Orbitron', sans-serif; color: var(--warning-color); margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;`;
+            const installMessage = document.createElement('p');
+            installMessage.id = 'install-modal-message';
+            installMessage.style.cssText = `color: var(--text-color); margin-bottom: 25px; font-size: 1.1em; line-height: 1.5;`;
+            const installButtons = document.createElement('div');
+            installButtons.style.cssText = `display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;`;
+            const installBtn = document.createElement('button');
+            installBtn.textContent = 'Install Wallet';
+            installBtn.className = 'bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-3 rounded-lg';
+            const closeInstallBtn = document.createElement('button');
+            closeInstallBtn.textContent = 'Close';
+            closeInstallBtn.className = 'bg-gray-600 hover:bg-gray-700 text-white font-bold px-6 py-3 rounded-lg';
+            installButtons.appendChild(installBtn);
+            installButtons.appendChild(closeInstallBtn);
+            installModalContent.appendChild(installTitle);
+            installModalContent.appendChild(installMessage);
+            installModalContent.appendChild(installButtons);
+            installModal.appendChild(installModalContent);
+            document.body.appendChild(installModal);
+
+            let connectedWalletType = null;
+
+            function getInstallUrl(walletId) {
+                const urls = {
+                    phantom: 'https://phantom.app/',
+                    backpack: 'https://backpack.app/',
+                    solflare: 'https://solflare.com/'
+                };
+                return urls[walletId] || '';
+            }
+
+            function onDisconnect() {
+                connectedWalletType = null;
+                provider = null;
+                connection = null;
+                connectedWalletKey = null;
+
+                connectWalletBtn.textContent = 'Connect Wallet & See Fortune';
+                connectWalletBtn.disabled = false;
                 
+                horoscopeSection.classList.add('hidden');
+                connectWalletSection.classList.remove('hidden');
+                
+                // Reset fortune display to loading state for next connection
+                loadingState.style.display = 'flex';
+                fortuneState.classList.add('hidden');
+                errorState.classList.add('hidden');
+            }
+
+            async function handleConnection(selectedProvider, walletType) {
+                provider = selectedProvider;
                 connectWalletBtn.textContent = 'Connecting...';
                 connectWalletBtn.disabled = true;
 
                 try {
                     await provider.connect({ onlyIfTrusted: false });
-                    connectedWalletKey = provider.publicKey;
                     
+                    // Add event listener for disconnection
+                    if (provider.on) {
+                        provider.on('disconnect', onDisconnect);
+                    }
+                    
+                    connectedWalletKey = provider.publicKey;
                     connection = new Connection(HELIUS_RPC_URL, 'confirmed');
+                    connectedWalletType = walletType;
+
+                    const shortAddr = connectedWalletKey.toString().slice(0, 4) + '...' + connectedWalletKey.toString().slice(-4);
+                    connectWalletBtn.textContent = `Disconnect: ${shortAddr}`;
+                    connectWalletBtn.disabled = false;
 
                     connectWalletSection.classList.add('hidden');
                     horoscopeSection.classList.remove('hidden');
                     
                     await displayFortuneForWallet();
+
                 } catch (err) {
                     console.error("Wallet connection failed:", err);
                     showError("Wallet connection was rejected. Please try again.");
-                    connectWalletBtn.textContent = 'Connect Wallet & See Fortune';
-                    connectWalletBtn.disabled = false;
+                    onDisconnect(); // Reset state on failure
+                } finally {
+                     modal.style.display = 'none';
                 }
             }
+
+            connectWalletBtn.addEventListener('click', async () => {
+                if (connectedWalletType) {
+                    disconnectModal.style.display = 'flex';
+                    confirmBtn.onclick = () => {
+                        if (provider && provider.disconnect) {
+                            provider.disconnect().catch(console.error);
+                        }
+                        onDisconnect(); // Ensure UI resets even if disconnect throws
+                        disconnectModal.style.display = 'none';
+                    };
+                    cancelBtn.onclick = () => {
+                        disconnectModal.style.display = 'none';
+                    };
+                    return;
+                }
+
+                const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                
+                // Clear previous wallet options
+                while (modalContent.childNodes.length > 1) {
+                    modalContent.removeChild(modalContent.lastChild);
+                }
+
+                const wallets = [
+                    { id: 'phantom', name: 'Phantom', logo: 'https://i.ibb.co/H5KnQH1/images.jpg', getProvider: () => window.solana?.isPhantom ? window.solana : null, deeplink: (url) => `phantom://v1/browse/${encodeURIComponent(url)}` },
+                    { id: 'backpack', name: 'Backpack', logo: 'https://i.ibb.co/8nkGvqKT/33.jpg', getProvider: () => window.solana?.isBackpack ? window.solana : null, deeplink: (url) => `backpack://browse?url=${encodeURIComponent(url)}` },
+                    { id: 'solflare', name: 'Solflare', logo: 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png', getProvider: () => window.solflare || (window.solana?.isSolflare ? window.solana : null), deeplink: (url) => `solflare://browse/${encodeURIComponent(url)}` }
+                ];
+
+                wallets.forEach(wallet => {
+                    const btn = document.createElement('button');
+                    btn.className = 'wallet-select-btn w-full mb-2.5';
+                    btn.innerHTML = `<img src="${wallet.logo}" alt="${wallet.name} Logo" class="wallet-logo"><span>Connect ${wallet.name}</span>`;
+                    
+                    btn.onclick = async () => {
+                        const walletProvider = wallet.getProvider();
+
+                        if (isMobile && !walletProvider) {
+                            window.location.href = wallet.deeplink(window.location.href);
+                            return;
+                        }
+                        
+                        if (walletProvider) {
+                            await handleConnection(walletProvider, wallet.id);
+                        } else {
+                            installMessage.textContent = `${wallet.name} wallet is not installed. Please install it to continue.`;
+                            installBtn.onclick = () => window.open(getInstallUrl(wallet.id), '_blank');
+                            closeInstallBtn.onclick = () => installModal.style.display = 'none';
+                            installModal.style.display = 'flex';
+                        }
+                    };
+                    modalContent.appendChild(btn);
+                });
+
+                modal.style.display = 'flex';
+            });
+
+            // Close modals on outside click
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) modal.style.display = "none";
+                if (event.target === disconnectModal) disconnectModal.style.display = "none";
+                if (event.target === installModal) installModal.style.display = "none";
+            });
+
+            // --- Original Horoscope Functions (Unchanged) ---
 
             // 2. Boost Fortune (Send $MARK Tokens)
             async function sendMarkTokens() {
@@ -254,6 +477,10 @@
 
             // 3. Display Horoscope Logic
             async function displayFortuneForWallet() {
+                loadingState.style.display = 'flex';
+                fortuneState.classList.add('hidden');
+                errorState.classList.add('hidden');
+
                 const walletString = connectedWalletKey.toString();
                 const today = new Date().toISOString().split('T')[0];
                 const storedFortune = localStorage.getItem(`fortune_${walletString}_${today}`);
@@ -290,17 +517,6 @@
             
             // --- Utility & Helper Functions ---
             
-            function getProvider() {
-                if ('phantom' in window) {
-                    const provider = window.phantom?.solana;
-                    if (provider?.isPhantom) {
-                        return provider;
-                    }
-                }
-                window.open('https://phantom.app/', '_blank');
-                return null;
-            }
-
             async function getOrCreateAssociatedTokenAccount(owner, mint) {
                 const associatedTokenAddress = await solanaWeb3.splToken.getAssociatedTokenAddress(mint, owner, false, SPL_TOKEN_PROGRAM_ID);
                 const accountInfo = await connection.getAccountInfo(associatedTokenAddress);
