@@ -15,7 +15,7 @@
     
     <!-- Solana Web3.js Library -->
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
-    <!-- NEW: Solana SPL Token Library -->
+    <!-- Solana SPL Token Library -->
     <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.js"></script>
 
     <style>
@@ -441,7 +441,8 @@
                     const amount = 100 * Math.pow(10, decimals);
 
                     const transaction = new Transaction().add(
-                        solanaWeb3.splToken.createTransferInstruction(
+                        // FIX: Use splToken global object directly
+                        splToken.createTransferInstruction(
                             fromTokenAccount.address,
                             toTokenAccount.address,
                             provider.publicKey,
@@ -523,8 +524,8 @@
             // --- Utility & Helper Functions ---
             
             async function getOrCreateAssociatedTokenAccount(owner, mint) {
-                // Use the splToken object from the loaded library
-                const associatedTokenAddress = await solanaWeb3.splToken.getAssociatedTokenAddress(
+                // FIX: Use splToken global object directly
+                const associatedTokenAddress = await splToken.getAssociatedTokenAddress(
                     mint, 
                     owner, 
                     false, 
