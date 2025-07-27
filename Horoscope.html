@@ -15,6 +15,8 @@
     
     <!-- Solana Web3.js Library -->
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    <!-- NEW: Solana SPL Token Library -->
+    <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.js"></script>
 
     <style>
         /* 기본 스타일 */
@@ -432,6 +434,9 @@
                     boostMessageEl.textContent = "Please approve the transaction in your wallet...";
                     
                     const tokenMintInfo = await connection.getParsedAccountInfo(mintPublicKey);
+                    if (!tokenMintInfo || !tokenMintInfo.value) {
+                         throw new Error("Could not fetch token mint info.");
+                    }
                     const decimals = tokenMintInfo.value.data.parsed.info.decimals;
                     const amount = 100 * Math.pow(10, decimals);
 
@@ -518,9 +523,16 @@
             // --- Utility & Helper Functions ---
             
             async function getOrCreateAssociatedTokenAccount(owner, mint) {
-                const associatedTokenAddress = await solanaWeb3.splToken.getAssociatedTokenAddress(mint, owner, false, SPL_TOKEN_PROGRAM_ID);
+                // Use the splToken object from the loaded library
+                const associatedTokenAddress = await solanaWeb3.splToken.getAssociatedTokenAddress(
+                    mint, 
+                    owner, 
+                    false, 
+                    SPL_TOKEN_PROGRAM_ID
+                );
                 const accountInfo = await connection.getAccountInfo(associatedTokenAddress);
                 if (accountInfo === null) {
+                    // This error is intentional, guiding users to create an ATA first.
                     throw new Error(`The required token account for $MARK does not exist. Please create one first.`);
                 }
                 return { address: associatedTokenAddress };
