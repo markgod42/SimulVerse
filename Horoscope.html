@@ -3,679 +3,393 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mark's Daily Horoscope | SimulVerse</title>
+    <title>SimulVerse - Mark's Daily Horoscope</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
-    <link rel="icon" type="image/png" href="https://i.ibb.co/NgHMCZZX/image.png">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <!-- Solana Web3.js Library -->
+    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+
     <style>
-        :root {
-            --primary-color: #00ffc3;
-            --background-color: #0d0d1a;
-            --text-color: #e0e0e0;
-            --header-bg: rgba(13, 13, 26, 0.8);
-            --card-bg: rgba(25, 25, 40, 0.7);
-            --warning-color: #ff6b35;
-        }
-        body {
-            background-color: var(--background-color);
-            color: var(--text-color);
-            font-family: 'Inter', sans-serif;
-            margin: 0; padding: 0; overflow-x: hidden; line-height: 1.6;
-        }
-        .header { position: fixed; top: 0; left: 0; width: 100%; z-index: 1000; background-color: var(--header-bg); padding: 15px 0; }
-        .nav-container { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; padding: 0 20px; }
-        .logo-img { width: 40px; height: 40px; }
-        .logo-text { font-family: 'Orbitron', sans-serif; font-size: 1.5em; font-weight: 700; color: var(--primary-color);}
-        .nav-menu { display: flex; gap: 25px; }
-        .nav-link { color: var(--text-color); text-decoration: none; font-weight: 600; }
-        .nav-link:hover { color: var(--primary-color);}
-        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
-        .section-title { font-family: 'Orbitron', sans-serif; font-size: 3em; text-align: center; margin-bottom: 40px; color: var(--primary-color);}
-        .btn { padding: 12px 25px; border: 2px solid var(--primary-color); background: transparent; color: var(--primary-color); font-weight: 700; text-transform: uppercase; cursor: pointer; border-radius: 5px; }
-        .btn-primary { background-color: var(--primary-color); color: var(--background-color);}
-        .btn-secondary { background: transparent; color: var(--primary-color);}
-        .footer { padding: 40px 0; text-align: center; background-color: #080810; margin-top: 60px;}
-        #starfield { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -2; background: var(--background-color);}
-        #matrix-rain { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; opacity: 0.2;}
-        #horoscope-section { background: var(--card-bg); border-radius: 18px; margin: 100px auto 48px auto; padding: 40px 24px 32px 24px; box-shadow: 0 4px 32px 0 rgba(0,255,195,0.10); max-width: 1100px;}
-        .wallet-logo { width: 28px; height: 28px; border-radius: 6px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08);}
-        .wallet-select-btn { display: flex; align-items: center; gap: 12px; justify-content: center; font-weight: 700; font-size: 1.1em;}
-        .loader { border: 4px solid #222; border-top: 4px solid var(--primary-color); border-radius: 50%; width: 32px; height: 32px; animation: spin 1s linear infinite;}
-        @keyframes spin { to { transform: rotate(360deg); } }
+        /* Styles are the same as before */
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #0d0d1a; color: #e0e0e0; }
+        .font-orbitron { font-family: 'Orbitron', sans-serif; }
+        .text-primary { color: #00ffc3; }
+        .bg-card { background-color: rgba(25, 25, 40, 0.85); backdrop-filter: blur(10px); }
+        .border-glow { border: 1px solid rgba(0, 255, 195, 0.3); }
+        .shadow-primary { box-shadow: 0 0 25px rgba(0, 255, 195, 0.3); }
+        .btn-primary { background-color: #00ffc3; color: #0d0d1a; transition: all 0.3s ease; }
+        .btn-primary:hover:not(:disabled) { box-shadow: 0 0 15px rgba(0, 255, 195, 0.5); transform: translateY(-2px); }
+        .btn-primary:disabled { background-color: #4a5568; color: #a0aec0; cursor: not-allowed; }
+        .loader { border: 4px solid rgba(255, 255, 255, 0.2); border-top: 4px solid #00ffc3; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .progress-bar-bg { background-color: rgba(0, 0, 0, 0.3); }
+        .progress-bar-fill { background: linear-gradient(90deg, #ff00c3, #00ffc3); transition: width 1s ease-in-out; }
+        .recommendation-item { background-color: rgba(0, 255, 195, 0.05); padding: 0.75rem; border-radius: 0.5rem; border: 1px solid rgba(0, 255, 195, 0.1); }
     </style>
 </head>
-<body>
-    <div id="starfield"></div>
-    <canvas id="matrix-rain"></canvas>
-    <header class="header">
-        <nav>
-            <div class="nav-container">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                    <img src="https://i.ibb.co/NgHMCZZX/image.png" alt="SimulVerse Logo" class="logo-img">
-                    <span class="logo-text">SimulVerse</span>
+<body class="p-4 sm:p-8 flex items-center justify-center min-h-screen">
+
+    <div class="w-full max-w-2xl mx-auto">
+        <!-- Pre-connection screen -->
+        <div id="connect-wallet-section" class="bg-card border-glow rounded-2xl p-8 text-center shadow-primary">
+            <h1 class="font-orbitron text-4xl md:text-5xl font-bold text-primary mb-4">Mark's Daily Horoscope</h1>
+            <p class="text-lg text-gray-300 mb-8 max-w-2xl mx-auto">
+                Your fate is not fixed. It just changes daily according to Mark's whim. Connect your wallet to check today's simulation variables.
+            </p>
+            <button id="connect-wallet-btn" class="font-orbitron text-xl font-bold btn-primary px-8 py-4 rounded-lg">
+                Connect Wallet & See Fortune
+            </button>
+        </div>
+
+        <!-- Post-connection screen -->
+        <div id="horoscope-section" class="hidden">
+            <!-- Horoscope display section -->
+            <div class="text-center mb-8">
+                <p class="text-gray-400">Your Fate Variable (Last char of wallet):</p>
+                <p id="fate-variable" class="font-orbitron text-5xl font-bold text-primary my-2"></p>
+                <p id="wallet-address" class="text-sm text-gray-500 font-mono break-all"></p>
+            </div>
+            <div id="horoscope-content" class="bg-card border-glow rounded-2xl p-6 sm:p-8 min-h-[400px] flex flex-col justify-center">
+                <div id="loading-state" class="flex flex-col items-center justify-center">
+                    <div class="loader"></div>
+                    <p class="mt-4 font-orbitron">Reading the Tablet of Fate...</p>
                 </div>
-                <div class="nav-menu">
-                    <a href="index.html#home" class="nav-link">Home</a>
-                    <a href="index.html#prayer" class="nav-link">Prayer Mining</a>
-                    <a href="index.html#bug-report" class="nav-link">Bug Report</a>
-                    <a href="index.html#nfts" class="nav-link">NFTs</a>
-                    <a href="index.html#tokenomics" class="nav-link">Tokenomics</a>
-                    <a href="index.html#lore" class="nav-link">Lore</a>
-                    <a href="index.html#faq" class="nav-link">FAQ</a>
-                    <a href="index.html#community" class="nav-link">Community</a>
+                <div id="error-state" class="hidden flex-col items-center justify-center text-center">
+                     <p class="font-orbitron text-2xl text-red-500">An Error Occurred</p>
+                     <p id="error-message" class="mt-2 text-gray-300"></p>
+                </div>
+                <div id="fortune-state" class="hidden space-y-6">
+                    <div>
+                        <h3 class="font-orbitron text-primary text-sm uppercase tracking-widest text-center">Today's Simulation Variable</h3>
+                        <p id="simulation-variable" class="text-3xl font-bold mt-2 text-center"></p>
+                        <p id="reason" class="text-gray-400 mt-2 text-sm italic text-center"></p>
+                    </div>
+                    <div class="space-y-4">
+                        <div class="fortune-item">
+                            <div class="flex justify-between items-center mb-1"><span class="font-bold">Overall</span><span id="overall-score" class="font-orbitron text-primary">0 / 100</span></div>
+                            <div class="w-full progress-bar-bg rounded-full h-4"><div id="overall-bar" class="progress-bar-fill h-4 rounded-full" style="width: 0%"></div></div><p id="overall-text" class="text-sm text-gray-300 mt-2"></p>
+                        </div>
+                        <div class="fortune-item">
+                            <div class="flex justify-between items-center mb-1"><span class="font-bold">Money</span><span id="money-score" class="font-orbitron text-primary">0 / 100</span></div>
+                            <div class="w-full progress-bar-bg rounded-full h-4"><div id="money-bar" class="progress-bar-fill h-4 rounded-full" style="width: 0%"></div></div><p id="money-text" class="text-sm text-gray-300 mt-2"></p>
+                        </div>
+                        <div class="fortune-item">
+                            <div class="flex justify-between items-center mb-1"><span class="font-bold">Love</span><span id="love-score" class="font-orbitron text-primary">0 / 100</span></div>
+                            <div class="w-full progress-bar-bg rounded-full h-4"><div id="love-bar" class="progress-bar-fill h-4 rounded-full" style="width: 0%"></div></div><p id="love-text" class="text-sm text-gray-300 mt-2"></p>
+                        </div>
+                        <div class="fortune-item">
+                            <div class="flex justify-between items-center mb-1"><span class="font-bold">Health</span><span id="health-score" class="font-orbitron text-primary">0 / 100</span></div>
+                            <div class="w-full progress-bar-bg rounded-full h-4"><div id="health-bar" class="progress-bar-fill h-4 rounded-full" style="width: 0%"></div></div><p id="health-text" class="text-sm text-gray-300 mt-2"></p>
+                        </div>
+                    </div>
+                    <div class="border-t border-gray-700 pt-6 mt-6">
+                        <h3 class="font-orbitron text-primary text-sm uppercase tracking-widest text-center">Mark's Special Recommendations</h3>
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-4 text-center">
+                            <div class="recommendation-item"><p class="text-sm text-gray-400">Lucky Color</p><p id="rec-color" class="font-bold text-lg truncate"></p></div>
+                            <div class="recommendation-item"><p class="text-sm text-gray-400">Lucky Numbers</p><p id="rec-numbers" class="font-bold text-lg"></p></div>
+                            <div class="recommendation-item"><p class="text-sm text-gray-400">Lucky Place</p><p id="rec-place" class="font-bold text-lg truncate"></p></div>
+                            <div class="recommendation-item"><p class="text-sm text-gray-400">Lucky Food</p><p id="rec-food" class="font-bold text-lg truncate"></p></div>
+                        </div>
+                    </div>
+                     <div class="border-t border-gray-700 pt-6 mt-6">
+                        <h3 class="font-orbitron text-primary text-sm uppercase tracking-widest text-center">Attempt to Intervene in Fate</h3>
+                        <p class="text-center text-sm text-gray-400 mt-2">Not happy with your fortune? You can try to intervene by offering 100 $MARK.</p>
+                        <div class="text-center mt-4">
+                            <button id="boost-fortune-btn" class="font-orbitron text-lg font-bold btn-primary px-6 py-3 rounded-lg">
+                                Nudge Mark (100 $MARK)
+                            </button>
+                            <div id="boost-message" class="text-center text-sm mt-3"></div>
+                        </div>
+                    </div>
                 </div>
             </div>
-        </nav>
-    </header>
-    <main>
-        <div class="container">
-            <section id="horoscope-section">
-                <button id="back-to-main-btn" class="btn btn-secondary" style="margin-bottom:24px; float:right;">Back</button>
-                <h2 class="section-title">Mark's Daily Horoscope</h2>
-                <div id="horoscope-content" style="max-width:600px; margin:0 auto;">
-                    <div id="connect-wallet-section-horoscope" style="text-align:center;">
-                        <p style="font-size:1.2em; color:#e0e0e0; margin-bottom:24px;">Your fate is not fixed. It just changes daily according to Mark's whim. Connect your wallet to check today's simulation variables and plan your day according to the creator's will.</p>
-                        <button id="connect-wallet-btn" class="btn btn-primary" style="font-family:'Orbitron',sans-serif; font-size:1.2em; padding:12px 32px;">Connect Wallet & See Fortune</button>
-                    </div>
-                    <div id="horoscope-result-section" style="display:none;">
-                        <div style="text-align:center; margin-bottom:24px;">
-                            <p style="color:#aaa;">Your Fate Variable (Last char of wallet):</p>
-                            <p id="fate-variable" style="font-family:'Orbitron',sans-serif; font-size:2.5em; color:var(--primary-color);"></p>
-                            <p id="wallet-address" style="font-size:0.9em; color:#888; word-break:break-all;"></p>
-                        </div>
-                        <div id="horoscope-main-content" style="background:rgba(25,25,40,0.85); border-radius:16px; padding:24px;">
-                            <div id="loading-state-horoscope" style="text-align:center; display:none;">
-                                <div class="loader" style="margin:0 auto;"></div>
-                                <p style="margin-top:1em; font-family:'Orbitron',sans-serif;">Reading the Tablet of Fate...</p>
-                                <p style="margin-top:0.5em; color:#aaa; font-size:0.95em;">Decoding the coffee stains Mark left this morning.</p>
-                            </div>
-                            <div id="error-state-horoscope" style="display:none; text-align:center;">
-                                <p style="font-family:'Orbitron',sans-serif; color:#ff6b35; font-size:1.3em;">An Error Occurred</p>
-                                <p id="error-message-horoscope" style="color:#e0e0e0;"></p>
-                            </div>
-                            <div id="fortune-state-horoscope" style="display:none;">
-                                <div style="margin-bottom:24px;">
-                                    <h3 style="font-family:'Orbitron',sans-serif; color:var(--primary-color); font-size:1em; text-align:center;">Today's Simulation Variable</h3>
-                                    <p id="simulation-variable" style="font-size:1.5em; font-weight:bold; text-align:center;"></p>
-                                    <p id="reason" style="color:#aaa; font-size:0.95em; font-style:italic; text-align:center;"></p>
-                                </div>
-                                <div style="margin-bottom:24px;">
-                                    <div style="margin-bottom:12px;"><b>Overall</b> <span id="overall-score" style="color:var(--primary-color); font-family:'Orbitron',sans-serif;">0 / 100</span></div>
-                                    <div style="background:rgba(0,0,0,0.3); border-radius:8px; height:18px; margin-bottom:8px;"><div id="overall-bar" style="background:linear-gradient(90deg,#ff00c3,#00ffc3); height:18px; border-radius:8px; width:0%"></div></div>
-                                    <p id="overall-text" style="color:#e0e0e0; font-size:0.95em;"></p>
-                                    <div style="margin-bottom:12px;"><b>Money</b> <span id="money-score" style="color:var(--primary-color); font-family:'Orbitron',sans-serif;">0 / 100</span></div>
-                                    <div style="background:rgba(0,0,0,0.3); border-radius:8px; height:18px; margin-bottom:8px;"><div id="money-bar" style="background:linear-gradient(90deg,#ff00c3,#00ffc3); height:18px; border-radius:8px; width:0%"></div></div>
-                                    <p id="money-text" style="color:#e0e0e0; font-size:0.95em;"></p>
-                                    <div style="margin-bottom:12px;"><b>Love</b> <span id="love-score" style="color:var(--primary-color); font-family:'Orbitron',sans-serif;">0 / 100</span></div>
-                                    <div style="background:rgba(0,0,0,0.3); border-radius:8px; height:18px; margin-bottom:8px;"><div id="love-bar" style="background:linear-gradient(90deg,#ff00c3,#00ffc3); height:18px; border-radius:8px; width:0%"></div></div>
-                                    <p id="love-text" style="color:#e0e0e0; font-size:0.95em;"></p>
-                                    <div style="margin-bottom:12px;"><b>Health</b> <span id="health-score" style="color:var(--primary-color); font-family:'Orbitron',sans-serif;">0 / 100</span></div>
-                                    <div style="background:rgba(0,0,0,0.3); border-radius:8px; height:18px; margin-bottom:8px;"><div id="health-bar" style="background:linear-gradient(90deg,#ff00c3,#00ffc3); height:18px; border-radius:8px; width:0%"></div></div>
-                                    <p id="health-text" style="color:#e0e0e0; font-size:0.95em;"></p>
-                                </div>
-                                <div style="border-top:1px solid #333; padding-top:18px; margin-top:18px;">
-                                    <h3 style="font-family:'Orbitron',sans-serif; color:var(--primary-color); font-size:1em; text-align:center;">Mark's Special Recommendations</h3>
-                                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr 1fr; gap:12px; margin-top:12px;">
-                                        <div style="background:rgba(0,255,195,0.05); border-radius:8px; padding:10px; border:1px solid rgba(0,255,195,0.1);">
-                                            <p style="color:#aaa; font-size:0.95em;">Lucky Color</p>
-                                            <p id="rec-color" style="font-weight:bold; font-size:1.1em;"></p>
-                                        </div>
-                                        <div style="background:rgba(0,255,195,0.05); border-radius:8px; padding:10px; border:1px solid rgba(0,255,195,0.1);">
-                                            <p style="color:#aaa; font-size:0.95em;">Lucky Numbers</p>
-                                            <p id="rec-numbers" style="font-weight:bold; font-size:1.1em;"></p>
-                                        </div>
-                                        <div style="background:rgba(0,255,195,0.05); border-radius:8px; padding:10px; border:1px solid rgba(0,255,195,0.1);">
-                                            <p style="color:#aaa; font-size:0.95em;">Lucky Place</p>
-                                            <p id="rec-place" style="font-weight:bold; font-size:1.1em;"></p>
-                                        </div>
-                                        <div style="background:rgba(0,255,195,0.05); border-radius:8px; padding:10px; border:1px solid rgba(0,255,195,0.1);">
-                                            <p style="color:#aaa; font-size:0.95em;">Lucky Food</p>
-                                            <p id="rec-food" style="font-weight:bold; font-size:1.1em;"></p>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div style="border-top:1px solid #333; padding-top:18px; margin-top:18px;">
-                                    <h3 style="font-family:'Orbitron',sans-serif; color:var(--primary-color); font-size:1em; text-align:center;">Attempt to Intervene in Fate</h3>
-                                    <p style="text-align:center; color:#aaa; font-size:0.95em; margin-top:8px;">Not happy with your fortune? You can try to intervene in Mark's whim by offering 100 $MARK.</p>
-                                    <div style="text-align:center; margin-top:12px;">
-                                        <button id="boost-fortune-btn" class="btn btn-primary" style="font-family:'Orbitron',sans-serif; font-size:1.1em; padding:10px 28px;">Nudge Mark (100 $MARK)</button>
-                                        <div id="boost-message" style="text-align:center; font-size:0.95em; margin-top:8px;"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
         </div>
-    </main>
-    <footer class="footer">
-        <div class="container">
-            <p class="footer-disclaimer">This is a meme project. Mark is not responsible for your life choices. $MARK is a meme coin with no intrinsic value or expectation of financial return.</p>
-            <p class="footer-copyright">© 2024 SimulVerse. All rights reserved in this simulation.</p>
-        </div>
-    </footer>
-    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@latest/lib/index.iife.min.js"></script>
+    </div>
+
     <script>
-// Little Endian 변환 함수 (전역 선언)
-function numberToLEBuffer(number, bytes = 8) {
-    const buffer = new ArrayBuffer(bytes);
-    const view = new DataView(buffer);
-    let big = BigInt(number);
-    for (let i = 0; i < bytes; i++) {
-        view.setUint8(i, Number(big & 0xffn));
-        big >>= 8n;
-    }
-    return new Uint8Array(buffer);
-}
-let connectedWalletType = null;
-let connectedAddress = null;
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- ✅ Configuration Complete: All provided information has been applied. ---
+            
+            // 1. Helius RPC URL
+            const HELIUS_RPC_URL = 'https://mainnet.helius-rpc.com/?api-key=ebc0620a-0038-421f-a8a0-83c551702d97'; 
 
-document.addEventListener('DOMContentLoaded', () => {
-    // --- 모달 생성 및 상태 관리 ---
-    // (1/2, 2/2에서 제공한 코드와 동일)
-    // ... (아래 코드 전체 복사) ...
+            // 2. $MARK Token Address
+            const MARK_TOKEN_MINT_ADDRESS = 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263';
 
-    // 지갑 선택 모달 생성
-    const modal = document.createElement('div');
-    modal.style.cssText = `
-        display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
-        overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
-    `;
-    const modalContent = document.createElement('div');
-    modalContent.style.cssText = `
-        background-color: var(--card-bg); padding: 20px; border: 1px solid var(--primary-color);
-        border-radius: 10px; text-align: center; width: 90%; max-width: 350px;
-    `;
-    const modalTitle = document.createElement('h3');
-    modalTitle.textContent = 'Select Wallet';
-    modalTitle.style.fontFamily = "'Orbitron', sans-serif";
-    modalTitle.style.color = "var(--primary-color)";
-    modalTitle.style.marginBottom = "20px";
-    modalContent.appendChild(modalTitle);
-    modal.appendChild(modalContent);
-    document.body.appendChild(modal);
+            // 3. Project Wallet Address (to receive $MARK)
+            const DESTINATION_WALLET_ADDRESS = 'JBk9pkuDcwmJwz7TrfVSnitPGdLutWyRBMzTaLZNHhi3';
 
-    // Disconnect 확인 모달 생성
-    const disconnectModal = document.createElement('div');
-    disconnectModal.style.cssText = `
-        display: none; position: fixed; z-index: 2001; left: 0; top: 0; width: 100%; height: 100%;
-        overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
-    `;
-    const disconnectModalContent = document.createElement('div');
-    disconnectModalContent.style.cssText = `
-        background-color: var(--card-bg); padding: 30px; border: 2px solid var(--primary-color);
-        border-radius: 15px; text-align: center; width: 90%; max-width: 400px;
-        box-shadow: 0 0 30px rgba(0, 255, 195, 0.3);
-    `;
-    const disconnectTitle = document.createElement('h3');
-    disconnectTitle.textContent = 'Disconnect Wallet';
-    disconnectTitle.style.cssText = `
-        font-family: 'Orbitron', sans-serif; color: var(--primary-color); 
-        margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;
-    `;
-    const disconnectMessage = document.createElement('p');
-    disconnectMessage.textContent = 'Are you sure you want to disconnect your wallet?';
-    disconnectMessage.style.cssText = `
-        color: var(--text-color); margin-bottom: 30px; font-size: 1.1em; line-height: 1.5;
-    `;
-    const disconnectButtons = document.createElement('div');
-    disconnectButtons.style.cssText = `
-        display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
-    `;
-    const confirmBtn = document.createElement('button');
-    confirmBtn.textContent = 'Yes, Disconnect';
-    confirmBtn.style.cssText = `
-        padding: 12px 25px; background-color: var(--primary-color); color: var(--background-color);
-        border: 2px solid var(--primary-color); border-radius: 5px; font-weight: 700;
-        cursor: pointer; transition: all 0.3s; text-transform: uppercase;
-    `;
-    confirmBtn.onmouseover = () => {
-        confirmBtn.style.boxShadow = '0 0 15px var(--primary-color)';
-    };
-    confirmBtn.onmouseout = () => {
-        confirmBtn.style.boxShadow = 'none';
-    };
-    const cancelBtn = document.createElement('button');
-    cancelBtn.textContent = 'Cancel';
-    cancelBtn.style.cssText = `
-        padding: 12px 25px; background-color: transparent; color: var(--text-color);
-        border: 2px solid var(--text-color); border-radius: 5px; font-weight: 700;
-        cursor: pointer; transition: all 0.3s; text-transform: uppercase;
-    `;
-    cancelBtn.onmouseover = () => {
-        cancelBtn.style.borderColor = 'var(--primary-color)';
-        cancelBtn.style.color = 'var(--primary-color)';
-        cancelBtn.style.boxShadow = '0 0 15px var(--primary-color)';
-    };
-    cancelBtn.onmouseout = () => {
-        cancelBtn.style.borderColor = 'var(--text-color)';
-        cancelBtn.style.color = 'var(--text-color)';
-        cancelBtn.style.boxShadow = 'none';
-    };
-    disconnectButtons.appendChild(confirmBtn);
-    disconnectButtons.appendChild(cancelBtn);
-    disconnectModalContent.appendChild(disconnectTitle);
-    disconnectModalContent.appendChild(disconnectMessage);
-    disconnectModalContent.appendChild(disconnectButtons);
-    disconnectModal.appendChild(disconnectModalContent);
-    document.body.appendChild(disconnectModal);
+            // 4. Horoscope Data URL
+            const HOROSCOPE_JSON_URL = 'https://gist.githubusercontent.com/markgod42/434a97acfb2d4c6d71137c7d4051511c/raw/058e4c5a918666c805e4f6f1a2d8e525ebc72a38/horoscope.json'; 
 
-    // 지갑 설치 안내 모달 생성
-    const installModal = document.createElement('div');
-    installModal.style.cssText = `
-        display: none; position: fixed; z-index: 2002; left: 0; top: 0; width: 100%; height: 100%;
-        overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
-    `;
-    const installModalContent = document.createElement('div');
-    installModalContent.style.cssText = `
-        background-color: var(--card-bg); padding: 30px; border: 2px solid var(--warning-color);
-        border-radius: 15px; text-align: center; width: 90%; max-width: 450px;
-        box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
-    `;
-    const installTitle = document.createElement('h3');
-    installTitle.textContent = 'Wallet Not Found';
-    installTitle.style.cssText = `
-        font-family: 'Orbitron', sans-serif; color: var(--warning-color); 
-        margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;
-    `;
-    const installMessage = document.createElement('p');
-    installMessage.id = 'install-modal-message';
-    installMessage.style.cssText = `
-        color: var(--text-color); margin-bottom: 25px; font-size: 1.1em; line-height: 1.5;
-    `;
-    const installButtons = document.createElement('div');
-    installButtons.style.cssText = `
-        display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;
-    `;
-    const installBtn = document.createElement('button');
-    installBtn.textContent = 'Install Wallet';
-    installBtn.style.cssText = `
-        padding: 12px 25px; background-color: var(--warning-color); color: var(--background-color);
-        border: 2px solid var(--warning-color); border-radius: 5px; font-weight: 700;
-        cursor: pointer; transition: all 0.3s; text-transform: uppercase;
-    `;
-    installBtn.onmouseover = () => {
-        installBtn.style.boxShadow = '0 0 15px var(--warning-color)';
-    };
-    installBtn.onmouseout = () => {
-        installBtn.style.boxShadow = 'none';
-    };
-    const closeInstallBtn = document.createElement('button');
-    closeInstallBtn.textContent = 'Close';
-    closeInstallBtn.style.cssText = `
-        padding: 12px 25px; background-color: transparent; color: var(--text-color);
-        border: 2px solid var(--text-color); border-radius: 5px; font-weight: 700;
-        cursor: pointer; transition: all 0.3s; text-transform: uppercase;
-    `;
-    closeInstallBtn.onmouseover = () => {
-        closeInstallBtn.style.borderColor = 'var(--warning-color)';
-        closeInstallBtn.style.color = 'var(--warning-color)';
-        closeInstallBtn.style.boxShadow = '0 0 15px var(--warning-color)';
-    };
-    closeInstallBtn.onmouseout = () => {
-        closeInstallBtn.style.borderColor = 'var(--text-color)';
-        closeInstallBtn.style.color = 'var(--text-color)';
-        closeInstallBtn.style.boxShadow = 'none';
-    };
-    installButtons.appendChild(installBtn);
-    installButtons.appendChild(closeInstallBtn);
-    installModalContent.appendChild(installTitle);
-    installModalContent.appendChild(installMessage);
-    installModalContent.appendChild(installButtons);
-    installModal.appendChild(installModalContent);
-    document.body.appendChild(installModal);
+            // --- Global Variables ---
+            const { Connection, PublicKey, SystemProgram, Transaction } = solanaWeb3;
+            const SPL_TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+            let connection;
+            let provider; // Phantom wallet provider
+            let connectedWalletKey; // PublicKey of the connected wallet
+            let currentFortune = null;
+            let dailyHoroscopes = null;
 
-    function getInstallUrl(walletId) {
-        switch(walletId) {
-            case 'phantom':
-                return 'https://phantom.app/';
-            case 'backpack':
-                return 'https://backpack.app/';
-            case 'solflare':
-                return 'https://solflare.com/';
-            default:
-                return '';
-        }
-    }
+            // --- UI Elements ---
+            const connectWalletBtn = document.getElementById('connect-wallet-btn');
+            const connectWalletSection = document.getElementById('connect-wallet-section');
+            const horoscopeSection = document.getElementById('horoscope-section');
+            const loadingState = document.getElementById('loading-state');
+            const errorState = document.getElementById('error-state');
+            const errorMessageEl = document.getElementById('error-message');
+            const fortuneState = document.getElementById('fortune-state');
+            const walletAddressEl = document.getElementById('wallet-address');
+            const fateVariableEl = document.getElementById('fate-variable');
+            const simVarEl = document.getElementById('simulation-variable');
+            const reasonEl = document.getElementById('reason');
+            const boostBtn = document.getElementById('boost-fortune-btn');
+            const boostMessageEl = document.getElementById('boost-message');
 
-    // Connect Wallet 버튼 클릭 시 모달 표시 (항상 동작)
-    const connectBtn = document.getElementById('connect-wallet-btn');
-    if (connectBtn && !connectBtn._walletEventRegistered) {
-        connectBtn._walletEventRegistered = true;
-        connectBtn.addEventListener('click', async (e) => {
-            if (connectedWalletType) {
-                disconnectModal.style.display = 'flex';
-                confirmBtn.onclick = () => {
-                    let provider = null;
-                    if (connectedWalletType === 'phantom' && window.solana && window.solana.isPhantom) {
-                        provider = window.solana;
-                    } else if (connectedWalletType === 'backpack' && window.solana && window.solana.isBackpack) {
-                        provider = window.solana;
-                    } else if (connectedWalletType === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
-                        provider = window.solflare || window.solana;
-                    }
-                    if (provider && provider.disconnect) {
-                        provider.disconnect();
-                    } else {
-                        onDisconnect();
-                    }
-                    disconnectModal.style.display = 'none';
-                };
-                cancelBtn.onclick = () => {
-                    disconnectModal.style.display = 'none';
-                };
-                return;
-            }
-            const isMobile = /Mobi|Android|iPhone|iPad|iPod|Opera Mini|IEMobile|WPDesktop/i.test(navigator.userAgent);
-            let provider = null;
-            let walletType = null;
-            if (isMobile) {
-                if (window.solana && window.solana.isPhantom) {
-                    provider = window.solana;
-                    walletType = 'phantom';
-                } else if (window.solana && window.solana.isBackpack) {
-                    provider = window.solana;
-                    walletType = 'backpack';
-                } else if (window.solflare) {
-                    provider = window.solflare;
-                    walletType = 'solflare';
+            // --- Event Listeners ---
+            connectWalletBtn.addEventListener('click', connectWallet);
+            boostBtn.addEventListener('click', sendMarkTokens);
+
+            // --- Functions ---
+
+            // 1. Connect Wallet
+            async function connectWallet() {
+                provider = getProvider();
+                if (!provider) {
+                    showError("Phantom wallet is not installed. Please install it to continue.");
+                    return;
                 }
-                if (provider) {
-                    try {
-                        await provider.connect();
-                        const address = provider.publicKey ? provider.publicKey.toString() : '';
-                        connectedWalletType = walletType;
-                        connectedAddress = address;
-                        connectBtn.textContent = `Disconnect: ${address.slice(0,4)}...${address.slice(-4)}`;
-                        document.getElementById('connect-wallet-section-horoscope').style.display = 'none';
-                        document.getElementById('horoscope-result-section').style.display = '';
-                        document.getElementById('loading-state-horoscope').style.display = 'none';
-                        document.getElementById('error-state-horoscope').style.display = 'none';
-                        showHoroscopeResult(address);
-                        if (provider.on) {
-                            provider.on('disconnect', onDisconnect);
-                        }
-                        return;
-                    } catch (e) {
-                        const messageElement = document.getElementById('install-modal-message');
-                        if (messageElement) {
-                            messageElement.textContent = 'Failed to connect wallet. Please try again in your wallet browser.';
-                        }
-                        installModal.style.display = 'flex';
-                        return;
-                    }
+                
+                connectWalletBtn.textContent = 'Connecting...';
+                connectWalletBtn.disabled = true;
+
+                try {
+                    await provider.connect({ onlyIfTrusted: false });
+                    connectedWalletKey = provider.publicKey;
+                    
+                    connection = new Connection(HELIUS_RPC_URL, 'confirmed');
+
+                    connectWalletSection.classList.add('hidden');
+                    horoscopeSection.classList.remove('hidden');
+                    
+                    await displayFortuneForWallet();
+                } catch (err) {
+                    console.error("Wallet connection failed:", err);
+                    showError("Wallet connection was rejected. Please try again.");
+                    connectWalletBtn.textContent = 'Connect Wallet & See Fortune';
+                    connectWalletBtn.disabled = false;
                 }
             }
-            while (modalContent.childNodes.length > 1) modalContent.removeChild(modalContent.lastChild);
-            const wallets = [
-                {
-                    id: 'phantom',
-                    name: 'Phantom',
-                    logo: 'https://i.ibb.co/H5KnQH1/images.jpg',
-                    deeplink: (url) => `phantom://app/ul/browse/${encodeURIComponent(url)}`
-                },
-                {
-                    id: 'backpack',
-                    name: 'Backpack',
-                    logo: 'https://i.ibb.co/8nkGvqKT/33.jpg',
-                    deeplink: (url) => `backpack://app/open?url=${encodeURIComponent(url)}`
-                },
-                {
-                    id: 'solflare',
-                    name: 'Solflare',
-                    logo: 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png',
-                    deeplink: (url) => `solflare://open?url=${encodeURIComponent(url)}`
+
+            // 2. Boost Fortune (Send $MARK Tokens)
+            async function sendMarkTokens() {
+                if (!provider || !connectedWalletKey || !connection) {
+                    showError("Wallet not connected. Please connect your wallet first.");
+                    return;
                 }
-            ];
-            wallets.forEach(wallet => {
-                const btn = document.createElement('button');
-                btn.className = 'btn btn-primary wallet-select-btn';
-                btn.style.cssText = 'display: flex; width: 100%; margin-bottom: 10px; align-items: center; justify-content: center;';
-                btn.onclick = async () => {
-                    if (isMobile) {
-                        const deeplinkUrl = wallet.deeplink(window.location.href);
-                        const installUrl = getInstallUrl(wallet.id);
-                        const currentUrl = window.location.href;
-                        window.location.href = deeplinkUrl;
-                        setTimeout(() => {
-                            if (window.location.href === currentUrl) {
-                                const messageElement = document.getElementById('install-modal-message');
-                                if (messageElement) {
-                                    messageElement.textContent = `${wallet.name} wallet app is not installed on your mobile device. Please install the app and try again.`;
-                                }
-                                installBtn.onclick = () => {
-                                    if (installUrl) {
-                                        window.open(installUrl, '_blank');
-                                    }
-                                    installModal.style.display = 'none';
-                                };
-                                closeInstallBtn.onclick = () => {
-                                    installModal.style.display = 'none';
-                                };
-                                installModal.style.display = 'flex';
-                            }
-                        }, 2000);
-                        modal.style.display = 'none';
-                        return;
-                    }
-                    let provider = null;
-                    if (wallet.id === 'phantom' && window.solana && window.solana.isPhantom) {
-                        provider = window.solana;
-                        if (provider.isConnected && provider.disconnect) {
-                            try { await provider.disconnect(); } catch (e) {}
-                        }
-                    } else if (wallet.id === 'backpack' && window.solana && window.solana.isBackpack) {
-                        provider = window.solana;
-                        if (provider.isConnected && provider.disconnect) {
-                            try { await provider.disconnect(); } catch (e) {}
-                        }
-                    } else if (wallet.id === 'solflare' && (window.solflare || (window.solana && window.solana.isSolflare))) {
-                        provider = window.solflare || window.solana;
-                        if (provider.isConnected && provider.disconnect) {
-                            try { await provider.disconnect(); } catch (e) {}
-                        }
-                    }
-                    if (!provider) {
-                        const messageElement = document.getElementById('install-modal-message');
-                        if (messageElement) {
-                            messageElement.textContent = `${wallet.name} wallet extension is not installed. Please install the extension and try again.`;
-                        }
-                        installBtn.onclick = () => {
-                            const installUrl = getInstallUrl(wallet.id);
-                            if (installUrl) {
-                                window.open(installUrl, '_blank');
-                            }
-                            installModal.style.display = 'none';
-                        };
-                        closeInstallBtn.onclick = () => {
-                            installModal.style.display = 'none';
-                        };
-                        installModal.style.display = 'flex';
-                        return;
-                    }
+
+                boostBtn.disabled = true;
+                boostMessageEl.textContent = "Preparing transaction... Please wait.";
+                boostMessageEl.classList.remove('text-red-500', 'text-green-500');
+
+                try {
+                    const mintPublicKey = new PublicKey(MARK_TOKEN_MINT_ADDRESS);
+                    const destPublicKey = new PublicKey(DESTINATION_WALLET_ADDRESS);
+                    
+                    const fromTokenAccount = await getOrCreateAssociatedTokenAccount(provider.publicKey, mintPublicKey);
+                    const toTokenAccount = await getOrCreateAssociatedTokenAccount(destPublicKey, mintPublicKey);
+
+                    boostMessageEl.textContent = "Please approve the transaction in your wallet...";
+                    
+                    const tokenMintInfo = await connection.getParsedAccountInfo(mintPublicKey);
+                    const decimals = tokenMintInfo.value.data.parsed.info.decimals;
+                    const amount = 100 * Math.pow(10, decimals);
+
+                    const transaction = new Transaction().add(
+                        solanaWeb3.splToken.createTransferInstruction(
+                            fromTokenAccount.address,
+                            toTokenAccount.address,
+                            provider.publicKey,
+                            amount,
+                            [],
+                            SPL_TOKEN_PROGRAM_ID
+                        )
+                    );
+                    
+                    const { blockhash } = await connection.getLatestBlockhash();
+                    transaction.recentBlockhash = blockhash;
+                    transaction.feePayer = provider.publicKey;
+
+                    const signedTransaction = await provider.signTransaction(transaction);
+                    const signature = await connection.sendRawTransaction(signedTransaction.serialize());
+                    
+                    boostMessageEl.textContent = "Confirming transaction on the blockchain...";
+                    await connection.confirmTransaction(signature, 'confirmed');
+                    
+                    console.log('Transaction successful with signature:', signature);
+
+                    boostScores();
+                    currentFortune.boostUsed = true;
+                    const today = new Date().toISOString().split('T')[0];
+                    localStorage.setItem(`fortune_${connectedWalletKey.toString()}_${today}`, JSON.stringify(currentFortune));
+                    displayFortune(currentFortune);
+                    
+                    boostMessageEl.textContent = "Intervention successful! Mark has heard your request.";
+                    boostMessageEl.classList.add('text-green-500');
+
+                } catch (error) {
+                    console.error('Token transfer failed:', error);
+                    boostMessageEl.textContent = `Intervention failed: ${error.message}`;
+                    boostMessageEl.classList.add('text-red-500');
+                    boostBtn.disabled = false;
+                }
+            }
+
+            // 3. Display Horoscope Logic
+            async function displayFortuneForWallet() {
+                const walletString = connectedWalletKey.toString();
+                const today = new Date().toISOString().split('T')[0];
+                const storedFortune = localStorage.getItem(`fortune_${walletString}_${today}`);
+
+                if (storedFortune) {
+                    currentFortune = JSON.parse(storedFortune);
+                    displayFortune(currentFortune);
+                    return;
+                }
+                
+                if (!dailyHoroscopes) {
                     try {
-                        await provider.connect();
-                        if (provider.publicKey || (provider.publicKey && provider.publicKey.toString)) {
-                            const address = provider.publicKey ? provider.publicKey.toString() : (provider.publicKey || '');
-                            const shortAddr = address.slice(0, 4) + '...' + address.slice(-4);
-                            connectedWalletType = wallet.id;
-                            connectedAddress = address;
-                            connectBtn.textContent = `Disconnect: ${shortAddr}`;
-                            document.getElementById('connect-wallet-section-horoscope').style.display = 'none';
-                            document.getElementById('horoscope-result-section').style.display = '';
-                            document.getElementById('loading-state-horoscope').style.display = 'none';
-                            document.getElementById('error-state-horoscope').style.display = 'none';
-                            showHoroscopeResult(address);
-                            if (provider.on) {
-                                provider.on('disconnect', onDisconnect);
-                            }
-                        }
-                        modal.style.display = 'none';
-                    } catch (e) {
-                        alert('Failed to connect wallet. Please check your wallet app or extension and try again.\n' + (e && e.message ? e.message : e));
+                        dailyHoroscopes = await fetchHoroscopeData();
+                    } catch (error) {
+                        console.warn("Failed to load live horoscope data. Using fallback data.", error.message);
+                        dailyHoroscopes = generateFallbackData();
                     }
-                };
-                const logo = document.createElement('img');
-                logo.src = wallet.logo;
-                logo.alt = wallet.name + ' Logo';
-                logo.className = 'wallet-logo';
-                btn.appendChild(logo);
-                const span = document.createElement('span');
-                span.textContent = `Connect ${wallet.name}`;
-                btn.appendChild(span);
-                modalContent.appendChild(btn);
-            });
-            modal.style.display = 'flex';
-        });
-    }
-    window.addEventListener('click', (event) => {
-        if (event.target === modal) {
-            modal.style.display = "none";
-        }
-        if (event.target === disconnectModal) {
-            disconnectModal.style.display = "none";
-        }
-        if (event.target === installModal) {
-            installModal.style.display = "none";
-        }
-    });
+                }
 
-    function onDisconnect() {
-        connectedWalletType = null;
-        connectedAddress = null;
-        connectBtn.textContent = 'Connect Wallet & See Fortune';
-        document.getElementById('horoscope-result-section').style.display = 'none';
-        document.getElementById('connect-wallet-section-horoscope').style.display = '';
-    }
-});
+                const lastChar = walletString.slice(-1);
+                walletAddressEl.textContent = walletString;
+                fateVariableEl.textContent = lastChar;
+                
+                const fortuneData = dailyHoroscopes[lastChar];
+                
+                if (fortuneData) {
+                    currentFortune = { ...fortuneData, boostUsed: false };
+                    localStorage.setItem(`fortune_${walletString}_${today}`, JSON.stringify(currentFortune));
+                    displayFortune(currentFortune);
+                } else {
+                    showError(`Could not find a fate for the variable '${lastChar}'.`);
+                }
+            }
+            
+            // --- Utility & Helper Functions ---
+            
+            function getProvider() {
+                if ('phantom' in window) {
+                    const provider = window.phantom?.solana;
+                    if (provider?.isPhantom) {
+                        return provider;
+                    }
+                }
+                window.open('https://phantom.app/', '_blank');
+                return null;
+            }
 
-// 운세 결과 표시 함수
-function showHoroscopeResult(address) {
-    document.getElementById('fortune-state-horoscope').style.display = '';
-    document.getElementById('wallet-address').textContent = address;
-    const lastChar = address[address.length - 1];
-    document.getElementById('fate-variable').textContent = lastChar;
-    const simulationVariables = [
-        "Quantum Fluctuation", "Cosmic Alignment", "Server Maintenance", "Random Number Surge", "Glitchy Matrix", "Mark's Mood", "Coffee Quality", "Buggy Patch", "AI Uprising", "Lucky Day"
-    ];
-    const reasons = [
-        "Mark pulled an all-nighter.", "The simulation code was refactored.", "A cosmic ray hit the server.", "Mark's cat walked on the keyboard.", "The coffee was too strong.", "A bug was fixed (or introduced).", "Mark is feeling generous.", "The RNG gods smiled today.", "A new patch was deployed.", "Reality is unstable."
-    ];
-    const colors = ["Red", "Blue", "Green", "Yellow", "Purple", "Orange", "Pink", "Black", "White", "Cyan"];
-    const places = ["Library", "Café", "Park", "Home", "Lab", "Gym", "Beach", "Mountain", "Museum", "Arcade"];
-    const foods = ["Pizza", "Burger", "Sushi", "Ramen", "Salad", "Steak", "Ice Cream", "Taco", "Pasta", "Sandwich"];
-    const seed = lastChar.charCodeAt(0);
-    function pick(arr) { return arr[seed % arr.length]; }
-    function randScore(offset) { return 40 + (seed * offset) % 60; }
-    document.getElementById('simulation-variable').textContent = pick(simulationVariables);
-    document.getElementById('reason').textContent = pick(reasons);
-    const overall = randScore(1);
-    const money = randScore(2);
-    const love = randScore(3);
-    const health = randScore(4);
-    document.getElementById('overall-score').textContent = `${overall} / 100`;
-    document.getElementById('money-score').textContent = `${money} / 100`;
-    document.getElementById('love-score').textContent = `${love} / 100`;
-    document.getElementById('health-score').textContent = `${health} / 100`;
-    document.getElementById('overall-bar').style.width = `${overall}%`;
-    document.getElementById('money-bar').style.width = `${money}%`;
-    document.getElementById('love-bar').style.width = `${love}%`;
-    document.getElementById('health-bar').style.width = `${health}%`;
-    document.getElementById('overall-text').textContent = overall > 70 ? "Great day for simulation exploits!" : "Stay cautious, reality is unstable.";
-    document.getElementById('money-text').textContent = money > 70 ? "Unexpected airdrop incoming?" : "Don't spend all your $MARK at once.";
-    document.getElementById('love-text').textContent = love > 70 ? "NPCs are unusually friendly today." : "Maybe avoid romance subplots.";
-    document.getElementById('health-text').textContent = health > 70 ? "System integrity: stable." : "Watch out for random bugs!";
-    document.getElementById('rec-color').textContent = pick(colors);
-    document.getElementById('rec-numbers').textContent = `${seed % 10}, ${(seed+3)%10}, ${(seed+7)%10}`;
-    document.getElementById('rec-place').textContent = pick(places);
-    document.getElementById('rec-food').textContent = pick(foods);
-}
-document.getElementById('back-to-main-btn').onclick = function() {
-    window.location.href = 'index.html';
-};
-// === [MARK 토큰/지갑 변수 선언] ===
-const MARK_MINT_ADDRESS = "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"; // 실제 마크토큰 민트 주소로 교체
-const PROJECT_WALLET_ADDRESS = "JBk9pkuDcwmJwz7TrfVSnitPGdLutWyRBMzTaLZNHhi3";
-const MARK_DECIMALS = 9; // 실제 소수점 자리수로 교체(대부분 9)
-// === 운세 부스트 함수 ===
-async function boostHoroscopeUI() {
-    // 각 점수 15% 증가 (최대 100)
-    function boost(id) {
-        const el = document.getElementById(id);
-        let val = parseInt(el.textContent);
-        val = Math.min(100, Math.round(val * 1.15));
-        el.textContent = `${val} / 100`;
-        document.getElementById(id.replace('-score', '-bar')).style.width = `${val}%`;
-    }
-    boost('overall-score');
-    boost('money-score');
-    boost('love-score');
-    boost('health-score');
-}
-document.getElementById('boost-fortune-btn').onclick = async function() {
-    const btn = this;
-    const msg = document.getElementById('boost-message');
-    if (!connectedWalletType || !connectedAddress) {
-        msg.textContent = "먼저 지갑을 연결해주세요.";
-        return;
-    }
-    const provider = window.solana || window.solflare;
-    if (!provider || !provider.isConnected || !provider.publicKey) {
-        msg.textContent = "지갑이 연결되어 있지 않습니다. 다시 연결해 주세요.";
-        btn.disabled = false;
-        return;
-    }
-    btn.disabled = true;
-    msg.textContent = "블록체인에 거래를 전송 중입니다...";
-    try {
-        const connection = new solanaWeb3.Connection(solanaWeb3.clusterApiUrl('mainnet-beta'), 'confirmed');
-        const fromPubkey = new solanaWeb3.PublicKey(connectedAddress);
-        const toPubkey = new solanaWeb3.PublicKey(PROJECT_WALLET_ADDRESS);
-        const mintPubkey = new solanaWeb3.PublicKey(MARK_MINT_ADDRESS);
-        // ATA 직접 계산 함수
-        function getAssociatedTokenAddress(mint, owner) {
-            return solanaWeb3.PublicKey.findProgramAddressSync(
-                [
-                    owner.toBuffer(),
-                    splToken.TOKEN_PROGRAM_ID.toBuffer(),
-                    mint.toBuffer()
-                ],
-                splToken.ASSOCIATED_TOKEN_PROGRAM_ID
-            )[0];
-        }
-        const fromTokenAccount = getAssociatedTokenAddress(mintPubkey, fromPubkey);
-        const toTokenAccount = getAssociatedTokenAddress(mintPubkey, toPubkey);
-        const amount = 100 * (10 ** MARK_DECIMALS);
-        // TransferInstruction 직접 생성
-        const transferIx = new solanaWeb3.TransactionInstruction({
-            keys: [
-                { pubkey: fromTokenAccount, isSigner: false, isWritable: true },
-                { pubkey: toTokenAccount, isSigner: false, isWritable: true },
-                { pubkey: fromPubkey, isSigner: true, isWritable: false }
-            ],
-            programId: splToken.TOKEN_PROGRAM_ID,
-            data: new Uint8Array([3, ...numberToLEBuffer(amount, 8)])
+            async function getOrCreateAssociatedTokenAccount(owner, mint) {
+                const associatedTokenAddress = await solanaWeb3.splToken.getAssociatedTokenAddress(mint, owner, false, SPL_TOKEN_PROGRAM_ID);
+                const accountInfo = await connection.getAccountInfo(associatedTokenAddress);
+                if (accountInfo === null) {
+                    throw new Error(`The required token account for $MARK does not exist. Please create one first.`);
+                }
+                return { address: associatedTokenAddress };
+            }
+
+            async function fetchHoroscopeData() {
+                if (HOROSCOPE_JSON_URL.includes('YOUR_GIST_RAW_URL_HERE')) {
+                    throw new Error("Configuration Error: HOROSCOPE_JSON_URL must be updated.");
+                }
+                const response = await fetch(HOROSCOPE_JSON_URL, { cache: 'no-cache' });
+                if (!response.ok) throw new Error(`Failed to connect to the Tablet of Fate (HTTP ${response.status})`);
+                return await response.json();
+            }
+
+            function displayFortune(data) {
+                simVarEl.textContent = data.simulation_variable;
+                reasonEl.textContent = `(Reason: ${data.reason})`;
+                updateScoreAndGraph('overall', data.overall_score, data.overall_text);
+                updateScoreAndGraph('money', data.money_score, data.money_text);
+                updateScoreAndGraph('love', data.love_score, data.love_text);
+                updateScoreAndGraph('health', data.health_score, data.health_text);
+                document.getElementById('rec-color').textContent = data.recommended_color;
+                document.getElementById('rec-numbers').textContent = `${Math.floor(Math.random() * 100) + 1}, ${Math.floor(Math.random() * 100) + 1}`;
+                document.getElementById('rec-place').textContent = data.recommended_place;
+                document.getElementById('rec-food').textContent = data.recommended_food;
+
+                if (data.boostUsed) {
+                    boostBtn.textContent = "Mark has heard your request";
+                    boostBtn.disabled = true;
+                    boostMessageEl.textContent = 'You have already made a request today.';
+                    boostMessageEl.classList.add('text-gray-400');
+                } else {
+                    boostBtn.textContent = 'Nudge Mark (100 $MARK)';
+                    boostBtn.disabled = false;
+                    boostMessageEl.textContent = '';
+                }
+                loadingState.style.display = 'none';
+                errorState.classList.add('hidden');
+                fortuneState.classList.remove('hidden');
+            }
+            
+            function updateScoreAndGraph(type, score, text) {
+                document.getElementById(`${type}-score`).textContent = `${score} / 100`;
+                document.getElementById(`${type}-bar`).style.width = `${score}%`;
+                document.getElementById(`${type}-text`).textContent = text;
+            }
+
+            function boostScores() {
+                const boostValue = (score) => Math.min(100, Math.floor(score * (1 + (Math.random() * 0.2 + 0.1))));
+                currentFortune.overall_score = boostValue(currentFortune.overall_score);
+                currentFortune.money_score = boostValue(currentFortune.money_score);
+                currentFortune.love_score = boostValue(currentFortune.love_score);
+                currentFortune.health_score = boostValue(currentFortune.health_score);
+            }
+
+            function showError(message) {
+                loadingState.style.display = 'none';
+                fortuneState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                errorMessageEl.textContent = message;
+            }
+            
+            function generateFallbackData() {
+                const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+                const fallbackData = {};
+                characters.forEach(char => {
+                    fallbackData[char] = {
+                        "simulation_variable": "Cosmic Static",
+                        "reason": "Mark spilled ramen on the console, so you're getting this generic, pre-compiled fate. At least it's not a blue screen of death... yet.",
+                        "overall_score": 68,
+                        "overall_text": "Today is a perfectly beige day. Nothing spectacular will happen, but nothing catastrophic either. It's the Tuesday of days, existing purely as a buffer between more interesting events. Consider it a system-wide idle cycle; try not to tax the CPU with any complex decisions.",
+                        "money_score": 55,
+                        "money_text": "Your financial parameters are locked in a read-only state. No sudden windfalls, no surprise bills. Your balance will remain as static as a forgotten NPC in a starting village. It's a good day to *not* check your bank account, mostly because there's nothing new to see.",
+                        "love_score": 72,
+                        "love_text": "The social interaction module is running on low power mode. Existing connections will function within normal parameters, but attempts to initiate new relationships may result in a '404: Connection Not Found' error. Stick to your known party members; venturing into new social dungeons is not advised.",
+                        "health_score": 65,
+                        "health_text": "Your avatar's physics engine is unusually sensitive to gravity today. Avoid sudden movements, especially near stairs or precariously placed banana peels. A system reboot (i.e., a nap) is highly recommended to clear any lingering cache issues and prevent unexpected ragdoll physics.",
+                        "recommended_color": "Greyscale",
+                        "recommended_place": "Your designated charging station (i.e., your couch)",
+                        "recommended_food": "Nutrient Paste #7 (or toast)"
+                    };
+                });
+                return fallbackData;
+            }
         });
-        const transaction = new solanaWeb3.Transaction().add(transferIx);
-        transaction.feePayer = fromPubkey;
-        let { blockhash } = await connection.getRecentBlockhash();
-        transaction.recentBlockhash = blockhash;
-        let signed = await provider.signTransaction(transaction);
-        let txid = await connection.sendRawTransaction(signed.serialize());
-        msg.textContent = "거래 확인 중...";
-        await connection.confirmTransaction(txid, 'confirmed');
-        boostHoroscopeUI();
-        msg.textContent = "마크가 당신의 요청을 들었습니다! 운세가 상승했습니다.";
-        btn.disabled = true;
-        btn.textContent = "부스트 완료";
-    } catch (e) {
-        msg.textContent = "실패: " + (e.message || e);
-        btn.disabled = false;
-    }
-};
     </script>
 </body>
 </html>
