@@ -19,14 +19,33 @@
     <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.js"></script>
     
     <script>
-        // Ensure libraries are loaded before any code runs
-        window.addEventListener('load', () => {
-            // Verify libraries are available
-            if (typeof window.solanaWeb3 === 'undefined') {
-                console.error('Solana Web3 library not loaded');
-            }
-            if (typeof window.splToken === 'undefined') {
-                console.error('SPL Token library not loaded');
+        // Wait for all libraries to be loaded
+        function waitForLibraries() {
+            return new Promise((resolve) => {
+                const checkLibraries = () => {
+                    if (typeof window.solanaWeb3 !== 'undefined' && typeof window.splToken !== 'undefined') {
+                        console.log('All libraries loaded successfully');
+                        resolve();
+                    } else {
+                        console.log('Waiting for libraries...', {
+                            solanaWeb3: typeof window.solanaWeb3,
+                            splToken: typeof window.splToken
+                        });
+                        setTimeout(checkLibraries, 100);
+                    }
+                };
+                checkLibraries();
+            });
+        }
+        
+        // Initialize app only after libraries are loaded
+        window.addEventListener('load', async () => {
+            try {
+                await waitForLibraries();
+                console.log('Libraries ready, initializing app...');
+                // The main app will be initialized in the DOMContentLoaded event
+            } catch (error) {
+                console.error('Failed to load libraries:', error);
             }
         });
     </script>
@@ -164,10 +183,24 @@
     </div>
 
     <script>
-        // Initialize immediately when DOM is ready
+        // Initialize app after libraries are loaded
         document.addEventListener('DOMContentLoaded', async () => {
-            // Initialize immediately without waiting for libraries
+            // Wait for libraries to be loaded before initializing
             try {
+                // Wait for libraries to be available
+                await new Promise((resolve) => {
+                    const checkLibraries = () => {
+                        if (typeof window.solanaWeb3 !== 'undefined' && typeof window.splToken !== 'undefined') {
+                            console.log('Libraries available, starting app...');
+                            resolve();
+                        } else {
+                            console.log('Waiting for libraries in DOMContentLoaded...');
+                            setTimeout(checkLibraries, 100);
+                        }
+                    };
+                    checkLibraries();
+                });
+                
                 await main();
             } catch (error) {
                 console.error("Application failed to initialize:", error);
@@ -459,22 +492,13 @@
                 // --- Horoscope Functions ---
 
                 async function sendMarkTokens() {
-                    // Check if all required libraries are available
-                    if (typeof window.solanaWeb3 === 'undefined') {
-                        showError("Solana Web3 library not loaded. Please refresh the page and try again.");
-                        console.error("solanaWeb3 library is not available");
-                        return;
-                    }
-                    
-                    if (typeof window.splToken === 'undefined') {
-                        showError("SPL Token library not loaded. Please refresh the page and try again.");
-                        console.error("splToken library is not available");
-                        return;
-                    }
-                    
-                    if (typeof window.splToken.createTransferInstruction === 'undefined') {
-                        showError("SPL Token functions not loaded. Please refresh the page and try again.");
-                        console.error("splToken.createTransferInstruction is not available");
+                    // Libraries should be available by now, but double-check
+                    if (typeof window.solanaWeb3 === 'undefined' || typeof window.splToken === 'undefined') {
+                        showError("Required libraries not loaded. Please refresh the page and try again.");
+                        console.error("Libraries not available:", {
+                            solanaWeb3: typeof window.solanaWeb3,
+                            splToken: typeof window.splToken
+                        });
                         return;
                     }
 
@@ -587,13 +611,9 @@
                 }
                 
                 async function getOrCreateAssociatedTokenAccount(owner, mint) {
-                    // Check if splToken library is available
+                    // Libraries should be available by now
                     if (typeof window.splToken === 'undefined') {
                         throw new Error("SPL Token library not loaded. Please refresh the page and try again.");
-                    }
-                    
-                    if (typeof window.splToken.getAssociatedTokenAddress === 'undefined') {
-                        throw new Error("SPL Token functions not loaded. Please refresh the page and try again.");
                     }
                     
                     const associatedTokenAddress = await window.splToken.getAssociatedTokenAddress(
