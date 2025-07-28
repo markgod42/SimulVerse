@@ -19,39 +19,28 @@
     <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.js"></script>
     
     <script>
-        // Global flag to track if libraries are ready
-        window.librariesReady = false;
-        
-        // Wait for all libraries to be loaded
-        function waitForLibraries() {
-            return new Promise((resolve) => {
-                const checkLibraries = () => {
-                    if (typeof window.solanaWeb3 !== 'undefined' && typeof window.splToken !== 'undefined') {
-                        console.log('All libraries loaded successfully');
-                        window.librariesReady = true;
-                        resolve();
-                    } else {
-                        console.log('Waiting for libraries...', {
-                            solanaWeb3: typeof window.solanaWeb3,
-                            splToken: typeof window.splToken
-                        });
-                        setTimeout(checkLibraries, 100);
-                    }
-                };
-                checkLibraries();
+        // Simple library check function
+        function checkLibraries() {
+            const solanaWeb3Ready = typeof window.solanaWeb3 !== 'undefined';
+            const splTokenReady = typeof window.splToken !== 'undefined';
+            
+            console.log('Library status:', {
+                solanaWeb3: solanaWeb3Ready,
+                splToken: splTokenReady
             });
+            
+            return solanaWeb3Ready && splTokenReady;
         }
         
-        // Initialize app only after libraries are loaded
-        window.addEventListener('load', async () => {
-            try {
-                await waitForLibraries();
-                console.log('Libraries ready, initializing app...');
-                // The main app will be initialized in the DOMContentLoaded event
-            } catch (error) {
-                console.error('Failed to load libraries:', error);
+        // Check libraries after a short delay
+        setTimeout(() => {
+            if (checkLibraries()) {
+                console.log('Libraries loaded successfully');
+                window.librariesReady = true;
+            } else {
+                console.log('Some libraries not loaded, will retry when needed');
             }
-        });
+        }, 1000);
     </script>
 
     <style>
@@ -465,10 +454,21 @@
                 // --- Horoscope Functions ---
 
                 async function sendMarkTokens() {
-                    // Libraries should be available by now, but double-check
-                    if (typeof window.solanaWeb3 === 'undefined' || typeof window.splToken === 'undefined') {
+                    // Wait for libraries to be available
+                    let attempts = 0;
+                    const maxAttempts = 100; // 10 seconds
+                    
+                    while (attempts < maxAttempts) {
+                        if (typeof window.solanaWeb3 !== 'undefined' && typeof window.splToken !== 'undefined') {
+                            break;
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        attempts++;
+                    }
+                    
+                    if (attempts >= maxAttempts) {
                         showError("Required libraries not loaded. Please refresh the page and try again.");
-                        console.error("Libraries not available:", {
+                        console.error("Libraries not available after waiting:", {
                             solanaWeb3: typeof window.solanaWeb3,
                             splToken: typeof window.splToken
                         });
@@ -584,8 +584,19 @@
                 }
                 
                 async function getOrCreateAssociatedTokenAccount(owner, mint) {
-                    // Libraries should be available by now
-                    if (typeof window.splToken === 'undefined') {
+                    // Wait for splToken library to be available
+                    let attempts = 0;
+                    const maxAttempts = 100; // 10 seconds
+                    
+                    while (attempts < maxAttempts) {
+                        if (typeof window.splToken !== 'undefined') {
+                            break;
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        attempts++;
+                    }
+                    
+                    if (attempts >= maxAttempts) {
                         throw new Error("SPL Token library not loaded. Please refresh the page and try again.");
                     }
                     
@@ -688,22 +699,7 @@
             try {
                 // Initialize UI elements immediately
                 await main();
-                
-                // Libraries will be loaded in background
-                if (!window.librariesReady) {
-                    console.log('Libraries not ready yet, will wait for them...');
-                    await new Promise((resolve) => {
-                        const checkLibraries = () => {
-                            if (window.librariesReady) {
-                                console.log('Libraries now ready!');
-                                resolve();
-                            } else {
-                                setTimeout(checkLibraries, 100);
-                            }
-                        };
-                        checkLibraries();
-                    });
-                }
+                console.log('App initialized successfully');
             } catch (error) {
                 console.error("Application failed to initialize:", error);
                 // Display a user-friendly error on the page if initialization fails
