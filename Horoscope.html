@@ -19,12 +19,16 @@
     <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.js"></script>
     
     <script>
+        // Global flag to track if libraries are ready
+        window.librariesReady = false;
+        
         // Wait for all libraries to be loaded
         function waitForLibraries() {
             return new Promise((resolve) => {
                 const checkLibraries = () => {
                     if (typeof window.solanaWeb3 !== 'undefined' && typeof window.splToken !== 'undefined') {
                         console.log('All libraries loaded successfully');
+                        window.librariesReady = true;
                         resolve();
                     } else {
                         console.log('Waiting for libraries...', {
@@ -183,25 +187,27 @@
     </div>
 
     <script>
-        // Initialize app after libraries are loaded
-        document.addEventListener('DOMContentLoaded', async () => {
-            // Wait for libraries to be loaded before initializing
+        // Initialize app immediately when DOM is ready
+                document.addEventListener('DOMContentLoaded', async () => {
             try {
-                // Wait for libraries to be available
-                await new Promise((resolve) => {
-                    const checkLibraries = () => {
-                        if (typeof window.solanaWeb3 !== 'undefined' && typeof window.splToken !== 'undefined') {
-                            console.log('Libraries available, starting app...');
-                            resolve();
-                        } else {
-                            console.log('Waiting for libraries in DOMContentLoaded...');
-                            setTimeout(checkLibraries, 100);
-                        }
-                    };
-                    checkLibraries();
-                });
-                
+                // Initialize UI elements immediately
                 await main();
+                
+                // Libraries will be loaded in background
+                if (!window.librariesReady) {
+                    console.log('Libraries not ready yet, will wait for them...');
+                    await new Promise((resolve) => {
+                        const checkLibraries = () => {
+                            if (window.librariesReady) {
+                                console.log('Libraries now ready!');
+                                resolve();
+                            } else {
+                                setTimeout(checkLibraries, 100);
+                            }
+                        };
+                        checkLibraries();
+                    });
+                }
             } catch (error) {
                 console.error("Application failed to initialize:", error);
                 // Display a user-friendly error on the page if initialization fails
@@ -213,9 +219,10 @@
                     `;
                 }
             }
+        });
 
-            // --- Main App Initialization ---
-            async function main() {
+        // --- Main App Initialization ---
+        async function main() {
                 // --- ✅ Configuration Complete: All provided information has been applied. ---
                 
                 // 1. Helius RPC URL
