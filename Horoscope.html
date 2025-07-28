@@ -434,8 +434,19 @@
                 // --- Horoscope Functions ---
 
                 async function sendMarkTokens() {
-                    // FIX: Add a robust check at the point of use
-                    if (typeof window.splToken === 'undefined' || typeof window.splToken.createTransferInstruction === 'undefined') {
+                    // Wait for splToken library to be available
+                    let attempts = 0;
+                    const maxAttempts = 50;
+                    
+                    while (attempts < maxAttempts) {
+                        if (typeof window.splToken !== 'undefined' && typeof window.splToken.createTransferInstruction !== 'undefined') {
+                            break;
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        attempts++;
+                    }
+                    
+                    if (attempts >= maxAttempts) {
                         showError("Token library not loaded. Please refresh the page and try again.");
                         console.error("splToken library is not available on window object yet.");
                         return;
@@ -550,9 +561,22 @@
                 }
                 
                 async function getOrCreateAssociatedTokenAccount(owner, mint) {
-                    if (typeof window.splToken === 'undefined' || typeof window.splToken.getAssociatedTokenAddress === 'undefined') {
+                    // Wait for splToken library to be available
+                    let attempts = 0;
+                    const maxAttempts = 50;
+                    
+                    while (attempts < maxAttempts) {
+                        if (typeof window.splToken !== 'undefined' && typeof window.splToken.getAssociatedTokenAddress !== 'undefined') {
+                            break;
+                        }
+                        await new Promise(resolve => setTimeout(resolve, 100));
+                        attempts++;
+                    }
+                    
+                    if (attempts >= maxAttempts) {
                         throw new Error("Token library not loaded. Please refresh the page and try again.");
                     }
+                    
                     const associatedTokenAddress = await window.splToken.getAssociatedTokenAddress(
                         mint, 
                         owner, 
