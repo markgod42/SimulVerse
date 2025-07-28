@@ -14,9 +14,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     
     <!-- Solana Web3.js Library -->
-    <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.js"></script>
     <!-- Solana SPL Token Library -->
-    <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.js"></script>
+    <script src="https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js"></script>
     
     <script>
         // Wait for all scripts to load
@@ -26,6 +26,35 @@
                 solanaWeb3: typeof window.solanaWeb3,
                 splToken: typeof window.splToken
             });
+            
+            // Check if libraries are properly loaded
+            if (typeof window.solanaWeb3 === 'undefined') {
+                console.error('Solana Web3 library failed to load');
+            }
+            if (typeof window.splToken === 'undefined') {
+                console.error('SPL Token library failed to load');
+            }
+        });
+        
+        // Alternative library loading method
+        function loadLibrary(url, callback) {
+            const script = document.createElement('script');
+            script.src = url;
+            script.onload = callback;
+            script.onerror = () => console.error('Failed to load:', url);
+            document.head.appendChild(script);
+        }
+        
+        // Try alternative CDN if main one fails
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                if (typeof window.splToken === 'undefined') {
+                    console.log('Trying alternative SPL Token library...');
+                    loadLibrary('https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.9/lib/index.iife.js', () => {
+                        console.log('Alternative SPL Token library loaded');
+                    });
+                }
+            }, 2000);
         });
     </script>
 
@@ -440,7 +469,12 @@
                 // --- Horoscope Functions ---
 
                 async function sendMarkTokens() {
-                    // Check if libraries are available
+                    // Check if libraries are available with detailed logging
+                    console.log('Checking libraries in sendMarkTokens:', {
+                        solanaWeb3: typeof window.solanaWeb3,
+                        splToken: typeof window.splToken
+                    });
+                    
                     if (typeof window.solanaWeb3 === 'undefined') {
                         showError("Solana Web3 library not loaded. Please refresh the page and try again.");
                         console.error("solanaWeb3 not available");
