@@ -187,40 +187,6 @@
     </div>
 
     <script>
-        // Initialize app immediately when DOM is ready
-                document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                // Initialize UI elements immediately
-                await main();
-                
-                // Libraries will be loaded in background
-                if (!window.librariesReady) {
-                    console.log('Libraries not ready yet, will wait for them...');
-                    await new Promise((resolve) => {
-                        const checkLibraries = () => {
-                            if (window.librariesReady) {
-                                console.log('Libraries now ready!');
-                                resolve();
-                            } else {
-                                setTimeout(checkLibraries, 100);
-                            }
-                        };
-                        checkLibraries();
-                    });
-                }
-            } catch (error) {
-                console.error("Application failed to initialize:", error);
-                // Display a user-friendly error on the page if initialization fails
-                const connectSection = document.getElementById('connect-wallet-section');
-                if(connectSection) {
-                    connectSection.innerHTML = `
-                        <h1 class="font-orbitron text-3xl font-bold text-red-500 mb-4">Initialization Error</h1>
-                        <p class="text-lg text-gray-300">Could not load required libraries. Please check your internet connection and refresh the page.</p>
-                    `;
-                }
-            }
-        });
-
         // --- Main App Initialization ---
         async function main() {
                 // --- ✅ Configuration Complete: All provided information has been applied. ---
@@ -714,11 +680,42 @@
                         };
                     });
                     return fallbackData;
+                                 }
+             }
+
+        // Initialize app when DOM is ready
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                // Initialize UI elements immediately
+                await main();
+                
+                // Libraries will be loaded in background
+                if (!window.librariesReady) {
+                    console.log('Libraries not ready yet, will wait for them...');
+                    await new Promise((resolve) => {
+                        const checkLibraries = () => {
+                            if (window.librariesReady) {
+                                console.log('Libraries now ready!');
+                                resolve();
+                            } else {
+                                setTimeout(checkLibraries, 100);
+                            }
+                        };
+                        checkLibraries();
+                    });
+                }
+            } catch (error) {
+                console.error("Application failed to initialize:", error);
+                // Display a user-friendly error on the page if initialization fails
+                const connectSection = document.getElementById('connect-wallet-section');
+                if(connectSection) {
+                    connectSection.innerHTML = `
+                        <h1 class="font-orbitron text-3xl font-bold text-red-500 mb-4">Initialization Error</h1>
+                        <p class="text-lg text-gray-300">Could not load required libraries. Please check your internet connection and refresh the page.</p>
+                    `;
                 }
             }
-
-
         });
-    </script>
+     </script>
 </body>
 </html>
