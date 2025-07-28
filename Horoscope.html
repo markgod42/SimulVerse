@@ -17,6 +17,19 @@
     <script src="https://unpkg.com/@solana/web3.js@latest/lib/index.iife.js"></script>
     <!-- Solana SPL Token Library -->
     <script src="https://unpkg.com/@solana/spl-token@latest/lib/index.iife.js"></script>
+    
+    <script>
+        // Ensure libraries are loaded before any code runs
+        window.addEventListener('load', () => {
+            // Verify libraries are available
+            if (typeof window.solanaWeb3 === 'undefined') {
+                console.error('Solana Web3 library not loaded');
+            }
+            if (typeof window.splToken === 'undefined') {
+                console.error('SPL Token library not loaded');
+            }
+        });
+    </script>
 
     <style>
         /* 기본 스타일 */
@@ -446,21 +459,22 @@
                 // --- Horoscope Functions ---
 
                 async function sendMarkTokens() {
-                    // Wait for splToken library to be available
-                    let attempts = 0;
-                    const maxAttempts = 50;
-                    
-                    while (attempts < maxAttempts) {
-                        if (typeof window.splToken !== 'undefined' && typeof window.splToken.createTransferInstruction !== 'undefined') {
-                            break;
-                        }
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                        attempts++;
+                    // Check if all required libraries are available
+                    if (typeof window.solanaWeb3 === 'undefined') {
+                        showError("Solana Web3 library not loaded. Please refresh the page and try again.");
+                        console.error("solanaWeb3 library is not available");
+                        return;
                     }
                     
-                    if (attempts >= maxAttempts) {
-                        showError("Token library not loaded. Please refresh the page and try again.");
-                        console.error("splToken library is not available on window object.");
+                    if (typeof window.splToken === 'undefined') {
+                        showError("SPL Token library not loaded. Please refresh the page and try again.");
+                        console.error("splToken library is not available");
+                        return;
+                    }
+                    
+                    if (typeof window.splToken.createTransferInstruction === 'undefined') {
+                        showError("SPL Token functions not loaded. Please refresh the page and try again.");
+                        console.error("splToken.createTransferInstruction is not available");
                         return;
                     }
 
@@ -573,20 +587,13 @@
                 }
                 
                 async function getOrCreateAssociatedTokenAccount(owner, mint) {
-                    // Wait for splToken library to be available
-                    let attempts = 0;
-                    const maxAttempts = 50;
-                    
-                    while (attempts < maxAttempts) {
-                        if (typeof window.splToken !== 'undefined' && typeof window.splToken.getAssociatedTokenAddress !== 'undefined') {
-                            break;
-                        }
-                        await new Promise(resolve => setTimeout(resolve, 100));
-                        attempts++;
+                    // Check if splToken library is available
+                    if (typeof window.splToken === 'undefined') {
+                        throw new Error("SPL Token library not loaded. Please refresh the page and try again.");
                     }
                     
-                    if (attempts >= maxAttempts) {
-                        throw new Error("Token library not loaded. Please refresh the page and try again.");
+                    if (typeof window.splToken.getAssociatedTokenAddress === 'undefined') {
+                        throw new Error("SPL Token functions not loaded. Please refresh the page and try again.");
                     }
                     
                     const associatedTokenAddress = await window.splToken.getAssociatedTokenAddress(
