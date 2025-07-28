@@ -158,11 +158,19 @@
              * only runs after its dependencies are ready.
              */
             function waitForLibraries() {
-                return new Promise((resolve) => {
+                return new Promise((resolve, reject) => {
+                    let attempts = 0;
+                    const maxAttempts = 50; // Try for 5 seconds
                     const interval = setInterval(() => {
                         if (typeof window.solanaWeb3 !== 'undefined' && typeof window.splToken !== 'undefined') {
                             clearInterval(interval);
                             resolve();
+                        } else {
+                            attempts++;
+                            if (attempts > maxAttempts) {
+                                clearInterval(interval);
+                                reject(new Error("Solana libraries failed to load in time."));
+                            }
                         }
                     }, 100); // Check every 100 milliseconds
                 });
@@ -170,8 +178,6 @@
 
             // --- Main App Initialization ---
             async function main() {
-                await waitForLibraries();
-
                 // --- ✅ Configuration Complete: All provided information has been applied. ---
                 
                 // 1. Helius RPC URL
@@ -188,7 +194,6 @@
 
                 // --- Global Variables ---
                 const { Connection, PublicKey, SystemProgram, Transaction } = window.solanaWeb3;
-                const { getAssociatedTokenAddress, createTransferInstruction } = window.splToken;
                 const SPL_TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
                 
                 let connection;
@@ -429,6 +434,13 @@
                 // --- Horoscope Functions ---
 
                 async function sendMarkTokens() {
+                    // FIX: Add a robust check at the point of use
+                    if (typeof window.splToken === 'undefined' || typeof window.splToken.createTransferInstruction === 'undefined') {
+                        showError("Token library not loaded. Please refresh the page and try again.");
+                        console.error("splToken library is not available on window object yet.");
+                        return;
+                    }
+
                     if (!provider || !connectedWalletKey || !connection) {
                         showError("Wallet not connected. Please connect your wallet first.");
                         return;
@@ -455,7 +467,7 @@
                         const amount = 100 * Math.pow(10, decimals);
 
                         const transaction = new Transaction().add(
-                            createTransferInstruction(
+                            window.splToken.createTransferInstruction(
                                 fromTokenAccount.address,
                                 toTokenAccount.address,
                                 provider.publicKey,
@@ -488,14 +500,13 @@
 
                     } catch (error) {
                         console.error('Token transfer failed:', error);
-                        // FIX: Provide a user-friendly message for missing ATA
                         let userMessage = `Intervention failed: ${error.message}`;
                         if (error.message.includes('The required token account for $MARK does not exist')) {
                             userMessage = 'The required $MARK token account (ATA) was not found in your wallet. Please create one first and try again.';
                         }
-                        showError(userMessage); // Use the showError function for consistent UI
+                        showError(userMessage);
                         boostBtn.disabled = false;
-                        boostMessageEl.textContent = ''; // Clear the "preparing" message
+                        boostMessageEl.textContent = '';
                     }
                 }
 
@@ -539,7 +550,10 @@
                 }
                 
                 async function getOrCreateAssociatedTokenAccount(owner, mint) {
-                    const associatedTokenAddress = await getAssociatedTokenAddress(
+                    if (typeof window.splToken === 'undefined' || typeof window.splToken.getAssociatedTokenAddress === 'undefined') {
+                        throw new Error("Token library not loaded. Please refresh the page and try again.");
+                    }
+                    const associatedTokenAddress = await window.splToken.getAssociatedTokenAddress(
                         mint, 
                         owner, 
                         false, 
@@ -633,7 +647,17 @@
                 }
             }
 
-            main().catch(console.error);
+            main().catch(error => {
+                console.error("Application failed to initialize:", error);
+                // Display a user-friendly error on the page if initialization fails
+                const connectSection = document.getElementById('connect-wallet-section');
+                if(connectSection) {
+                    connectSection.innerHTML = `
+                        <h1 class="font-orbitron text-3xl font-bold text-red-500 mb-4">Initialization Error</h1>
+                        <p class="text-lg text-gray-300">Could not load required libraries. Please check your internet connection and refresh the page.</p>
+                    `;
+                }
+            });
         });
     </script>
 </body>
