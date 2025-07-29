@@ -15,8 +15,7 @@
     
     <!-- Solana Web3.js Library (from jsdelivr CDN) -->
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.js"></script>
-    <!-- Solana SPL Token Library (from jsdelivr CDN) -->
-    <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@latest/lib/index.iife.js"></script>
+    <!-- NOTE: SPL Token Library CDN is no longer needed as its functions are now included directly in the script -->
 
     <style>
         /* 기본 스타일 */
@@ -152,504 +151,9 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            /**
-             * Waits for necessary Solana libraries to be loaded on the window object.
-             * This prevents "is not defined" errors by ensuring that the app logic
-             * only runs after its dependencies are ready.
-             */
-            function waitForLibraries() {
-                return new Promise((resolve, reject) => {
-                    let attempts = 0;
-                    const maxAttempts = 50; // Try for 5 seconds
-                    const interval = setInterval(() => {
-                        if (typeof window.solanaWeb3 !== 'undefined' && typeof window.splToken !== 'undefined') {
-                            clearInterval(interval);
-                            resolve();
-                        } else {
-                            attempts++;
-                            if (attempts > maxAttempts) {
-                                clearInterval(interval);
-                                reject(new Error("Solana libraries failed to load in time."));
-                            }
-                        }
-                    }, 100); // Check every 100 milliseconds
-                });
-            }
-
-            // --- Main App Initialization ---
-            async function main() {
-                // --- ✅ Configuration Complete: All provided information has been applied. ---
-                
-                // 1. Helius RPC URL
-                const HELIUS_RPC_URL = 'https://mainnet.helius-rpc.com/?api-key=ebc0620a-0038-421f-a8a0-83c551702d97'; 
-
-                // 2. $MARK Token Address
-                const MARK_TOKEN_MINT_ADDRESS = 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263';
-
-                // 3. Project Wallet Address (to receive $MARK)
-                const DESTINATION_WALLET_ADDRESS = 'JBk9pkuDcwmJwz7TrfVSnitPGdLutWyRBMzTaLZNHhi3';
-
-                // 4. Horoscope Data URL
-                const HOROSCOPE_JSON_URL = 'https://gist.githubusercontent.com/markgod42/434a97acfb2d4c6d71137c7d4051511c/raw/058e4c5a918666c805e4f6f1a2d8e525ebc72a38/horoscope.json'; 
-
-                // --- Global Variables ---
-                const { Connection, PublicKey, SystemProgram, Transaction } = window.solanaWeb3;
-                const SPL_TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
-                
-                let connection;
-                let provider; // Wallet provider (Phantom, Solflare, etc.)
-                let connectedWalletKey; // PublicKey of the connected wallet
-                let currentFortune = null;
-                let dailyHoroscopes = null;
-
-                // --- UI Elements ---
-                const connectWalletBtn = document.getElementById('connect-wallet-btn');
-                const connectWalletSection = document.getElementById('connect-wallet-section');
-                const horoscopeSection = document.getElementById('horoscope-section');
-                const loadingState = document.getElementById('loading-state');
-                const errorState = document.getElementById('error-state');
-                const errorMessageEl = document.getElementById('error-message');
-                const fortuneState = document.getElementById('fortune-state');
-                const walletAddressEl = document.getElementById('wallet-address');
-                const fateVariableEl = document.getElementById('fate-variable');
-                const simVarEl = document.getElementById('simulation-variable');
-                const reasonEl = document.getElementById('reason');
-                const boostBtn = document.getElementById('boost-fortune-btn');
-                const boostMessageEl = document.getElementById('boost-message');
-
-                // --- Event Listeners ---
-                boostBtn.addEventListener('click', sendMarkTokens);
-
-                // --- Wallet Connection Logic ---
-                
-                const modal = document.createElement('div');
-                modal.style.cssText = `
-                    display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
-                    overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
-                `;
-                const modalContent = document.createElement('div');
-                modalContent.style.cssText = `
-                    background-color: var(--card-bg); padding: 20px; border: 1px solid var(--primary-color);
-                    border-radius: 10px; text-align: center; width: 90%; max-width: 350px;
-                `;
-                const modalTitle = document.createElement('h3');
-                modalTitle.textContent = 'Select Wallet';
-                modalTitle.style.fontFamily = "'Orbitron', sans-serif";
-                modalTitle.style.color = "var(--primary-color)";
-                modalTitle.style.marginBottom = "20px";
-                modalContent.appendChild(modalTitle);
-                modal.appendChild(modalContent);
-                document.body.appendChild(modal);
-
-                const disconnectModal = document.createElement('div');
-                disconnectModal.style.cssText = `
-                    display: none; position: fixed; z-index: 2001; left: 0; top: 0; width: 100%; height: 100%;
-                    overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
-                `;
-                const disconnectModalContent = document.createElement('div');
-                disconnectModalContent.style.cssText = `
-                    background-color: var(--card-bg); padding: 30px; border: 2px solid var(--primary-color);
-                    border-radius: 15px; text-align: center; width: 90%; max-width: 400px;
-                    box-shadow: 0 0 30px rgba(0, 255, 195, 0.3);
-                `;
-                const disconnectTitle = document.createElement('h3');
-                disconnectTitle.textContent = 'Disconnect Wallet';
-                disconnectTitle.style.cssText = `font-family: 'Orbitron', sans-serif; color: var(--primary-color); margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;`;
-                const disconnectMessage = document.createElement('p');
-                disconnectMessage.textContent = 'Are you sure you want to disconnect your wallet?';
-                disconnectMessage.style.cssText = `color: var(--text-color); margin-bottom: 30px; font-size: 1.1em; line-height: 1.5;`;
-                const disconnectButtons = document.createElement('div');
-                disconnectButtons.style.cssText = `display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;`;
-                const confirmBtn = document.createElement('button');
-                confirmBtn.textContent = 'Yes, Disconnect';
-                confirmBtn.className = 'btn-primary px-6 py-3 rounded-lg';
-                const cancelBtn = document.createElement('button');
-                cancelBtn.textContent = 'Cancel';
-                cancelBtn.className = 'bg-gray-600 hover:bg-gray-700 text-white font-bold px-6 py-3 rounded-lg';
-                disconnectButtons.appendChild(confirmBtn);
-                disconnectButtons.appendChild(cancelBtn);
-                disconnectModalContent.appendChild(disconnectTitle);
-                disconnectModalContent.appendChild(disconnectMessage);
-                disconnectModalContent.appendChild(disconnectButtons);
-                disconnectModal.appendChild(disconnectModalContent);
-                document.body.appendChild(disconnectModal);
-
-                const installModal = document.createElement('div');
-                installModal.style.cssText = `
-                    display: none; position: fixed; z-index: 2002; left: 0; top: 0; width: 100%; height: 100%;
-                    overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
-                `;
-                const installModalContent = document.createElement('div');
-                installModalContent.style.cssText = `
-                    background-color: var(--card-bg); padding: 30px; border: 2px solid var(--warning-color);
-                    border-radius: 15px; text-align: center; width: 90%; max-width: 450px;
-                    box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
-                `;
-                const installTitle = document.createElement('h3');
-                installTitle.textContent = 'Wallet Not Found';
-                installTitle.style.cssText = `font-family: 'Orbitron', sans-serif; color: var(--warning-color); margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;`;
-                const installMessage = document.createElement('p');
-                installMessage.id = 'install-modal-message';
-                installMessage.style.cssText = `color: var(--text-color); margin-bottom: 25px; font-size: 1.1em; line-height: 1.5;`;
-                const installButtons = document.createElement('div');
-                installButtons.style.cssText = `display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;`;
-                const installBtn = document.createElement('button');
-                installBtn.textContent = 'Install Wallet';
-                installBtn.className = 'bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-3 rounded-lg';
-                const closeInstallBtn = document.createElement('button');
-                closeInstallBtn.textContent = 'Close';
-                closeInstallBtn.className = 'bg-gray-600 hover:bg-gray-700 text-white font-bold px-6 py-3 rounded-lg';
-                installButtons.appendChild(installBtn);
-                installButtons.appendChild(closeInstallBtn);
-                installModalContent.appendChild(installTitle);
-                installModalContent.appendChild(installMessage);
-                installModalContent.appendChild(installButtons);
-                installModal.appendChild(installModalContent);
-                document.body.appendChild(installModal);
-
-                let connectedWalletType = null;
-
-                function getInstallUrl(walletId) {
-                    const urls = {
-                        phantom: 'https://phantom.app/',
-                        backpack: 'https://backpack.app/',
-                        solflare: 'https://solflare.com/'
-                    };
-                    return urls[walletId] || '';
-                }
-
-                function onDisconnect() {
-                    connectedWalletType = null;
-                    provider = null;
-                    connection = null;
-                    connectedWalletKey = null;
-
-                    connectWalletBtn.textContent = 'Connect Wallet & See Fortune';
-                    connectWalletBtn.disabled = false;
-                    
-                    horoscopeSection.classList.add('hidden');
-                    connectWalletSection.classList.remove('hidden');
-                    
-                    loadingState.style.display = 'flex';
-                    fortuneState.classList.add('hidden');
-                    errorState.classList.add('hidden');
-                }
-
-                async function handleConnection(selectedProvider, walletType) {
-                    provider = selectedProvider;
-                    connectWalletBtn.textContent = 'Connecting...';
-                    connectWalletBtn.disabled = true;
-
-                    try {
-                        await provider.connect({ onlyIfTrusted: false });
-                        
-                        if (provider.on) {
-                            provider.on('disconnect', onDisconnect);
-                        }
-                        
-                        connectedWalletKey = provider.publicKey;
-                        connection = new Connection(HELIUS_RPC_URL, 'confirmed');
-                        connectedWalletType = walletType;
-
-                        const shortAddr = connectedWalletKey.toString().slice(0, 4) + '...' + connectedWalletKey.toString().slice(-4);
-                        connectWalletBtn.textContent = `Disconnect: ${shortAddr}`;
-                        connectWalletBtn.disabled = false;
-
-                        connectWalletSection.classList.add('hidden');
-                        horoscopeSection.classList.remove('hidden');
-                        
-                        await displayFortuneForWallet();
-
-                    } catch (err) {
-                        console.error("Wallet connection failed:", err);
-                        showError("Wallet connection was rejected. Please try again.");
-                        onDisconnect();
-                    } finally {
-                         modal.style.display = 'none';
-                    }
-                }
-
-                connectWalletBtn.addEventListener('click', async () => {
-                    if (connectedWalletType) {
-                        disconnectModal.style.display = 'flex';
-                        confirmBtn.onclick = () => {
-                            if (provider && provider.disconnect) {
-                                provider.disconnect().catch(console.error);
-                            }
-                            onDisconnect();
-                            disconnectModal.style.display = 'none';
-                        };
-                        cancelBtn.onclick = () => {
-                            disconnectModal.style.display = 'none';
-                        };
-                        return;
-                    }
-
-                    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-                    
-                    while (modalContent.childNodes.length > 1) {
-                        modalContent.removeChild(modalContent.lastChild);
-                    }
-
-                    const wallets = [
-                        { id: 'phantom', name: 'Phantom', logo: 'https://i.ibb.co/H5KnQH1/images.jpg', getProvider: () => window.solana?.isPhantom ? window.solana : null, deeplink: (url) => `phantom://v1/browse/${encodeURIComponent(url)}` },
-                        { id: 'backpack', name: 'Backpack', logo: 'https://i.ibb.co/8nkGvqKT/33.jpg', getProvider: () => window.solana?.isBackpack ? window.solana : null, deeplink: (url) => `backpack://browse?url=${encodeURIComponent(url)}` },
-                        { id: 'solflare', name: 'Solflare', logo: 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png', getProvider: () => window.solflare || (window.solana?.isSolflare ? window.solana : null), deeplink: (url) => `solflare://browse/${encodeURIComponent(url)}` }
-                    ];
-
-                    wallets.forEach(wallet => {
-                        const btn = document.createElement('button');
-                        btn.className = 'wallet-select-btn w-full mb-2.5';
-                        btn.innerHTML = `<img src="${wallet.logo}" alt="${wallet.name} Logo" class="wallet-logo"><span>Connect ${wallet.name}</span>`;
-                        
-                        btn.onclick = async () => {
-                            const walletProvider = wallet.getProvider();
-
-                            if (isMobile && !walletProvider) {
-                                window.location.href = wallet.deeplink(window.location.href);
-                                return;
-                            }
-                            
-                            if (walletProvider) {
-                                await handleConnection(walletProvider, wallet.id);
-                            } else {
-                                installMessage.textContent = `${wallet.name} wallet is not installed. Please install it to continue.`;
-                                installBtn.onclick = () => window.open(getInstallUrl(wallet.id), '_blank');
-                                closeInstallBtn.onclick = () => installModal.style.display = 'none';
-                                installModal.style.display = 'flex';
-                            }
-                        };
-                        modalContent.appendChild(btn);
-                    });
-
-                    modal.style.display = 'flex';
-                });
-
-                window.addEventListener('click', (event) => {
-                    if (event.target === modal) modal.style.display = "none";
-                    if (event.target === disconnectModal) disconnectModal.style.display = "none";
-                    if (event.target === installModal) installModal.style.display = "none";
-                });
-
-                // --- Horoscope Functions ---
-
-                async function sendMarkTokens() {
-                    // FIX: Add a robust check at the point of use
-                    if (typeof window.splToken === 'undefined' || typeof window.splToken.createTransferInstruction === 'undefined') {
-                        showError("Token library not loaded. Please refresh the page and try again.");
-                        console.error("splToken library is not available on window object yet.");
-                        return;
-                    }
-
-                    if (!provider || !connectedWalletKey || !connection) {
-                        showError("Wallet not connected. Please connect your wallet first.");
-                        return;
-                    }
-
-                    boostBtn.disabled = true;
-                    boostMessageEl.textContent = "Preparing transaction... Please wait.";
-                    boostMessageEl.classList.remove('text-red-500', 'text-green-500');
-
-                    try {
-                        const mintPublicKey = new PublicKey(MARK_TOKEN_MINT_ADDRESS);
-                        const destPublicKey = new PublicKey(DESTINATION_WALLET_ADDRESS);
-                        
-                        const fromTokenAccount = await getOrCreateAssociatedTokenAccount(provider.publicKey, mintPublicKey);
-                        const toTokenAccount = await getOrCreateAssociatedTokenAccount(destPublicKey, mintPublicKey);
-
-                        boostMessageEl.textContent = "Please approve the transaction in your wallet...";
-                        
-                        const tokenMintInfo = await connection.getParsedAccountInfo(mintPublicKey);
-                        if (!tokenMintInfo || !tokenMintInfo.value) {
-                             throw new Error("Could not fetch token mint info.");
-                        }
-                        const decimals = tokenMintInfo.value.data.parsed.info.decimals;
-                        const amount = 100 * Math.pow(10, decimals);
-
-                        const transaction = new Transaction().add(
-                            window.splToken.createTransferInstruction(
-                                fromTokenAccount.address,
-                                toTokenAccount.address,
-                                provider.publicKey,
-                                amount,
-                                [],
-                                SPL_TOKEN_PROGRAM_ID
-                            )
-                        );
-                        
-                        const { blockhash } = await connection.getLatestBlockhash();
-                        transaction.recentBlockhash = blockhash;
-                        transaction.feePayer = provider.publicKey;
-
-                        const signedTransaction = await provider.signTransaction(transaction);
-                        const signature = await connection.sendRawTransaction(signedTransaction.serialize());
-                        
-                        boostMessageEl.textContent = "Confirming transaction on the blockchain...";
-                        await connection.confirmTransaction(signature, 'confirmed');
-                        
-                        console.log('Transaction successful with signature:', signature);
-
-                        boostScores();
-                        currentFortune.boostUsed = true;
-                        const today = new Date().toISOString().split('T')[0];
-                        localStorage.setItem(`fortune_${connectedWalletKey.toString()}_${today}`, JSON.stringify(currentFortune));
-                        displayFortune(currentFortune);
-                        
-                        boostMessageEl.textContent = "Intervention successful! Mark has heard your request.";
-                        boostMessageEl.classList.add('text-green-500');
-
-                    } catch (error) {
-                        console.error('Token transfer failed:', error);
-                        let userMessage = `Intervention failed: ${error.message}`;
-                        if (error.message.includes('The required token account for $MARK does not exist')) {
-                            userMessage = 'The required $MARK token account (ATA) was not found in your wallet. Please create one first and try again.';
-                        }
-                        showError(userMessage);
-                        boostBtn.disabled = false;
-                        boostMessageEl.textContent = '';
-                    }
-                }
-
-                async function displayFortuneForWallet() {
-                    loadingState.style.display = 'flex';
-                    fortuneState.classList.add('hidden');
-                    errorState.classList.add('hidden');
-
-                    const walletString = connectedWalletKey.toString();
-                    const today = new Date().toISOString().split('T')[0];
-                    const storedFortune = localStorage.getItem(`fortune_${walletString}_${today}`);
-
-                    if (storedFortune) {
-                        currentFortune = JSON.parse(storedFortune);
-                        displayFortune(currentFortune);
-                        return;
-                    }
-                    
-                    if (!dailyHoroscopes) {
-                        try {
-                            dailyHoroscopes = await fetchHoroscopeData();
-                        } catch (error) {
-                            console.warn("Failed to load live horoscope data. Using fallback data.", error.message);
-                            dailyHoroscopes = generateFallbackData();
-                        }
-                    }
-
-                    const lastChar = walletString.slice(-1);
-                    walletAddressEl.textContent = walletString;
-                    fateVariableEl.textContent = lastChar;
-                    
-                    const fortuneData = dailyHoroscopes[lastChar];
-                    
-                    if (fortuneData) {
-                        currentFortune = { ...fortuneData, boostUsed: false };
-                        localStorage.setItem(`fortune_${walletString}_${today}`, JSON.stringify(currentFortune));
-                        displayFortune(currentFortune);
-                    } else {
-                        showError(`Could not find a fate for the variable '${lastChar}'.`);
-                    }
-                }
-                
-                async function getOrCreateAssociatedTokenAccount(owner, mint) {
-                    if (typeof window.splToken === 'undefined' || typeof window.splToken.getAssociatedTokenAddress === 'undefined') {
-                        throw new Error("Token library not loaded. Please refresh the page and try again.");
-                    }
-                    const associatedTokenAddress = await window.splToken.getAssociatedTokenAddress(
-                        mint, 
-                        owner, 
-                        false, 
-                        SPL_TOKEN_PROGRAM_ID
-                    );
-                    const accountInfo = await connection.getAccountInfo(associatedTokenAddress);
-                    if (accountInfo === null) {
-                        throw new Error(`The required token account for $MARK does not exist. Please create one first.`);
-                    }
-                    return { address: associatedTokenAddress };
-                }
-
-                async function fetchHoroscopeData() {
-                    if (HOROSCOPE_JSON_URL.includes('YOUR_GIST_RAW_URL_HERE')) {
-                        throw new Error("Configuration Error: HOROSCOPE_JSON_URL must be updated.");
-                    }
-                    const response = await fetch(HOROSCOPE_JSON_URL, { cache: 'no-cache' });
-                    if (!response.ok) throw new Error(`Failed to connect to the Tablet of Fate (HTTP ${response.status})`);
-                    return await response.json();
-                }
-
-                function displayFortune(data) {
-                    simVarEl.textContent = data.simulation_variable;
-                    reasonEl.textContent = `(Reason: ${data.reason})`;
-                    updateScoreAndGraph('overall', data.overall_score, data.overall_text);
-                    updateScoreAndGraph('money', data.money_score, data.money_text);
-                    updateScoreAndGraph('love', data.love_score, data.love_text);
-                    updateScoreAndGraph('health', data.health_score, data.health_text);
-                    document.getElementById('rec-color').textContent = data.recommended_color;
-                    document.getElementById('rec-numbers').textContent = `${Math.floor(Math.random() * 100) + 1}, ${Math.floor(Math.random() * 100) + 1}`;
-                    document.getElementById('rec-place').textContent = data.recommended_place;
-                    document.getElementById('rec-food').textContent = data.recommended_food;
-
-                    if (data.boostUsed) {
-                        boostBtn.textContent = "Mark has heard your request";
-                        boostBtn.disabled = true;
-                        boostMessageEl.textContent = 'You have already made a request today.';
-                        boostMessageEl.classList.add('text-gray-400');
-                    } else {
-                        boostBtn.textContent = 'Nudge Mark (100 $MARK)';
-                        boostBtn.disabled = false;
-                        boostMessageEl.textContent = '';
-                    }
-                    loadingState.style.display = 'none';
-                    errorState.classList.add('hidden');
-                    fortuneState.classList.remove('hidden');
-                }
-                
-                function updateScoreAndGraph(type, score, text) {
-                    document.getElementById(`${type}-score`).textContent = `${score} / 100`;
-                    document.getElementById(`${type}-bar`).style.width = `${score}%`;
-                    document.getElementById(`${type}-text`).textContent = text;
-                }
-
-                function boostScores() {
-                    const boostValue = (score) => Math.min(100, Math.floor(score * (1 + (Math.random() * 0.2 + 0.1))));
-                    currentFortune.overall_score = boostValue(currentFortune.overall_score);
-                    currentFortune.money_score = boostValue(currentFortune.money_score);
-                    currentFortune.love_score = boostValue(currentFortune.love_score);
-                    currentFortune.health_score = boostValue(currentFortune.health_score);
-                }
-
-                function showError(message) {
-                    loadingState.style.display = 'none';
-                    fortuneState.classList.add('hidden');
-                    errorState.classList.remove('hidden');
-                    errorMessageEl.textContent = message;
-                }
-                
-                function generateFallbackData() {
-                    const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
-                    const fallbackData = {};
-                    characters.forEach(char => {
-                        fallbackData[char] = {
-                            "simulation_variable": "Cosmic Static",
-                            "reason": "Mark spilled ramen on the console, so you're getting this generic, pre-compiled fate. At least it's not a blue screen of death... yet.",
-                            "overall_score": 68,
-                            "overall_text": "Today is a perfectly beige day. Nothing spectacular will happen, but nothing catastrophic either. It's the Tuesday of days, existing purely as a buffer between more interesting events. Consider it a system-wide idle cycle; try not to tax the CPU with any complex decisions.",
-                            "money_score": 55,
-                            "money_text": "Your financial parameters are locked in a read-only state. No sudden windfalls, no surprise bills. Your balance will remain as static as a forgotten NPC in a starting village. It's a good day to *not* check your bank account, mostly because there's nothing new to see.",
-                            "love_score": 72,
-                            "love_text": "The social interaction module is running on low power mode. Existing connections will function within normal parameters, but attempts to initiate new relationships may result in a '404: Connection Not Found' error. Stick to your known party members; venturing into new social dungeons is not advised.",
-                            "health_score": 65,
-                            "health_text": "Your avatar's physics engine is unusually sensitive to gravity today. Avoid sudden movements, especially near stairs or precariously placed banana peels. A system reboot (i.e., a nap) is highly recommended to clear any lingering cache issues and prevent unexpected ragdoll physics.",
-                            "recommended_color": "Greyscale",
-                            "recommended_place": "Your designated charging station (i.e., your couch)",
-                            "recommended_food": "Nutrient Paste #7 (or toast)"
-                        };
-                    });
-                    return fallbackData;
-                }
-            }
-
-            main().catch(error => {
-                console.error("Application failed to initialize:", error);
-                // Display a user-friendly error on the page if initialization fails
+            // FIX: Check for the essential web3 library right away.
+            if (typeof window.solanaWeb3 === 'undefined') {
+                console.error("FATAL: solanaWeb3 library not loaded. Check internet connection or CDN link.");
                 const connectSection = document.getElementById('connect-wallet-section');
                 if(connectSection) {
                     connectSection.innerHTML = `
@@ -657,7 +161,497 @@
                         <p class="text-lg text-gray-300">Could not load required libraries. Please check your internet connection and refresh the page.</p>
                     `;
                 }
+                return; // Stop all further execution
+            }
+
+            // --- ✅ Configuration Complete: All provided information has been applied. ---
+            
+            // 1. Helius RPC URL
+            const HELIUS_RPC_URL = 'https://mainnet.helius-rpc.com/?api-key=ebc0620a-0038-421f-a8a0-83c551702d97'; 
+
+            // 2. $MARK Token Address
+            const MARK_TOKEN_MINT_ADDRESS = 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263';
+
+            // 3. Project Wallet Address (to receive $MARK)
+            const DESTINATION_WALLET_ADDRESS = 'JBk9pkuDcwmJwz7TrfVSnitPGdLutWyRBMzTaLZNHhi3';
+
+            // 4. Horoscope Data URL
+            const HOROSCOPE_JSON_URL = 'https://gist.githubusercontent.com/markgod42/434a97acfb2d4c6d71137c7d4051511c/raw/058e4c5a918666c805e4f6f1a2d8e525ebc72a38/horoscope.json'; 
+
+            // --- Global Variables ---
+            const { Connection, PublicKey, SystemProgram, Transaction, TransactionInstruction } = window.solanaWeb3;
+            const SPL_TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
+            const ASSOCIATED_TOKEN_PROGRAM_ID = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL');
+            
+            let connection;
+            let provider; // Wallet provider (Phantom, Solflare, etc.)
+            let connectedWalletKey; // PublicKey of the connected wallet
+            let currentFortune = null;
+            let dailyHoroscopes = null;
+
+            // --- UI Elements ---
+            const connectWalletBtn = document.getElementById('connect-wallet-btn');
+            const connectWalletSection = document.getElementById('connect-wallet-section');
+            const horoscopeSection = document.getElementById('horoscope-section');
+            const loadingState = document.getElementById('loading-state');
+            const errorState = document.getElementById('error-state');
+            const errorMessageEl = document.getElementById('error-message');
+            const fortuneState = document.getElementById('fortune-state');
+            const walletAddressEl = document.getElementById('wallet-address');
+            const fateVariableEl = document.getElementById('fate-variable');
+            const simVarEl = document.getElementById('simulation-variable');
+            const reasonEl = document.getElementById('reason');
+            const boostBtn = document.getElementById('boost-fortune-btn');
+            const boostMessageEl = document.getElementById('boost-message');
+
+            // --- Event Listeners ---
+            boostBtn.addEventListener('click', sendMarkTokens);
+
+            // --- Wallet Connection Logic ---
+            
+            const modal = document.createElement('div');
+            modal.style.cssText = `
+                display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%;
+                overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;
+            `;
+            const modalContent = document.createElement('div');
+            modalContent.style.cssText = `
+                background-color: var(--card-bg); padding: 20px; border: 1px solid var(--primary-color);
+                border-radius: 10px; text-align: center; width: 90%; max-width: 350px;
+            `;
+            const modalTitle = document.createElement('h3');
+            modalTitle.textContent = 'Select Wallet';
+            modalTitle.style.fontFamily = "'Orbitron', sans-serif";
+            modalTitle.style.color = "var(--primary-color)";
+            modalTitle.style.marginBottom = "20px";
+            modalContent.appendChild(modalTitle);
+            modal.appendChild(modalContent);
+            document.body.appendChild(modal);
+
+            const disconnectModal = document.createElement('div');
+            disconnectModal.style.cssText = `
+                display: none; position: fixed; z-index: 2001; left: 0; top: 0; width: 100%; height: 100%;
+                overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
+            `;
+            const disconnectModalContent = document.createElement('div');
+            disconnectModalContent.style.cssText = `
+                background-color: var(--card-bg); padding: 30px; border: 2px solid var(--primary-color);
+                border-radius: 15px; text-align: center; width: 90%; max-width: 400px;
+                box-shadow: 0 0 30px rgba(0, 255, 195, 0.3);
+            `;
+            const disconnectTitle = document.createElement('h3');
+            disconnectTitle.textContent = 'Disconnect Wallet';
+            disconnectTitle.style.cssText = `font-family: 'Orbitron', sans-serif; color: var(--primary-color); margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;`;
+            const disconnectMessage = document.createElement('p');
+            disconnectMessage.textContent = 'Are you sure you want to disconnect your wallet?';
+            disconnectMessage.style.cssText = `color: var(--text-color); margin-bottom: 30px; font-size: 1.1em; line-height: 1.5;`;
+            const disconnectButtons = document.createElement('div');
+            disconnectButtons.style.cssText = `display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;`;
+            const confirmBtn = document.createElement('button');
+            confirmBtn.textContent = 'Yes, Disconnect';
+            confirmBtn.className = 'btn-primary px-6 py-3 rounded-lg';
+            const cancelBtn = document.createElement('button');
+            cancelBtn.textContent = 'Cancel';
+            cancelBtn.className = 'bg-gray-600 hover:bg-gray-700 text-white font-bold px-6 py-3 rounded-lg';
+            disconnectButtons.appendChild(confirmBtn);
+            disconnectButtons.appendChild(cancelBtn);
+            disconnectModalContent.appendChild(disconnectTitle);
+            disconnectModalContent.appendChild(disconnectMessage);
+            disconnectModalContent.appendChild(disconnectButtons);
+            disconnectModal.appendChild(disconnectModalContent);
+            document.body.appendChild(disconnectModal);
+
+            const installModal = document.createElement('div');
+            installModal.style.cssText = `
+                display: none; position: fixed; z-index: 2002; left: 0; top: 0; width: 100%; height: 100%;
+                overflow: auto; background-color: rgba(0,0,0,0.8); justify-content: center; align-items: center;
+            `;
+            const installModalContent = document.createElement('div');
+            installModalContent.style.cssText = `
+                background-color: var(--card-bg); padding: 30px; border: 2px solid var(--warning-color);
+                border-radius: 15px; text-align: center; width: 90%; max-width: 450px;
+                box-shadow: 0 0 30px rgba(255, 107, 53, 0.3);
+            `;
+            const installTitle = document.createElement('h3');
+            installTitle.textContent = 'Wallet Not Found';
+            installTitle.style.cssText = `font-family: 'Orbitron', sans-serif; color: var(--warning-color); margin-bottom: 20px; font-size: 1.5em; text-transform: uppercase;`;
+            const installMessage = document.createElement('p');
+            installMessage.id = 'install-modal-message';
+            installMessage.style.cssText = `color: var(--text-color); margin-bottom: 25px; font-size: 1.1em; line-height: 1.5;`;
+            const installButtons = document.createElement('div');
+            installButtons.style.cssText = `display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;`;
+            const installBtn = document.createElement('button');
+            installBtn.textContent = 'Install Wallet';
+            installBtn.className = 'bg-yellow-500 hover:bg-yellow-600 text-black font-bold px-6 py-3 rounded-lg';
+            const closeInstallBtn = document.createElement('button');
+            closeInstallBtn.textContent = 'Close';
+            closeInstallBtn.className = 'bg-gray-600 hover:bg-gray-700 text-white font-bold px-6 py-3 rounded-lg';
+            installButtons.appendChild(installBtn);
+            installButtons.appendChild(closeInstallBtn);
+            installModalContent.appendChild(installTitle);
+            installModalContent.appendChild(installMessage);
+            installModalContent.appendChild(installButtons);
+            installModal.appendChild(installModalContent);
+            document.body.appendChild(installModal);
+
+            let connectedWalletType = null;
+
+            function getInstallUrl(walletId) {
+                const urls = {
+                    phantom: 'https://phantom.app/',
+                    backpack: 'https://backpack.app/',
+                    solflare: 'https://solflare.com/'
+                };
+                return urls[walletId] || '';
+            }
+
+            function onDisconnect() {
+                connectedWalletType = null;
+                provider = null;
+                connection = null;
+                connectedWalletKey = null;
+
+                connectWalletBtn.textContent = 'Connect Wallet & See Fortune';
+                connectWalletBtn.disabled = false;
+                
+                horoscopeSection.classList.add('hidden');
+                connectWalletSection.classList.remove('hidden');
+                
+                loadingState.style.display = 'flex';
+                fortuneState.classList.add('hidden');
+                errorState.classList.add('hidden');
+            }
+
+            async function handleConnection(selectedProvider, walletType) {
+                provider = selectedProvider;
+                connectWalletBtn.textContent = 'Connecting...';
+                connectWalletBtn.disabled = true;
+
+                try {
+                    await provider.connect({ onlyIfTrusted: false });
+                    
+                    if (provider.on) {
+                        provider.on('disconnect', onDisconnect);
+                    }
+                    
+                    connectedWalletKey = provider.publicKey;
+                    connection = new Connection(HELIUS_RPC_URL, 'confirmed');
+                    connectedWalletType = walletType;
+
+                    const shortAddr = connectedWalletKey.toString().slice(0, 4) + '...' + connectedWalletKey.toString().slice(-4);
+                    connectWalletBtn.textContent = `Disconnect: ${shortAddr}`;
+                    connectWalletBtn.disabled = false;
+
+                    connectWalletSection.classList.add('hidden');
+                    horoscopeSection.classList.remove('hidden');
+                    
+                    await displayFortuneForWallet();
+
+                } catch (err) {
+                    console.error("Wallet connection failed:", err);
+                    showError("Wallet connection was rejected. Please try again.");
+                    onDisconnect();
+                } finally {
+                     modal.style.display = 'none';
+                }
+            }
+
+            connectWalletBtn.addEventListener('click', async () => {
+                if (connectedWalletType) {
+                    disconnectModal.style.display = 'flex';
+                    confirmBtn.onclick = () => {
+                        if (provider && provider.disconnect) {
+                            provider.disconnect().catch(console.error);
+                        }
+                        onDisconnect();
+                        disconnectModal.style.display = 'none';
+                    };
+                    cancelBtn.onclick = () => {
+                        disconnectModal.style.display = 'none';
+                    };
+                    return;
+                }
+
+                const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+                
+                while (modalContent.childNodes.length > 1) {
+                    modalContent.removeChild(modalContent.lastChild);
+                }
+
+                const wallets = [
+                    { id: 'phantom', name: 'Phantom', logo: 'https://i.ibb.co/H5KnQH1/images.jpg', getProvider: () => window.solana?.isPhantom ? window.solana : null, deeplink: (url) => `phantom://v1/browse/${encodeURIComponent(url)}` },
+                    { id: 'backpack', name: 'Backpack', logo: 'https://i.ibb.co/8nkGvqKT/33.jpg', getProvider: () => window.solana?.isBackpack ? window.solana : null, deeplink: (url) => `backpack://browse?url=${encodeURIComponent(url)}` },
+                    { id: 'solflare', name: 'Solflare', logo: 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png', getProvider: () => window.solflare || (window.solana?.isSolflare ? window.solana : null), deeplink: (url) => `solflare://browse/${encodeURIComponent(url)}` }
+                ];
+
+                wallets.forEach(wallet => {
+                    const btn = document.createElement('button');
+                    btn.className = 'wallet-select-btn w-full mb-2.5';
+                    btn.innerHTML = `<img src="${wallet.logo}" alt="${wallet.name} Logo" class="wallet-logo"><span>Connect ${wallet.name}</span>`;
+                    
+                    btn.onclick = async () => {
+                        const walletProvider = wallet.getProvider();
+
+                        if (isMobile && !walletProvider) {
+                            window.location.href = wallet.deeplink(window.location.href);
+                            return;
+                        }
+                        
+                        if (walletProvider) {
+                            await handleConnection(walletProvider, wallet.id);
+                        } else {
+                            installMessage.textContent = `${wallet.name} wallet is not installed. Please install it to continue.`;
+                            installBtn.onclick = () => window.open(getInstallUrl(wallet.id), '_blank');
+                            closeInstallBtn.onclick = () => installModal.style.display = 'none';
+                            installModal.style.display = 'flex';
+                        }
+                    };
+                    modalContent.appendChild(btn);
+                });
+
+                modal.style.display = 'flex';
             });
+
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) modal.style.display = "none";
+                if (event.target === disconnectModal) disconnectModal.style.display = "none";
+                if (event.target === installModal) installModal.style.display = "none";
+            });
+
+            // --- Horoscope Functions ---
+
+            // FIX: Inlined SPL Token library functions to remove CDN dependency
+            const splToken = {
+                async getAssociatedTokenAddress(mint, owner, allowOwnerOffCurve = false, programId = SPL_TOKEN_PROGRAM_ID, associatedTokenProgramId = ASSOCIATED_TOKEN_PROGRAM_ID) {
+                    if (!allowOwnerOffCurve && !PublicKey.isOnCurve(owner.toBuffer())) {
+                        throw new Error('TokenOwnerOffCurveError');
+                    }
+                    const [address] = await PublicKey.findProgramAddress(
+                        [owner.toBuffer(), programId.toBuffer(), mint.toBuffer()],
+                        associatedTokenProgramId
+                    );
+                    return address;
+                },
+                createTransferInstruction(source, destination, owner, amount, multiSigners = [], programId = SPL_TOKEN_PROGRAM_ID) {
+                    const data = Buffer.alloc(9);
+                    data.writeUInt8(3, 0); // Instruction: Transfer
+                    const amountBuffer = Buffer.alloc(8);
+                    amountBuffer.writeBigUInt64LE(BigInt(amount));
+                    amountBuffer.copy(data, 1);
+
+                    const keys = [
+                        { pubkey: source, isSigner: false, isWritable: true },
+                        { pubkey: destination, isSigner: false, isWritable: true },
+                        { pubkey: owner, isSigner: true, isWritable: false },
+                    ];
+                    
+                    for (const signer of multiSigners) {
+                        keys.push({ pubkey: signer.publicKey, isSigner: true, isWritable: false });
+                    }
+
+                    return new TransactionInstruction({ keys, programId, data });
+                }
+            };
+
+            async function sendMarkTokens() {
+                if (!provider || !connectedWalletKey || !connection) {
+                    showError("Wallet not connected. Please connect your wallet first.");
+                    return;
+                }
+
+                boostBtn.disabled = true;
+                boostMessageEl.textContent = "Preparing transaction... Please wait.";
+                boostMessageEl.classList.remove('text-red-500', 'text-green-500');
+
+                try {
+                    const mintPublicKey = new PublicKey(MARK_TOKEN_MINT_ADDRESS);
+                    const destPublicKey = new PublicKey(DESTINATION_WALLET_ADDRESS);
+                    
+                    const fromTokenAccount = await getOrCreateAssociatedTokenAccount(provider.publicKey, mintPublicKey);
+                    const toTokenAccount = await getOrCreateAssociatedTokenAccount(destPublicKey, mintPublicKey);
+
+                    boostMessageEl.textContent = "Please approve the transaction in your wallet...";
+                    
+                    const tokenMintInfo = await connection.getParsedAccountInfo(mintPublicKey);
+                    if (!tokenMintInfo || !tokenMintInfo.value) {
+                         throw new Error("Could not fetch token mint info.");
+                    }
+                    const decimals = tokenMintInfo.value.data.parsed.info.decimals;
+                    const amount = 100 * Math.pow(10, decimals);
+
+                    const transaction = new Transaction().add(
+                        splToken.createTransferInstruction(
+                            fromTokenAccount.address,
+                            toTokenAccount.address,
+                            provider.publicKey,
+                            amount,
+                            []
+                        )
+                    );
+                    
+                    const { blockhash } = await connection.getLatestBlockhash();
+                    transaction.recentBlockhash = blockhash;
+                    transaction.feePayer = provider.publicKey;
+
+                    const signedTransaction = await provider.signTransaction(transaction);
+                    const signature = await connection.sendRawTransaction(signedTransaction.serialize());
+                    
+                    boostMessageEl.textContent = "Confirming transaction on the blockchain...";
+                    await connection.confirmTransaction(signature, 'confirmed');
+                    
+                    console.log('Transaction successful with signature:', signature);
+
+                    boostScores();
+                    currentFortune.boostUsed = true;
+                    const today = new Date().toISOString().split('T')[0];
+                    localStorage.setItem(`fortune_${connectedWalletKey.toString()}_${today}`, JSON.stringify(currentFortune));
+                    displayFortune(currentFortune);
+                    
+                    boostMessageEl.textContent = "Intervention successful! Mark has heard your request.";
+                    boostMessageEl.classList.add('text-green-500');
+
+                } catch (error) {
+                    console.error('Token transfer failed:', error);
+                    let userMessage = `Intervention failed: ${error.message}`;
+                    if (error.message.includes('The required token account for $MARK does not exist')) {
+                        userMessage = 'The required $MARK token account (ATA) was not found in your wallet. Please create one first and try again.';
+                    }
+                    showError(userMessage);
+                    boostBtn.disabled = false;
+                    boostMessageEl.textContent = '';
+                }
+            }
+
+            async function displayFortuneForWallet() {
+                loadingState.style.display = 'flex';
+                fortuneState.classList.add('hidden');
+                errorState.classList.add('hidden');
+
+                const walletString = connectedWalletKey.toString();
+                const today = new Date().toISOString().split('T')[0];
+                const storedFortune = localStorage.getItem(`fortune_${walletString}_${today}`);
+
+                if (storedFortune) {
+                    currentFortune = JSON.parse(storedFortune);
+                    displayFortune(currentFortune);
+                    return;
+                }
+                
+                if (!dailyHoroscopes) {
+                    try {
+                        dailyHoroscopes = await fetchHoroscopeData();
+                    } catch (error) {
+                        console.warn("Failed to load live horoscope data. Using fallback data.", error.message);
+                        dailyHoroscopes = generateFallbackData();
+                    }
+                }
+
+                const lastChar = walletString.slice(-1);
+                walletAddressEl.textContent = walletString;
+                fateVariableEl.textContent = lastChar;
+                
+                const fortuneData = dailyHoroscopes[lastChar];
+                
+                if (fortuneData) {
+                    currentFortune = { ...fortuneData, boostUsed: false };
+                    localStorage.setItem(`fortune_${walletString}_${today}`, JSON.stringify(currentFortune));
+                    displayFortune(currentFortune);
+                } else {
+                    showError(`Could not find a fate for the variable '${lastChar}'.`);
+                }
+            }
+            
+            async function getOrCreateAssociatedTokenAccount(owner, mint) {
+                const associatedTokenAddress = await splToken.getAssociatedTokenAddress(
+                    mint, 
+                    owner
+                );
+                const accountInfo = await connection.getAccountInfo(associatedTokenAddress);
+                if (accountInfo === null) {
+                    throw new Error(`The required token account for $MARK does not exist. Please create one first.`);
+                }
+                return { address: associatedTokenAddress };
+            }
+
+            async function fetchHoroscopeData() {
+                if (HOROSCOPE_JSON_URL.includes('YOUR_GIST_RAW_URL_HERE')) {
+                    throw new Error("Configuration Error: HOROSCOPE_JSON_URL must be updated.");
+                }
+                const response = await fetch(HOROSCOPE_JSON_URL, { cache: 'no-cache' });
+                if (!response.ok) throw new Error(`Failed to connect to the Tablet of Fate (HTTP ${response.status})`);
+                return await response.json();
+            }
+
+            function displayFortune(data) {
+                simVarEl.textContent = data.simulation_variable;
+                reasonEl.textContent = `(Reason: ${data.reason})`;
+                updateScoreAndGraph('overall', data.overall_score, data.overall_text);
+                updateScoreAndGraph('money', data.money_score, data.money_text);
+                updateScoreAndGraph('love', data.love_score, data.love_text);
+                updateScoreAndGraph('health', data.health_score, data.health_text);
+                document.getElementById('rec-color').textContent = data.recommended_color;
+                document.getElementById('rec-numbers').textContent = `${Math.floor(Math.random() * 100) + 1}, ${Math.floor(Math.random() * 100) + 1}`;
+                document.getElementById('rec-place').textContent = data.recommended_place;
+                document.getElementById('rec-food').textContent = data.recommended_food;
+
+                if (data.boostUsed) {
+                    boostBtn.textContent = "Mark has heard your request";
+                    boostBtn.disabled = true;
+                    boostMessageEl.textContent = 'You have already made a request today.';
+                    boostMessageEl.classList.add('text-gray-400');
+                } else {
+                    boostBtn.textContent = 'Nudge Mark (100 $MARK)';
+                    boostBtn.disabled = false;
+                    boostMessageEl.textContent = '';
+                }
+                loadingState.style.display = 'none';
+                errorState.classList.add('hidden');
+                fortuneState.classList.remove('hidden');
+            }
+            
+            function updateScoreAndGraph(type, score, text) {
+                document.getElementById(`${type}-score`).textContent = `${score} / 100`;
+                document.getElementById(`${type}-bar`).style.width = `${score}%`;
+                document.getElementById(`${type}-text`).textContent = text;
+            }
+
+            function boostScores() {
+                const boostValue = (score) => Math.min(100, Math.floor(score * (1 + (Math.random() * 0.2 + 0.1))));
+                currentFortune.overall_score = boostValue(currentFortune.overall_score);
+                currentFortune.money_score = boostValue(currentFortune.money_score);
+                currentFortune.love_score = boostValue(currentFortune.love_score);
+                currentFortune.health_score = boostValue(currentFortune.health_score);
+            }
+
+            function showError(message) {
+                loadingState.style.display = 'none';
+                fortuneState.classList.add('hidden');
+                errorState.classList.remove('hidden');
+                errorMessageEl.textContent = message;
+            }
+            
+            function generateFallbackData() {
+                const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+                const fallbackData = {};
+                characters.forEach(char => {
+                    fallbackData[char] = {
+                        "simulation_variable": "Cosmic Static",
+                        "reason": "Mark spilled ramen on the console, so you're getting this generic, pre-compiled fate. At least it's not a blue screen of death... yet.",
+                        "overall_score": 68,
+                        "overall_text": "Today is a perfectly beige day. Nothing spectacular will happen, but nothing catastrophic either. It's the Tuesday of days, existing purely as a buffer between more interesting events. Consider it a system-wide idle cycle; try not to tax the CPU with any complex decisions.",
+                        "money_score": 55,
+                        "money_text": "Your financial parameters are locked in a read-only state. No sudden windfalls, no surprise bills. Your balance will remain as static as a forgotten NPC in a starting village. It's a good day to *not* check your bank account, mostly because there's nothing new to see.",
+                        "love_score": 72,
+                        "love_text": "The social interaction module is running on low power mode. Existing connections will function within normal parameters, but attempts to initiate new relationships may result in a '404: Connection Not Found' error. Stick to your known party members; venturing into new social dungeons is not advised.",
+                        "health_score": 65,
+                        "health_text": "Your avatar's physics engine is unusually sensitive to gravity today. Avoid sudden movements, especially near stairs or precariously placed banana peels. A system reboot (i.e., a nap) is highly recommended to clear any lingering cache issues and prevent unexpected ragdoll physics.",
+                        "recommended_color": "Greyscale",
+                        "recommended_place": "Your designated charging station (i.e., your couch)",
+                        "recommended_food": "Nutrient Paste #7 (or toast)"
+                    };
+                });
+                return fallbackData;
+            }
         });
     </script>
 </body>
