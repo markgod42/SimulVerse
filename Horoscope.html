@@ -13,62 +13,10 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
     
-    <!-- Solana Web3.js Library -->
-    <script src="https://unpkg.com/@solana/web3.js@1.87.6/lib/index.iife.js"></script>
-    <!-- Solana SPL Token Library -->
-    <script src="https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js"></script>
-    
-    <script>
-        // Wait for all scripts to load
-        window.addEventListener('load', () => {
-            console.log('All resources loaded');
-            console.log('Library status:', {
-                solanaWeb3: typeof window.solanaWeb3,
-                splToken: typeof window.splToken
-            });
-            
-            // Check if libraries are properly loaded
-            if (typeof window.solanaWeb3 === 'undefined') {
-                console.error('Solana Web3 library failed to load');
-            }
-            if (typeof window.splToken === 'undefined') {
-                console.error('SPL Token library failed to load');
-            }
-        });
-        
-        // Alternative library loading method
-        function loadLibrary(url, callback) {
-            const script = document.createElement('script');
-            script.src = url;
-            script.onload = callback;
-            script.onerror = () => console.error('Failed to load:', url);
-            document.head.appendChild(script);
-        }
-        
-        // Try multiple CDNs if main one fails
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                if (typeof window.splToken === 'undefined') {
-                    console.log('Trying alternative SPL Token library...');
-                    loadLibrary('https://cdn.jsdelivr.net/npm/@solana/spl-token@0.3.9/lib/index.iife.js', () => {
-                        console.log('Alternative SPL Token library loaded');
-                    });
-                }
-            }, 2000);
-        });
-        
-        // Try even more alternatives
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                if (typeof window.splToken === 'undefined') {
-                    console.log('Trying third SPL Token library...');
-                    loadLibrary('https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js', () => {
-                        console.log('Third SPL Token library loaded');
-                    });
-                }
-            }, 4000);
-        });
-    </script>
+    <!-- Solana Web3.js Library (from jsdelivr CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.js"></script>
+    <!-- Solana SPL Token Library (from jsdelivr CDN) -->
+    <script src="https://cdn.jsdelivr.net/npm/@solana/spl-token@latest/lib/index.iife.js"></script>
 
     <style>
         /* 기본 스타일 */
@@ -203,8 +151,33 @@
     </div>
 
     <script>
-        // --- Main App Initialization ---
-        async function main() {
+        document.addEventListener('DOMContentLoaded', () => {
+            /**
+             * Waits for necessary Solana libraries to be loaded on the window object.
+             * This prevents "is not defined" errors by ensuring that the app logic
+             * only runs after its dependencies are ready.
+             */
+            function waitForLibraries() {
+                return new Promise((resolve, reject) => {
+                    let attempts = 0;
+                    const maxAttempts = 50; // Try for 5 seconds
+                    const interval = setInterval(() => {
+                        if (typeof window.solanaWeb3 !== 'undefined' && typeof window.splToken !== 'undefined') {
+                            clearInterval(interval);
+                            resolve();
+                        } else {
+                            attempts++;
+                            if (attempts > maxAttempts) {
+                                clearInterval(interval);
+                                reject(new Error("Solana libraries failed to load in time."));
+                            }
+                        }
+                    }, 100); // Check every 100 milliseconds
+                });
+            }
+
+            // --- Main App Initialization ---
+            async function main() {
                 // --- ✅ Configuration Complete: All provided information has been applied. ---
                 
                 // 1. Helius RPC URL
@@ -220,22 +193,8 @@
                 const HOROSCOPE_JSON_URL = 'https://gist.githubusercontent.com/markgod42/434a97acfb2d4c6d71137c7d4051511c/raw/058e4c5a918666c805e4f6f1a2d8e525ebc72a38/horoscope.json'; 
 
                 // --- Global Variables ---
-                let Connection, PublicKey, SystemProgram, Transaction;
-                let SPL_TOKEN_PROGRAM_ID;
-                
-                // Initialize Solana Web3 when available
-                function initializeSolanaWeb3() {
-                    if (typeof window.solanaWeb3 !== 'undefined') {
-                        const { Connection: Conn, PublicKey: PK, SystemProgram: SP, Transaction: Tx } = window.solanaWeb3;
-                        Connection = Conn;
-                        PublicKey = PK;
-                        SystemProgram = SP;
-                        Transaction = Tx;
-                        SPL_TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
-                        return true;
-                    }
-                    return false;
-                }
+                const { Connection, PublicKey, SystemProgram, Transaction } = window.solanaWeb3;
+                const SPL_TOKEN_PROGRAM_ID = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA');
                 
                 let connection;
                 let provider; // Wallet provider (Phantom, Solflare, etc.)
@@ -389,12 +348,6 @@
                         }
                         
                         connectedWalletKey = provider.publicKey;
-                        
-                        // Initialize Solana Web3 if not already done
-                        if (!initializeSolanaWeb3()) {
-                            throw new Error("Solana Web3 library not loaded");
-                        }
-                        
                         connection = new Connection(HELIUS_RPC_URL, 'confirmed');
                         connectedWalletType = walletType;
 
@@ -481,28 +434,11 @@
                 // --- Horoscope Functions ---
 
                 async function sendMarkTokens() {
-                    // Check if libraries are available with detailed logging
-                    console.log('Checking libraries in sendMarkTokens:', {
-                        solanaWeb3: typeof window.solanaWeb3,
-                        splToken: typeof window.splToken
-                    });
-                    
-                    if (typeof window.solanaWeb3 === 'undefined') {
-                        showError("Solana Web3 library not loaded. Please refresh the page and try again.");
-                        console.error("solanaWeb3 not available");
+                    // FIX: Add a robust check at the point of use
+                    if (typeof window.splToken === 'undefined' || typeof window.splToken.createTransferInstruction === 'undefined') {
+                        showError("Token library not loaded. Please refresh the page and try again.");
+                        console.error("splToken library is not available on window object yet.");
                         return;
-                    }
-                    
-                    // Try to load splToken manually if not available
-                    if (typeof window.splToken === 'undefined') {
-                        console.log('Attempting to load SPL Token library manually...');
-                        try {
-                            await loadSPLTokenManually();
-                        } catch (error) {
-                            showError("SPL Token library not loaded. Please refresh the page and try again.");
-                            console.error("splToken not available after manual load attempt");
-                            return;
-                        }
                     }
 
                     if (!provider || !connectedWalletKey || !connection) {
@@ -530,30 +466,16 @@
                         const decimals = tokenMintInfo.value.data.parsed.info.decimals;
                         const amount = 100 * Math.pow(10, decimals);
 
-                                                 // Create transfer instruction manually if splToken is not available
-                         let transferInstruction;
-                         if (typeof window.splToken !== 'undefined') {
-                             transferInstruction = window.splToken.createTransferInstruction(
-                                 fromTokenAccount.address,
-                                 toTokenAccount.address,
-                                 provider.publicKey,
-                                 amount,
-                                 [],
-                                 SPL_TOKEN_PROGRAM_ID
-                             );
-                         } else {
-                             // Fallback: Create instruction manually
-                             console.log('Creating transfer instruction manually...');
-                             transferInstruction = createTransferInstructionManually(
-                                 fromTokenAccount.address,
-                                 toTokenAccount.address,
-                                 provider.publicKey,
-                                 amount,
-                                 SPL_TOKEN_PROGRAM_ID
-                             );
-                         }
-                         
-                         const transaction = new Transaction().add(transferInstruction);
+                        const transaction = new Transaction().add(
+                            window.splToken.createTransferInstruction(
+                                fromTokenAccount.address,
+                                toTokenAccount.address,
+                                provider.publicKey,
+                                amount,
+                                [],
+                                SPL_TOKEN_PROGRAM_ID
+                            )
+                        );
                         
                         const { blockhash } = await connection.getLatestBlockhash();
                         transaction.recentBlockhash = blockhash;
@@ -627,17 +549,10 @@
                     }
                 }
                 
-                                 async function getOrCreateAssociatedTokenAccount(owner, mint) {
-                     // Try to load splToken manually if not available
-                     if (typeof window.splToken === 'undefined') {
-                         console.log('Attempting to load SPL Token library for ATA...');
-                         try {
-                             await loadSPLTokenManually();
-                         } catch (error) {
-                             throw new Error("SPL Token library not loaded. Please refresh the page and try again.");
-                         }
-                     }
-                    
+                async function getOrCreateAssociatedTokenAccount(owner, mint) {
+                    if (typeof window.splToken === 'undefined' || typeof window.splToken.getAssociatedTokenAddress === 'undefined') {
+                        throw new Error("Token library not loaded. Please refresh the page and try again.");
+                    }
                     const associatedTokenAddress = await window.splToken.getAssociatedTokenAddress(
                         mint, 
                         owner, 
@@ -708,72 +623,31 @@
                     errorMessageEl.textContent = message;
                 }
                 
-                                 function generateFallbackData() {
-                     const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
-                     const fallbackData = {};
-                     characters.forEach(char => {
-                         fallbackData[char] = {
-                             "simulation_variable": "Cosmic Static",
-                             "reason": "Mark spilled ramen on the console, so you're getting this generic, pre-compiled fate. At least it's not a blue screen of death... yet.",
-                             "overall_score": 68,
-                             "overall_text": "Today is a perfectly beige day. Nothing spectacular will happen, but nothing catastrophic either. It's the Tuesday of days, existing purely as a buffer between more interesting events. Consider it a system-wide idle cycle; try not to tax the CPU with any complex decisions.",
-                             "money_score": 55,
-                             "money_text": "Your financial parameters are locked in a read-only state. No sudden windfalls, no surprise bills. Your balance will remain as static as a forgotten NPC in a starting village. It's a good day to *not* check your bank account, mostly because there's nothing new to see.",
-                             "love_score": 72,
-                             "love_text": "The social interaction module is running on low power mode. Existing connections will function within normal parameters, but attempts to initiate new relationships may result in a '404: Connection Not Found' error. Stick to your known party members; venturing into new social dungeons is not advised.",
-                             "health_score": 65,
-                             "health_text": "Your avatar's physics engine is unusually sensitive to gravity today. Avoid sudden movements, especially near stairs or precariously placed banana peels. A system reboot (i.e., a nap) is highly recommended to clear any lingering cache issues and prevent unexpected ragdoll physics.",
-                             "recommended_color": "Greyscale",
-                             "recommended_place": "Your designated charging station (i.e., your couch)",
-                             "recommended_food": "Nutrient Paste #7 (or toast)"
-                         };
-                     });
-                     return fallbackData;
-                 }
-                 
-                 // Manual SPL Token library loader
-                 async function loadSPLTokenManually() {
-                     return new Promise((resolve, reject) => {
-                         const script = document.createElement('script');
-                         script.src = 'https://unpkg.com/@solana/spl-token@0.3.9/lib/index.iife.js';
-                         script.onload = () => {
-                             console.log('SPL Token library loaded manually');
-                             resolve();
-                         };
-                         script.onerror = () => {
-                             console.error('Failed to load SPL Token library manually');
-                             reject(new Error('Failed to load SPL Token library'));
-                         };
-                         document.head.appendChild(script);
-                     });
-                 }
-                 
-                 // Manual transfer instruction creator
-                 function createTransferInstructionManually(source, destination, owner, amount, programId) {
-                     console.log('Creating manual transfer instruction...');
-                     
-                     // Create a basic transfer instruction structure
-                     const instruction = {
-                         programId: programId,
-                         keys: [
-                             { pubkey: source, isSigner: false, isWritable: true },
-                             { pubkey: destination, isSigner: false, isWritable: true },
-                             { pubkey: owner, isSigner: true, isWritable: false }
-                         ],
-                         data: Buffer.from([3, ...new Uint8Array(new Uint64Array([amount]).buffer)])
-                     };
-                     
-                     return instruction;
-                 }
-             }
+                function generateFallbackData() {
+                    const characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz'.split('');
+                    const fallbackData = {};
+                    characters.forEach(char => {
+                        fallbackData[char] = {
+                            "simulation_variable": "Cosmic Static",
+                            "reason": "Mark spilled ramen on the console, so you're getting this generic, pre-compiled fate. At least it's not a blue screen of death... yet.",
+                            "overall_score": 68,
+                            "overall_text": "Today is a perfectly beige day. Nothing spectacular will happen, but nothing catastrophic either. It's the Tuesday of days, existing purely as a buffer between more interesting events. Consider it a system-wide idle cycle; try not to tax the CPU with any complex decisions.",
+                            "money_score": 55,
+                            "money_text": "Your financial parameters are locked in a read-only state. No sudden windfalls, no surprise bills. Your balance will remain as static as a forgotten NPC in a starting village. It's a good day to *not* check your bank account, mostly because there's nothing new to see.",
+                            "love_score": 72,
+                            "love_text": "The social interaction module is running on low power mode. Existing connections will function within normal parameters, but attempts to initiate new relationships may result in a '404: Connection Not Found' error. Stick to your known party members; venturing into new social dungeons is not advised.",
+                            "health_score": 65,
+                            "health_text": "Your avatar's physics engine is unusually sensitive to gravity today. Avoid sudden movements, especially near stairs or precariously placed banana peels. A system reboot (i.e., a nap) is highly recommended to clear any lingering cache issues and prevent unexpected ragdoll physics.",
+                            "recommended_color": "Greyscale",
+                            "recommended_place": "Your designated charging station (i.e., your couch)",
+                            "recommended_food": "Nutrient Paste #7 (or toast)"
+                        };
+                    });
+                    return fallbackData;
+                }
+            }
 
-        // Initialize app when DOM is ready
-        document.addEventListener('DOMContentLoaded', async () => {
-            try {
-                // Initialize UI elements immediately
-                await main();
-                console.log('App initialized successfully');
-            } catch (error) {
+            main().catch(error => {
                 console.error("Application failed to initialize:", error);
                 // Display a user-friendly error on the page if initialization fails
                 const connectSection = document.getElementById('connect-wallet-section');
@@ -783,8 +657,8 @@
                         <p class="text-lg text-gray-300">Could not load required libraries. Please check your internet connection and refresh the page.</p>
                     `;
                 }
-            }
+            });
         });
-     </script>
+    </script>
 </body>
 </html>
