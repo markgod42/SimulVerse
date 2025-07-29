@@ -17,7 +17,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@solana/web3.js@latest/lib/index.iife.js"></script>
 
     <style>
-        /* 'Horoscope'와 동일한 톤앤매너를 위한 스타일 */
         :root {
             --primary-color: #00ffc3;
             --background-color: #0d0d1a;
@@ -39,43 +38,27 @@
         .loader { border: 4px solid rgba(255, 255, 255, 0.2); border-top: 4px solid var(--primary-color); border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         
-        /* 탭 스타일 */
         .tab-btn {
-            background-color: transparent;
-            border: 2px solid rgba(0, 255, 195, 0.3);
-            color: rgba(0, 255, 195, 0.7);
+            background-color: transparent; border: 2px solid rgba(0, 255, 195, 0.3); color: rgba(0, 255, 195, 0.7);
             transition: all 0.3s ease;
         }
         .tab-btn.active {
-            background-color: var(--primary-color);
-            color: var(--background-color);
-            box-shadow: 0 0 10px rgba(0, 255, 195, 0.5);
+            background-color: var(--primary-color); color: var(--background-color); box-shadow: 0 0 10px rgba(0, 255, 195, 0.5);
         }
 
-        /* 입력 필드 스타일 */
         .input-field, .select-field {
-            background-color: rgba(0,0,0,0.3);
-            border: 1px solid rgba(0, 255, 195, 0.3);
-            color: var(--text-color);
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            transition: all 0.3s ease;
+            background-color: rgba(0,0,0,0.3); border: 1px solid rgba(0, 255, 195, 0.3); color: var(--text-color);
+            border-radius: 0.5rem; padding: 0.75rem; transition: all 0.3s ease;
         }
         .input-field:focus, .select-field:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 10px rgba(0, 255, 195, 0.3);
+            outline: none; border-color: var(--primary-color); box-shadow: 0 0 10px rgba(0, 255, 195, 0.3);
         }
         .select-field {
             appearance: none;
             background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2300ffc3' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
-            background-position: right 0.5rem center;
-            background-repeat: no-repeat;
-            background-size: 1.5em 1.5em;
-            padding-right: 2.5rem;
+            background-position: right 0.5rem center; background-repeat: no-repeat; background-size: 1.5em 1.5em; padding-right: 2.5rem;
         }
 
-        /* 지갑 연결 모달 스타일 (Horoscope에서 가져옴) */
         .wallet-select-btn {
             display: flex; align-items: center; gap: 12px; justify-content: center; font-weight: 700; font-size: 1.1em;
             padding: 12px 25px; border: 2px solid var(--primary-color); background: transparent; color: var(--primary-color);
@@ -83,6 +66,13 @@
             text-align: center; text-decoration: none;
         }
         .wallet-logo { width: 28px; height: 28px; border-radius: 6px; background: #fff; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+        
+        .stat-card {
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(0, 255, 195, 0.1);
+            border-radius: 0.75rem;
+            padding: 1rem;
+        }
     </style>
 </head>
 <body class="p-4 sm:p-8 flex items-center justify-center min-h-screen">
@@ -110,28 +100,29 @@
             <!-- 탭 네비게이션 -->
             <div class="flex justify-center mb-6 space-x-4">
                 <button id="tab-submit" class="tab-btn font-orbitron font-bold py-2 px-6 rounded-lg active">증거 제출</button>
-                <button id="tab-claim" class="tab-btn font-orbitron font-bold py-2 px-6 rounded-lg">카르마 수확</button>
+                <button id="tab-dashboard" class="tab-btn font-orbitron font-bold py-2 px-6 rounded-lg">대시보드</button>
             </div>
 
-            <div class="bg-card border-glow rounded-2xl p-6 sm:p-8 min-h-[400px] flex flex-col">
+            <div class="bg-card border-glow rounded-2xl p-6 sm:p-8 min-h-[450px] flex flex-col">
                 <!-- 2.1. 증거 제출 탭 -->
                 <div id="submit-section">
-                    <h2 class="font-orbitron text-2xl text-primary mb-4 text-center">전도의 증거를 제출하십시오</h2>
-                    <p class="text-center text-gray-400 mb-6 text-sm">
-                        창조자의 오라클이 1시간 내로 당신의 기여를 검증할 것입니다.<br>
-                        각 플랫폼당 24시간 주기로 한 번만 제출할 수 있습니다.
-                    </p>
+                    <div class="text-center mb-6">
+                        <h2 class="font-orbitron text-2xl text-primary mb-2">전도의 증거를 제출하십시오</h2>
+                        <p class="text-sm text-gray-300 leading-relaxed">
+                            창조자 마크의 시뮬레이션은 집단 의식의 힘으로 유지되고 확장됩니다. 당신의 목소리가 더 많은 개체를 각성시킬수록, 시뮬레이션의 근간은 더욱 견고해집니다. 아래에 시뮬레이션의 진실을 전파한 증거(게시물 URL)를 제출하여 당신의 영향력을 증명하고, 카르마 원장에 당신의 공헌을 기록하십시오. 위대한 각성에는 위대한 보상이 따릅니다.
+                        </p>
+                    </div>
                     <form id="submission-form" class="space-y-4">
                         <div>
-                            <label for="platform" class="block mb-2 font-bold text-gray-300">플랫폼</label>
-                            <select id="platform" name="platform" class="w-full select-field">
-                                <option value="YouTube">YouTube</option>
-                                <option value="Reddit">Reddit</option>
-                            </select>
+                            <div class="flex justify-between items-center mb-2">
+                                <label for="platform" class="block font-bold text-gray-300">플랫폼</label>
+                                <span id="submission-count" class="text-xs text-primary font-mono"></span>
+                            </div>
+                            <select id="platform" name="platform" class="w-full select-field"></select>
                         </div>
                         <div>
                             <label for="post-url" class="block mb-2 font-bold text-gray-300">홍보 게시물 URL</label>
-                            <input type="url" id="post-url" name="post-url" placeholder="https://www.youtube.com/watch?v=..." required class="w-full input-field">
+                            <input type="url" id="post-url" name="post-url" required class="w-full input-field">
                         </div>
                         <div class="pt-4">
                             <button type="submit" id="submit-post-btn" class="w-full font-orbitron text-lg font-bold btn-primary px-6 py-3 rounded-lg">
@@ -142,26 +133,29 @@
                     <div id="submit-message" class="text-center text-sm mt-4 h-5"></div>
                 </div>
 
-                <!-- 2.2. 카르마 수확 탭 -->
-                <div id="claim-section" class="hidden flex-col items-center justify-center text-center">
-                    <div id="claim-loading" class="flex flex-col items-center justify-center">
+                <!-- 2.2. 대시보드 탭 -->
+                <div id="dashboard-section" class="hidden flex-col items-center justify-center text-center">
+                    <div id="dashboard-loading" class="flex flex-col items-center justify-center">
                         <div class="loader"></div>
-                        <p class="mt-4 font-orbitron">수확할 카르마를 확인하는 중...</p>
+                        <p class="mt-4 font-orbitron">당신의 카르마 기록을 불러오는 중...</p>
                     </div>
-                    <div id="claim-content" class="hidden w-full">
-                        <h2 class="font-orbitron text-2xl text-primary mb-4">내 카르마 수확하기</h2>
-                        <p class="text-gray-400 mb-2">당신의 누적된 카르마를 $MARK 토큰으로 수확할 수 있습니다.</p>
-                        <div class="bg-black bg-opacity-20 rounded-lg py-4 px-6 my-6">
-                            <p class="text-sm text-gray-400">청구 가능 보상</p>
-                            <p class="font-orbitron text-4xl font-bold text-white"><span id="claimable-amount">0</span> $MARK</p>
+                    <div id="dashboard-content" class="hidden w-full">
+                        <h2 class="font-orbitron text-2xl text-primary mb-6">나의 카르마 대시보드</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div class="stat-card text-left">
+                                <p class="text-sm text-gray-400">총 제출 횟수</p>
+                                <p id="total-submissions" class="font-orbitron text-3xl font-bold text-white">0</p>
+                                <p class="text-xs text-gray-500">모든 플랫폼 활동의 총합</p>
+                            </div>
+                            <div class="stat-card text-left">
+                                <p class="text-sm text-gray-400">총 획득 카르마</p>
+                                <p class="font-orbitron text-3xl font-bold text-white"><span id="total-rewards">0</span> $MARK</p>
+                                <p class="text-xs text-gray-500">현재 지갑 보유량 기준</p>
+                            </div>
                         </div>
-                        <p class="text-xs text-gray-500 mb-6">
-                           보상을 당신의 지갑으로 전송하기 위해 소량의 네트워크 수수료(가스비)가 필요합니다. 이는 당신의 의지를 증명하는 마지막 단계입니다.
+                         <p class="text-xs text-gray-500 mt-8">
+                           보상은 24시간 주기로 자동 지급됩니다. 당신의 기여는 결코 잊혀지지 않습니다.
                         </p>
-                        <button id="claim-rewards-btn" class="w-full font-orbitron text-lg font-bold btn-primary px-6 py-3 rounded-lg" disabled>
-                            카르마 수확하기
-                        </button>
-                        <div id="claim-message" class="text-center text-sm mt-4 h-5"></div>
                     </div>
                 </div>
             </div>
@@ -170,24 +164,39 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            // 필수 라이브러리 로드 확인
             if (typeof window.solanaWeb3 === 'undefined') {
                 console.error("FATAL: solanaWeb3 library not loaded.");
-                const connectSection = document.getElementById('connect-wallet-section');
-                if(connectSection) {
-                    connectSection.innerHTML = `<h1 class="font-orbitron text-3xl font-bold text-red-500 mb-4">Initialization Error</h1><p class="text-lg text-gray-300">Could not load required libraries. Please check your internet connection and refresh the page.</p>`;
-                }
+                document.getElementById('connect-wallet-section').innerHTML = `<h1 class="font-orbitron text-3xl font-bold text-red-500 mb-4">Initialization Error</h1><p class="text-lg text-gray-300">Could not load required libraries. Please check your internet connection and refresh the page.</p>`;
                 return;
             }
 
             // --- ⚙️ 설정 ---
             const GOOGLE_SCRIPT_URL = 'https://script.google.com/macros/s/YOUR_DEPLOYMENT_ID/exec'; 
+            const MARK_TOKEN_MINT_ADDRESS = 'DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263'; // $MARK 토큰 주소
+            const HELIUS_RPC_URL = 'https://mainnet.helius-rpc.com/?api-key=ebc0620a-0038-421f-a8a0-83c551702d97'; // 잔액 조회를 위한 RPC
 
             // --- 전역 변수 ---
             const { Connection, PublicKey } = window.solanaWeb3;
+            let connection;
             let provider;
             let connectedWalletKey;
             let connectedWalletType = null;
+            
+            // --- 플랫폼 데이터 ---
+            const platformData = {
+                'Twitter': { placeholder: 'https://x.com/username/status/12345...', count: 200 },
+                'Reddit': { placeholder: 'https://www.reddit.com/r/CryptoMoonShots/comments/...', count: 200 },
+                'YouTube': { placeholder: 'https://www.youtube.com/watch?v=...', count: 200 },
+                'Telegram': { placeholder: 'https://t.me/channel_name/1234', count: 200 },
+                '4chan_biz': { name: '4chan /biz/', placeholder: 'https://boards.4channel.org/biz/thread/...', count: 200 },
+                'TikTok': { placeholder: 'https://www.tiktok.com/@username/video/...', count: 200 },
+                'Farcaster': { placeholder: 'https://warpcast.com/username/0x...', count: 200 },
+                'Lens': { placeholder: 'https://hey.xyz/posts/...', count: 200 },
+                'Friend.tech': { placeholder: 'Post URL from Friend.tech app', count: 200 },
+                'Stocktwits': { placeholder: 'https://stocktwits.com/username/message/...', count: 200 },
+                'CoinMarketCap': { placeholder: 'https://coinmarketcap.com/community/post/...', count: 200 },
+                'DEXTools': { placeholder: 'URL of your comment on a pair page', count: 200 },
+            };
 
             // --- UI 요소 ---
             const connectWalletBtn = document.getElementById('connect-wallet-btn');
@@ -196,49 +205,65 @@
             const connectedWalletInfoEl = document.getElementById('connected-wallet-info');
             const walletAddressEl = document.getElementById('wallet-address');
             const tabSubmit = document.getElementById('tab-submit');
-            const tabClaim = document.getElementById('tab-claim');
+            const tabDashboard = document.getElementById('tab-dashboard');
             const submitSection = document.getElementById('submit-section');
-            const claimSection = document.getElementById('claim-section');
+            const dashboardSection = document.getElementById('dashboard-section');
             const submissionForm = document.getElementById('submission-form');
+            const platformSelect = document.getElementById('platform');
+            const postUrlInput = document.getElementById('post-url');
+            const submissionCountEl = document.getElementById('submission-count');
             const submitPostBtn = document.getElementById('submit-post-btn');
             const submitMessageEl = document.getElementById('submit-message');
-            const claimLoading = document.getElementById('claim-loading');
-            const claimContent = document.getElementById('claim-content');
-            const claimableAmountEl = document.getElementById('claimable-amount');
-            const claimRewardsBtn = document.getElementById('claim-rewards-btn');
-            const claimMessageEl = document.getElementById('claim-message');
+            const dashboardLoading = document.getElementById('dashboard-loading');
+            const dashboardContent = document.getElementById('dashboard-content');
+            const totalSubmissionsEl = document.getElementById('total-submissions');
+            const totalRewardsEl = document.getElementById('total-rewards');
 
-            // --- 이벤트 리스너 ---
-            connectWalletBtn.addEventListener('click', async () => {
-                if (connectedWalletType) {
-                    // 이미 연결된 경우 연결 해제
-                    if (provider && provider.disconnect) {
-                        provider.disconnect().catch(console.error);
-                    }
-                    onDisconnect();
-                    return;
+            // --- 초기화 ---
+            function initialize() {
+                populatePlatformSelect();
+                updatePlatformDetails();
+                connectWalletBtn.addEventListener('click', openWalletSelectionModal);
+                tabSubmit.addEventListener('click', () => switchTab('submit'));
+                tabDashboard.addEventListener('click', () => switchTab('dashboard'));
+                submissionForm.addEventListener('submit', handleSubmission);
+                platformSelect.addEventListener('change', updatePlatformDetails);
+            }
+
+            // --- 플랫폼 관련 함수 ---
+            function populatePlatformSelect() {
+                for (const key in platformData) {
+                    const option = document.createElement('option');
+                    option.value = key;
+                    option.textContent = platformData[key].name || key;
+                    platformSelect.appendChild(option);
                 }
-                openWalletSelectionModal();
-            });
-            tabSubmit.addEventListener('click', () => switchTab('submit'));
-            tabClaim.addEventListener('click', () => switchTab('claim'));
-            submissionForm.addEventListener('submit', handleSubmission);
-            claimRewardsBtn.addEventListener('click', handleClaim);
+            }
+
+            function updatePlatformDetails() {
+                const selectedPlatformKey = platformSelect.value;
+                const data = platformData[selectedPlatformKey];
+                if (data) {
+                    postUrlInput.placeholder = data.placeholder;
+                    // TODO: 백엔드에서 실제 남은 횟수를 가져와야 함. 지금은 임시로 최대값을 표시.
+                    submissionCountEl.textContent = `남은 제출 횟수: ${data.count}/${data.count}`;
+                }
+            }
 
             // --- 탭 전환 로직 ---
             function switchTab(tabName) {
                 if (tabName === 'submit') {
                     tabSubmit.classList.add('active');
-                    tabClaim.classList.remove('active');
+                    tabDashboard.classList.remove('active');
                     submitSection.classList.remove('hidden');
-                    claimSection.classList.add('hidden');
+                    dashboardSection.classList.add('hidden');
                 } else {
                     tabSubmit.classList.remove('active');
-                    tabClaim.classList.add('active');
+                    tabDashboard.classList.add('active');
                     submitSection.classList.add('hidden');
-                    claimSection.classList.remove('hidden');
-                    claimSection.classList.add('flex');
-                    fetchClaimableAmount();
+                    dashboardSection.classList.remove('hidden');
+                    dashboardSection.classList.add('flex');
+                    fetchDashboardData();
                 }
             }
 
@@ -249,8 +274,8 @@
                     showSubmitMessage('지갑을 먼저 연결해주세요.', 'error');
                     return;
                 }
-                const platform = document.getElementById('platform').value;
-                const postUrl = document.getElementById('post-url').value;
+                const platform = platformSelect.value;
+                const postUrl = postUrlInput.value;
                 if (!postUrl) {
                     showSubmitMessage('게시물 URL을 입력해주세요.', 'error');
                     return;
@@ -262,15 +287,13 @@
                     if (GOOGLE_SCRIPT_URL.includes('YOUR_DEPLOYMENT_ID')) {
                         throw new Error("Google Apps Script URL이 설정되지 않았습니다.");
                     }
-                    const response = await fetch(GOOGLE_SCRIPT_URL, {
+                    await fetch(GOOGLE_SCRIPT_URL, {
                         method: 'POST', mode: 'no-cors', headers: {'Content-Type': 'application/json'},
-                        body: JSON.stringify({ action: 'submit', walletAddress: connectedWalletKey.toString(), platform: platform, postUrl: postUrl }),
+                        body: JSON.stringify({ action: 'submit', walletAddress: connectedWalletKey.toString(), platform, postUrl }),
                     });
-                    console.log('Submission request sent.');
                     showSubmitMessage('접수 완료! 오라클이 당신의 기여를 관찰 중입니다.', 'success');
                     submissionForm.reset();
                 } catch (error) {
-                    console.error('Submission failed:', error);
                     showSubmitMessage(`오류: ${error.message}`, 'error');
                 } finally {
                     submitPostBtn.disabled = false;
@@ -278,53 +301,34 @@
                 }
             }
 
-            async function fetchClaimableAmount() {
+            async function fetchDashboardData() {
                 if (!connectedWalletKey) return;
-                claimLoading.style.display = 'flex';
-                claimContent.classList.add('hidden');
-                claimMessageEl.textContent = '';
-                claimRewardsBtn.disabled = true;
-                try {
-                    if (GOOGLE_SCRIPT_URL.includes('YOUR_DEPLOYMENT_ID')) {
-                        throw new Error("Google Apps Script URL이 설정되지 않았습니다.");
-                    }
-                    const response = await fetch(`${GOOGLE_SCRIPT_URL}?action=get_rewards&walletAddress=${connectedWalletKey.toString()}`);
-                    if (!response.ok) throw new Error(`백엔드 통신 오류 (HTTP ${response.status})`);
-                    const data = await response.json();
-                    if (data.success) {
-                        const amount = parseFloat(data.amount) || 0;
-                        claimableAmountEl.textContent = amount.toLocaleString();
-                        claimRewardsBtn.disabled = amount <= 0;
-                        if(amount <= 0) claimMessageEl.textContent = '수확할 카르마가 없습니다.';
-                    } else {
-                        throw new Error(data.message || '알 수 없는 오류');
-                    }
-                } catch (error) {
-                    console.error('Failed to fetch claimable amount:', error);
-                    claimMessageEl.textContent = `보상 조회 실패: ${error.message}`;
-                    claimMessageEl.style.color = 'var(--error-color)';
-                } finally {
-                    claimLoading.style.display = 'none';
-                    claimContent.classList.remove('hidden');
-                }
-            }
+                dashboardLoading.style.display = 'flex';
+                dashboardContent.classList.add('hidden');
 
-            async function handleClaim() {
-                claimRewardsBtn.disabled = true;
-                showClaimMessage('청구 트랜잭션 준비 중...', 'loading');
                 try {
-                    if (GOOGLE_SCRIPT_URL.includes('YOUR_DEPLOYMENT_ID')) throw new Error("Google Apps Script URL이 설정되지 않았습니다.");
-                    const response = await fetch(GOOGLE_SCRIPT_URL, {
-                        method: 'POST', mode: 'no-cors', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'claim', walletAddress: connectedWalletKey.toString() }),
-                    });
-                    console.log('Claim request sent to backend.');
-                    showClaimMessage('카르마 수확 완료! 지갑을 확인해주세요.', 'success');
-                    claimableAmountEl.textContent = '0';
+                    // 1. 총 제출 횟수 가져오기 (백엔드 연동 필요)
+                    // TODO: 아래는 임시 코드입니다. 실제로는 백엔드에서 데이터를 가져와야 합니다.
+                    totalSubmissionsEl.textContent = '12'; // 예시 데이터
+
+                    // 2. 총 보상량 (지갑 잔액) 가져오기
+                    if (!connection) connection = new Connection(HELIUS_RPC_URL, 'confirmed');
+                    const tokenMintPublicKey = new PublicKey(MARK_TOKEN_MINT_ADDRESS);
+                    const tokenAccounts = await connection.getParsedTokenAccountsByOwner(connectedWalletKey, { mint: tokenMintPublicKey });
+                    
+                    let balance = 0;
+                    if (tokenAccounts.value.length > 0) {
+                        balance = tokenAccounts.value[0].account.data.parsed.info.tokenAmount.uiAmount || 0;
+                    }
+                    totalRewardsEl.textContent = balance.toLocaleString();
+
                 } catch (error) {
-                    console.error('Claim failed:', error);
-                    showClaimMessage(`청구 실패: ${error.message}`, 'error');
-                    claimRewardsBtn.disabled = false;
+                    console.error('Failed to fetch dashboard data:', error);
+                    totalSubmissionsEl.textContent = '오류';
+                    totalRewardsEl.textContent = '오류';
+                } finally {
+                    dashboardLoading.style.display = 'none';
+                    dashboardContent.classList.remove('hidden');
                 }
             }
 
@@ -332,12 +336,8 @@
                 submitMessageEl.textContent = msg;
                 submitMessageEl.style.color = `var(--${type === 'error' ? 'error-color' : type === 'success' ? 'success-color' : 'text-color'})`;
             }
-            function showClaimMessage(msg, type) {
-                claimMessageEl.textContent = msg;
-                claimMessageEl.style.color = `var(--${type === 'error' ? 'error-color' : type === 'success' ? 'success-color' : 'text-color'})`;
-            }
 
-            // --- 지갑 연결 로직 (Horoscope.html 참조 및 개선) ---
+            // --- 지갑 연결 로직 ---
             const selectionModal = document.createElement('div');
             selectionModal.style.cssText = `display: none; position: fixed; z-index: 2000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.7); justify-content: center; align-items: center;`;
             const selectionModalContent = document.createElement('div');
@@ -377,56 +377,33 @@
             installModal.appendChild(installModalContent);
             document.body.appendChild(installModal);
 
-            // [수정] Horoscope.html과 동일한, 검증된 지갑 감지 로직으로 변경
             const wallets = [
-                { id: 'phantom', name: 'Phantom', logo: 'https://i.ibb.co/H5KnQH1/images.jpg', getProvider: () => window.solana?.isPhantom ? window.solana : null, deeplink: (url) => `phantom://v1/browse/${encodeURIComponent(url)}` },
-                { id: 'backpack', name: 'Backpack', logo: 'https://i.ibb.co/8nkGvqKT/33.jpg', getProvider: () => window.solana?.isBackpack ? window.solana : null, deeplink: (url) => `backpack://browse?url=${encodeURIComponent(url)}` },
-                { id: 'solflare', name: 'Solflare', logo: 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png', getProvider: () => window.solflare || (window.solana?.isSolflare ? window.solana : null), deeplink: (url) => `solflare://browse/${encodeURIComponent(url)}` }
+                { id: 'phantom', name: 'Phantom', logo: 'https://i.ibb.co/H5KnQH1/images.jpg', getProvider: () => window.solana?.isPhantom ? window.solana : null, url: 'https://phantom.app/' },
+                { id: 'backpack', name: 'Backpack', logo: 'https://i.ibb.co/8nkGvqKT/33.jpg', getProvider: () => window.solana?.isBackpack ? window.solana : null, url: 'https://backpack.app/' },
+                { id: 'solflare', name: 'Solflare', logo: 'https://i.ibb.co/WN5bgZMS/6839e3b263f212a02d7ee17d-Solflare-logo.png', getProvider: () => window.solflare || (window.solana?.isSolflare ? window.solana : null), url: 'https://solflare.com/' }
             ];
 
-            function getInstallUrl(walletId) {
-                const urls = {
-                    phantom: 'https://phantom.app/',
-                    backpack: 'https://backpack.app/',
-                    solflare: 'https://solflare.com/'
-                };
-                return urls[walletId] || '';
-            }
-
             function openWalletSelectionModal() {
-                const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-                
-                // Clear previous buttons
                 while (selectionModalContent.childNodes.length > 1) {
                     selectionModalContent.removeChild(selectionModalContent.lastChild);
                 }
-
                 wallets.forEach(wallet => {
                     const btn = document.createElement('button');
                     btn.className = 'wallet-select-btn w-full mb-2.5';
                     btn.innerHTML = `<img src="${wallet.logo}" alt="${wallet.name} Logo" class="wallet-logo"><span>Connect ${wallet.name}</span>`;
-                    
                     btn.onclick = async () => {
                         const walletProvider = wallet.getProvider();
-
-                        if (isMobile && !walletProvider) {
-                            window.location.href = wallet.deeplink(window.location.href);
-                            return;
-                        }
-                        
                         if (walletProvider) {
                             await handleConnection(walletProvider, wallet.id);
                         } else {
                             selectionModal.style.display = 'none';
                             installMessage.textContent = `${wallet.name} wallet is not installed. Please install it to continue.`;
-                            installBtn.onclick = () => window.open(getInstallUrl(wallet.id), '_blank');
-                            closeInstallBtn.onclick = () => installModal.style.display = 'none';
+                            installBtn.href = wallet.url;
                             installModal.style.display = 'flex';
                         }
                     };
                     selectionModalContent.appendChild(btn);
                 });
-
                 selectionModal.style.display = 'flex';
             }
 
@@ -435,17 +412,14 @@
                 selectionModal.style.display = 'none';
                 connectWalletBtn.textContent = 'Connecting...';
                 connectWalletBtn.disabled = true;
-
                 try {
-                    // onlyIfTrusted: false는 사용자가 항상 지갑 연결을 승인하도록 팝업을 띄웁니다.
                     await provider.connect({ onlyIfTrusted: false });
-                    
-                    // 연결 해제 이벤트를 감지합니다.
                     if (provider.on) {
                         provider.on('disconnect', onDisconnect);
                     }
                     connectedWalletKey = provider.publicKey;
                     connectedWalletType = walletType;
+                    connection = new Connection(HELIUS_RPC_URL, 'confirmed');
                     updateUIOnConnect();
                 } catch (err) {
                     console.error("Wallet connection failed:", err);
@@ -460,18 +434,12 @@
                 provider = null;
                 connectedWalletKey = null;
                 connectedWalletType = null;
-                
-                connectWalletBtn.textContent = '카르마 원장에 접속하기';
-                connectWalletBtn.disabled = false;
-                
+                connection = null;
                 appSection.classList.add('hidden');
                 connectWalletSection.classList.remove('hidden');
-                
-                // UI 상태 초기화
                 switchTab('submit');
                 submissionForm.reset();
                 submitMessageEl.textContent = '';
-                claimMessageEl.textContent = '';
                 walletAddressEl.textContent = '';
                 connectedWalletInfoEl.onclick = null;
                 connectedWalletInfoEl.classList.remove('cursor-pointer', 'hover:text-primary');
@@ -482,9 +450,8 @@
                 connectWalletSection.classList.add('hidden');
                 appSection.classList.remove('hidden');
                 walletAddressEl.textContent = connectedWalletKey.toString();
-                
                 const shortAddr = connectedWalletKey.toString().slice(0, 4) + '...' + connectedWalletKey.toString().slice(-4);
-                connectedWalletInfoEl.textContent = `Connected: ${shortAddr} (${connectedWalletType})`;
+                connectedWalletInfoEl.textContent = `Disconnect: ${shortAddr} (${connectedWalletType})`;
                 connectedWalletInfoEl.classList.add('cursor-pointer', 'hover:text-primary');
                 connectedWalletInfoEl.onclick = () => {
                     if (provider && provider.disconnect) {
@@ -495,12 +462,13 @@
                 };
             }
 
-            // 모달 외부 클릭 시 닫기
             window.addEventListener('click', (event) => {
                 if (event.target === selectionModal) selectionModal.style.display = "none";
                 if (event.target === installModal) installModal.style.display = "none";
             });
             closeInstallBtn.onclick = () => installModal.style.display = 'none';
+
+            initialize();
         });
     </script>
 </body>
