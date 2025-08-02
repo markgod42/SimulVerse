@@ -202,98 +202,11 @@
     <script src="https://terminal.jup.ag/main-v2.js" data-preload></script>
 
     <script>
-        // 라이브러리 로딩 상태 추적
-        let librariesLoaded = 0;
-        const totalLibraries = 6;
-        let loadTimeout;
-        
-        function checkLibrary(name, checkFn) {
-            try {
-                if (checkFn()) {
-                    librariesLoaded++;
-                    console.log(`✅ ${name} 로드 완료`);
-                } else {
-                    console.warn(`⚠️ ${name} 로드 실패`);
-                }
-            } catch (e) {
-                console.error(`❌ ${name} 로드 오류:`, e);
-            }
-        }
-
-        function initializeApp() {
-            console.log('🚀 애플리케이션 초기화 시작...');
+        // 즉시 애플리케이션 시작
+        function startApp() {
+            console.log('🚀 애플리케이션 시작...');
             
-            // 10초 후에도 로딩이 안되면 강제로 실행
-            loadTimeout = setTimeout(() => {
-                console.log('⏰ 타임아웃: 강제로 애플리케이션 시작');
-                runApplication();
-            }, 10000);
-            
-            // 라이브러리 로딩 체크
-            checkLibrary('Buffer', () => typeof window.buffer !== 'undefined');
-            checkLibrary('Solana Web3', () => typeof window.solanaWeb3 !== 'undefined');
-            checkLibrary('SPL Token', () => typeof window.splToken !== 'undefined');
-            checkLibrary('Metaplex', () => typeof window.mplJs !== 'undefined');
-            checkLibrary('Wallet Adapter', () => typeof window.walletAdapterWallets !== 'undefined');
-            checkLibrary('Jupiter', () => typeof window.Jupiter !== 'undefined');
-
-            // 최소 2개 라이브러리만 로드되어도 실행 (더 관대한 조건)
-            if (librariesLoaded >= 2) {
-                clearTimeout(loadTimeout);
-                console.log('✅ 필수 라이브러리 로드 완료, 애플리케이션 시작');
-                runApplication();
-            } else {
-                console.log(`⚠️ 현재 ${librariesLoaded}/6 라이브러리 로드됨. 잠시 후 다시 시도...`);
-                // 3초 후 다시 체크
-                setTimeout(() => {
-                    if (librariesLoaded >= 2) {
-                        clearTimeout(loadTimeout);
-                        console.log('✅ 지연 로딩 완료, 애플리케이션 시작');
-                        runApplication();
-                    } else {
-                        console.log('⚠️ 여전히 라이브러리 로딩 중...');
-                    }
-                }, 3000);
-            }
-        }
-
-        function showLoadingError() {
-            document.body.innerHTML = `
-                <div class="min-h-screen bg-gray-900 flex items-center justify-center">
-                    <div class="text-center p-8">
-                        <h1 class="text-2xl font-bold text-red-400 mb-4">페이지 로딩 실패</h1>
-                        <p class="text-gray-300 mb-4">네트워크 연결을 확인하고 잠시 후 다시 시도해주세요.</p>
-                        <div class="space-y-2">
-                            <button onclick="location.reload()" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mr-2">
-                                페이지 새로고침
-                            </button>
-                            <button onclick="retryLoad()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-                                다시 시도
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }
-
-        function retryLoad() {
-            console.log('🔄 라이브러리 로딩 재시도...');
-            librariesLoaded = 0;
-            initializeApp();
-        }
-
-        // 페이지 로드 완료 후 초기화
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', initializeApp);
-        } else {
-            // 이미 로드된 경우
-            setTimeout(initializeApp, 100);
-        }
-
-        function runApplication() {
             try {
-                console.log('🔧 애플리케이션 초기화 중...');
-                
                 // Buffer 설정
                 if (typeof window.buffer !== 'undefined') {
                     window.Buffer = buffer.Buffer;
@@ -309,11 +222,6 @@
                 const { createSetAuthorityInstruction, AuthorityType, TOKEN_PROGRAM_ID, MINT_SIZE, createInitializeMintInstruction, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction, createMintToInstruction } = splToken;
                 const { Metaplex, keypairIdentity, bundlrStorage } = mplJs;
                 const { PhantomWalletAdapter, SolflareWalletAdapter } = walletAdapterWallets;
-
-                // 필수 라이브러리 확인 (더 관대하게)
-                if (!Connection || !Keypair || !SystemProgram) {
-                    console.warn('⚠️ Solana Web3 라이브러리가 완전히 로드되지 않았습니다. 기본 기능만 사용 가능합니다.');
-                }
 
                 // --- DOM Elements ---
                 const connectWalletBtn = document.getElementById('connect-wallet-btn');
@@ -652,8 +560,18 @@
                 
             } catch (error) {
                 console.error('❌ 애플리케이션 초기화 실패:', error);
-                showLoadingError();
+                // 에러가 발생해도 기본 UI는 표시
+                showPage('home');
+                renderKyodanList();
             }
+        }
+
+        // 페이지 로드 완료 후 즉시 시작
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', startApp);
+        } else {
+            // 이미 로드된 경우 즉시 시작
+            startApp();
         }
     </script>
 </body>
