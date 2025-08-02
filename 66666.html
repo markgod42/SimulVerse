@@ -193,377 +193,300 @@
     </div>
 
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/buffer/6.0.3/buffer.min.js"></script>
-    <script src="https://unpkg.com/@solana/web3.js@1.91.4/lib/index.iife.min.js"></script>
-    <script src="https://unpkg.com/@solana/spl-token@0.4.6/lib/index.iife.min.js"></script>
-    <script src="https://unpkg.com/@metaplex-foundation/js@0.19.5/dist/bundles/js.min.js"></script>
-    <script src="https://unpkg.com/@solana/wallet-adapter-base@0.9.23/lib/index.iife.js"></script>
-    <script src="https://unpkg.com/@solana/wallet-adapter-wallets@0.19.32/lib/index.iife.js"></script>
-    <script src="https://terminal.jup.ag/main-v2.js" data-preload></script>
-
     <script>
-        // 즉시 애플리케이션 시작
+        // 기본 애플리케이션 시작 (외부 라이브러리 없이)
         function startApp() {
-            console.log('🚀 애플리케이션 시작...');
+            console.log('🚀 기본 애플리케이션 시작...');
             
-            try {
-                // Buffer 설정
-                if (typeof window.buffer !== 'undefined') {
-                    window.Buffer = buffer.Buffer;
-                }
+            // --- DOM Elements ---
+            const connectWalletBtn = document.getElementById('connect-wallet-btn');
+            const disconnectWalletBtn = document.getElementById('disconnect-wallet-btn');
+            const walletInfoDiv = document.getElementById('wallet-info');
+            const walletAddressP = document.getElementById('wallet-address');
+            const launchBtn = document.getElementById('launch-btn');
+            const pages = document.querySelectorAll('.page');
+            const navLinks = document.querySelectorAll('.nav-link');
+            
+            // Modal
+            const statusModal = document.getElementById('status-modal');
+            const statusTitle = document.getElementById('status-title');
+            const statusMessage = document.getElementById('status-message');
+            const txLink = document.getElementById('tx-link');
+            const loader = document.getElementById('loader');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const successInfo = document.getElementById('success-info');
+            const newMintAddressInput = document.getElementById('new-mint-address');
+            const copyMintBtn = document.getElementById('copy-mint-btn');
+            const goToSwapBtn = document.getElementById('go-to-swap-btn');
+            const swapModal = document.getElementById('swap-modal');
+            const closeSwapModalBtn = document.getElementById('close-swap-modal-btn');
 
-                // 라이브러리 추출 (안전하게)
-                const solanaWeb3 = window.solanaWeb3 || {};
-                const splToken = window.splToken || {};
-                const mplJs = window.mplJs || {};
-                const walletAdapterWallets = window.walletAdapterWallets || {};
+            // --- Constants & State ---
+            let wallet = null;
+            
+            const kyodansData = [
+                 { name: "최후의 날 생존단", subToken: "$SURVIVE", logo: "🛡️", vision: "다가올 시뮬레이션 리셋(종말)에 대비하여, 가장 많은 $MARK를 확보하고 다음 생의 지배 계급이 되려는 현실주의자 집단입니다.", mint: "So11111111111111111111111111111111111111112"},
+                 { name: "지고의 신부단", subToken: "$WAIFU", logo: "💍", vision: "이 시뮬레이션 어딘가에 숨겨진 창조자의 '최애캐'를 찾아내어 신부로 맞이하려는 자들.", mint: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN"},
+                 { name: "만물의 가챠 교단", subToken: "$ROLL", logo: "🎰", vision: "인생은 한 번의 뽑기! 창조자의 확률 테이블을 간파하여 '천상계 SSR 등급'의 다음 생을 뽑으려는 궁극의 도박사들.", mint: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"},
+            ];
 
-                const { Connection, Keypair, SystemProgram, PublicKey, Transaction } = solanaWeb3;
-                const { createSetAuthorityInstruction, AuthorityType, TOKEN_PROGRAM_ID, MINT_SIZE, createInitializeMintInstruction, getAssociatedTokenAddress, createAssociatedTokenAccountInstruction, createMintToInstruction } = splToken;
-                const { Metaplex, keypairIdentity, bundlrStorage } = mplJs;
-                const { PhantomWalletAdapter, SolflareWalletAdapter } = walletAdapterWallets;
-
-                // --- DOM Elements ---
-                const connectWalletBtn = document.getElementById('connect-wallet-btn');
-                const disconnectWalletBtn = document.getElementById('disconnect-wallet-btn');
-                const walletInfoDiv = document.getElementById('wallet-info');
-                const walletAddressP = document.getElementById('wallet-address');
-                const launchBtn = document.getElementById('launch-btn');
-                const pages = document.querySelectorAll('.page');
-                const navLinks = document.querySelectorAll('.nav-link');
-                
-                // Modal
-                const statusModal = document.getElementById('status-modal');
-                const statusTitle = document.getElementById('status-title');
-                const statusMessage = document.getElementById('status-message');
-                const txLink = document.getElementById('tx-link');
-                const loader = document.getElementById('loader');
-                const closeModalBtn = document.getElementById('close-modal-btn');
-                const successInfo = document.getElementById('success-info');
-                const newMintAddressInput = document.getElementById('new-mint-address');
-                const copyMintBtn = document.getElementById('copy-mint-btn');
-                const goToSwapBtn = document.getElementById('go-to-swap-btn');
-                const swapModal = document.getElementById('swap-modal');
-                const closeSwapModalBtn = document.getElementById('close-swap-modal-btn');
-
-                // --- Constants & State ---
-                const RPC_URL = 'https://api.devnet.solana.com';
-                const MARK_TOKEN_MINT = 'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr'; // Devnet USDC
-                let wallet = null;
-                let connection = null;
-                let metaplex = null;
-                
-                // Connection 초기화 (안전하게)
-                if (Connection) {
-                    connection = new Connection(RPC_URL, 'confirmed');
-                }
-                
-                const kyodansData = [
-                     { name: "최후의 날 생존단", subToken: "$SURVIVE", logo: "🛡️", vision: "다가올 시뮬레이션 리셋(종말)에 대비하여, 가장 많은 $MARK를 확보하고 다음 생의 지배 계급이 되려는 현실주의자 집단입니다.", mint: "So11111111111111111111111111111111111111112"},
-                     { name: "지고의 신부단", subToken: "$WAIFU", logo: "💍", vision: "이 시뮬레이션 어딘가에 숨겨진 창조자의 '최애캐'를 찾아내어 신부로 맞이하려는 자들.", mint: "JUPyiwrYJFskUPiHa7hkeR8VUtAeFoSYbKedZNsDvCN"},
-                     { name: "만물의 가챠 교단", subToken: "$ROLL", logo: "🎰", vision: "인생은 한 번의 뽑기! 창조자의 확률 테이블을 간파하여 '천상계 SSR 등급'의 다음 생을 뽑으려는 궁극의 도박사들.", mint: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"},
-                ];
-
-                // --- Page & Tab Management ---
-                const showPage = (pageId) => {
-                    pages.forEach(page => {
-                        page.style.display = page.id === pageId ? 'block' : 'none';
-                    });
-                    navLinks.forEach(link => {
-                        link.classList.toggle('active', link.dataset.page === pageId);
-                    });
-                    window.scrollTo(0, 0);
-                }
-
-                // --- Jupiter Integration ---
-                const initializeJupiter = (subTokenMint) => {
-                    if (!wallet || !wallet.connected) {
-                        showError({ message: '주피터 거래창을 사용하려면 먼저 지갑을 연결해주세요.' });
-                        return;
-                    }
-                    if (!subTokenMint) {
-                        showError({ message: '거래할 서브 토큰의 주소를 입력해주세요.' });
-                        return;
-                    }
-                    if (!window.Jupiter) {
-                        showError({ message: '거래소 모듈을 로딩 중입니다. 잠시 후 다시 시도해주세요.' });
-                        return;
-                    }
-
-                    swapModal.style.display = 'flex';
-                    const jupiterContainer = document.getElementById('jupiter-terminal');
-                    jupiterContainer.innerHTML = '<div class="flex justify-center items-center p-8"><div class="loader"></div><p class="ml-4 text-neutral-300">거래소 로딩 중...</p></div>'; 
-                    
-                    try {
-                        window.Jupiter.init({
-                            endpoint: RPC_URL,
-                            container: jupiterContainer,
-                            formProps: {
-                                initialInputMint: MARK_TOKEN_MINT,
-                                initialOutputMint: subTokenMint,
-                            },
-                            passthroughWallet: wallet, 
-                            strictTokenList: false,
-                            onSuccess: ({ txid }) => {
-                                console.log('Swap successful:', txid);
-                                setTimeout(() => swapModal.style.display = 'none', 3000);
-                            }
-                        });
-                    } catch (e) {
-                        showError(e);
-                    }
-                }
-
-                // --- Wallet Management ---
-                async function connectWallet() {
-                    if (!PhantomWalletAdapter || !SolflareWalletAdapter) {
-                        alert('지갑 어댑터가 로드되지 않았습니다. 페이지를 새로고침해주세요.');
-                        return;
-                    }
-                    
-                    if (window.solana && window.solana.isPhantom) {
-                        wallet = new PhantomWalletAdapter();
-                    } else if (window.solflare) {
-                        wallet = new SolflareWalletAdapter();
-                    } else {
-                        alert('솔라나 지갑(Phantom 또는 Solflare)이 설치되어 있지 않습니다.');
-                        return;
-                    }
-                    
-                    wallet.on('connect', onConnect);
-                    wallet.on('disconnect', onDisconnect);
-
-                    try {
-                        await wallet.connect();
-                    } catch (error) {
-                        console.error('지갑 연결 실패:', error);
-                    }
-                }
-
-                function onConnect() {
-                    const publicKey = wallet.publicKey;
-                    connectWalletBtn.classList.add('hidden');
-                    walletInfoDiv.classList.remove('hidden');
-                    walletInfoDiv.classList.add('flex');
-                    walletAddressP.textContent = `${publicKey.toBase58().substring(0, 4)}...${publicKey.toBase58().substring(publicKey.toBase58().length - 4)}`;
-                    launchBtn.disabled = false;
-                    
-                    if (Metaplex && mplJs && connection) {
-                        metaplex = Metaplex.make(connection)
-                            .use(keypairIdentity({ publicKey: wallet.publicKey, signTransaction: wallet.signTransaction.bind(wallet) }))
-                            .use(bundlrStorage({
-                                address: 'https://devnet.bundlr.network',
-                                providerUrl: RPC_URL,
-                                timeout: 60000,
-                            }));
-                    }
-                }
-
-                async function disconnectWallet() {
-                    if (wallet) {
-                        await wallet.disconnect();
-                    }
-                }
-
-                function onDisconnect() {
-                    wallet = null;
-                    connectWalletBtn.classList.remove('hidden');
-                    walletInfoDiv.classList.add('hidden');
-                    walletAddressP.textContent = '';
-                    launchBtn.disabled = true;
-                    metaplex = null;
-                }
-
-                // --- Modal UI ---
-                function showModal(title, message) {
-                    statusTitle.textContent = title;
-                    statusMessage.textContent = message;
-                    statusModal.classList.remove('hidden');
-                    loader.classList.remove('hidden');
-                    txLink.classList.add('hidden');
-                    closeModalBtn.classList.add('hidden');
-                    successInfo.classList.add('hidden');
-                }
-
-                function updateModal(message) {
-                    statusMessage.textContent += `\n${message}`;
-                }
-                
-                function showSuccess(signature, mintAddress) {
-                    loader.classList.add('hidden');
-                    statusTitle.textContent = '성공!';
-                    statusMessage.textContent = '교단 창설이 완료되었습니다. 아래에서 토큰 주소를 확인하세요.';
-                    
-                    successInfo.classList.remove('hidden');
-                    newMintAddressInput.value = mintAddress;
-
-                    txLink.href = `https://solscan.io/tx/${signature}?cluster=devnet`;
-                    txLink.classList.remove('hidden');
-                    closeModalBtn.classList.remove('hidden');
-                }
-
-                function showError(error) {
-                    statusTitle.textContent = '오류 발생';
-                    statusMessage.textContent = error.message || '알 수 없는 오류가 발생했습니다.';
-                    loader.classList.add('hidden');
-                    successInfo.classList.add('hidden');
-                    txLink.classList.add('hidden');
-                    closeModalBtn.classList.remove('hidden');
-                    statusModal.classList.remove('hidden');
-                }
-                
-                // --- Main Launch Logic ---
-                async function handleLaunch() {
-                    if (!wallet || !wallet.connected) {
-                        showError({ message: '토큰을 생성하려면 먼저 지갑을 연결해주세요.' });
-                        return;
-                    }
-
-                    if (!connection || !Keypair || !SystemProgram) {
-                        showError({ message: '솔라나 라이브러리가 로드되지 않았습니다. 페이지를 새로고침해주세요.' });
-                        return;
-                    }
-
-                    const tokenName = document.getElementById('token-name').value;
-                    const tokenSymbol = document.getElementById('token-symbol').value;
-                    const tokenUri = document.getElementById('token-uri').value;
-                    const tokenSupply = parseFloat(document.getElementById('token-supply').value);
-                    const tokenDecimals = parseInt(document.getElementById('token-decimals').value);
-
-                    if (!tokenName || !tokenSymbol || !tokenUri || isNaN(tokenSupply) || isNaN(tokenDecimals)) {
-                        showError({ message: '토큰 정보를 모두 올바르게 입력해주세요.' });
-                        return;
-                    }
-
-                    showModal('엔진 가동 시작...', '트랜잭션을 준비합니다.');
-
-                    try {
-                        const transaction = new Transaction();
-                        const signers = [];
-                        const mintKeypair = Keypair.generate();
-                        signers.push(mintKeypair);
-
-                        updateModal('1/3: 토큰 및 메타데이터 생성 중...');
-                        const lamports = await connection.getMinimumBalanceForRentExemption(MINT_SIZE);
-
-                        transaction.add(SystemProgram.createAccount({
-                            fromPubkey: wallet.publicKey,
-                            newAccountPubkey: mintKeypair.publicKey,
-                            space: MINT_SIZE,
-                            lamports,
-                            programId: TOKEN_PROGRAM_ID,
-                        }));
-                        transaction.add(createInitializeMintInstruction(mintKeypair.publicKey, tokenDecimals, wallet.publicKey, wallet.publicKey));
-                        
-                        if (metaplex) {
-                            const { uri: metadataUri } = await metaplex.nfts().uploadMetadata({ name: tokenName, symbol: tokenSymbol, image: tokenUri });
-                            
-                            const createMetadataInstruction = metaplex.nfts().builders().create({
-                                uri: metadataUri, name: tokenName, symbol: tokenSymbol, sellerFeeBasisPoints: 0,
-                                mint: { address: mintKeypair.publicKey, authorities: [{ address: wallet.publicKey, type: 'Mint' }] },
-                                useNewMint: false,
-                            }).getInstructions()[1];
-
-                            transaction.add(createMetadataInstruction);
-                        }
-
-                        updateModal('2/3: 토큰 발행 및 권한 제거 중...');
-                        const userAta = await getAssociatedTokenAddress(mintKeypair.publicKey, wallet.publicKey);
-                        transaction.add(createAssociatedTokenAccountInstruction(wallet.publicKey, userAta, wallet.publicKey, mintKeypair.publicKey));
-                        const supply = BigInt(tokenSupply * Math.pow(10, tokenDecimals));
-                        transaction.add(createMintToInstruction(mintKeypair.publicKey, userAta, wallet.publicKey, supply));
-                        transaction.add(createSetAuthorityInstruction(mintKeypair.publicKey, wallet.publicKey, AuthorityType.MintTokens, null));
-
-                        updateModal('3/3: 지갑에서 서명을 기다리는 중...');
-                        const blockhash = await connection.getLatestBlockhash();
-                        transaction.recentBlockhash = blockhash.blockhash;
-                        transaction.feePayer = wallet.publicKey;
-                        transaction.partialSign(...signers);
-
-                        const signedTransaction = await wallet.signTransaction(transaction);
-                        const signature = await connection.sendRawTransaction(signedTransaction.serialize());
-                        
-                        updateModal('트랜잭션 확인 중...');
-                        await connection.confirmTransaction({ signature, blockhash: blockhash.blockhash, lastValidBlockHeight: blockhash.lastValidBlockHeight }, 'confirmed');
-
-                        showSuccess(signature, mintKeypair.publicKey.toBase58());
-
-                    } catch (error) {
-                        console.error(error);
-                        showError(error);
-                    }
-                }
-                
-                // --- Render Kyodans ---
-                function renderKyodanList() {
-                    const container = document.getElementById('kyodan-list');
-                    container.innerHTML = '';
-                    kyodansData.forEach(k => {
-                        const kyodanCard = document.createElement('div');
-                        kyodanCard.className = "glass-card rounded-xl p-6 flex flex-col justify-between transform hover:-translate-y-1 transition-transform duration-300";
-                        kyodanCard.innerHTML = `
-                            <div>
-                                <div class="flex items-center mb-3">
-                                    <span class="text-5xl mr-4">${k.logo}</span>
-                                    <div>
-                                        <h3 class="text-2xl font-bold text-purple-300">${k.name}</h3>
-                                        <p class="text-md font-bold text-indigo-400">${k.subToken}</p>
-                                    </div>
-                                </div>
-                                <p class="text-gray-400 text-sm mb-4 h-16 overflow-hidden">${k.vision}</p>
-                            </div>
-                            <button class="w-full mt-4 btn-primary text-white font-bold py-2 px-4 rounded-md">
-                                $MARK로 거래하기
-                            </button>
-                        `;
-                        kyodanCard.querySelector('button').addEventListener('click', () => initializeJupiter(k.mint));
-                        container.appendChild(kyodanCard);
-                    });
-                }
-
-                // --- Event Listeners ---
-                connectWalletBtn.addEventListener('click', connectWallet);
-                disconnectWalletBtn.addEventListener('click', disconnectWallet);
-                launchBtn.addEventListener('click', handleLaunch);
-                closeModalBtn.addEventListener('click', () => statusModal.classList.add('hidden'));
-                closeSwapModalBtn.addEventListener('click', () => swapModal.style.display = 'none');
-                
+            // --- Page & Tab Management ---
+            const showPage = (pageId) => {
+                pages.forEach(page => {
+                    page.style.display = page.id === pageId ? 'block' : 'none';
+                });
                 navLinks.forEach(link => {
-                    link.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        showPage(e.target.dataset.page);
-                    });
+                    link.classList.toggle('active', link.dataset.page === pageId);
                 });
-                
-                document.getElementById('home-go-genesis').addEventListener('click', () => showPage('genesis'));
-                document.getElementById('home-go-kyodan').addEventListener('click', () => showPage('kyodan'));
-
-                copyMintBtn.addEventListener('click', () => {
-                    newMintAddressInput.select();
-                    document.execCommand('copy');
-                    copyMintBtn.textContent = '복사됨!';
-                    setTimeout(() => { copyMintBtn.textContent = '복사'; }, 2000);
-                });
-
-                goToSwapBtn.addEventListener('click', () => {
-                    const newMint = newMintAddressInput.value;
-                    closeModalBtn.click();
-                    showPage('kyodan');
-                    initializeJupiter(newMint);
-                });
-                
-                // --- Initial Load ---
-                showPage('home');
-                renderKyodanList();
-                
-                console.log('✅ 애플리케이션 초기화 완료');
-                
-            } catch (error) {
-                console.error('❌ 애플리케이션 초기화 실패:', error);
-                // 에러가 발생해도 기본 UI는 표시
-                showPage('home');
-                renderKyodanList();
+                window.scrollTo(0, 0);
             }
+
+            // --- Jupiter Integration ---
+            const initializeJupiter = (subTokenMint) => {
+                if (!wallet || !wallet.connected) {
+                    showError({ message: '주피터 거래창을 사용하려면 먼저 지갑을 연결해주세요.' });
+                    return;
+                }
+                if (!subTokenMint) {
+                    showError({ message: '거래할 서브 토큰의 주소를 입력해주세요.' });
+                    return;
+                }
+                if (!window.Jupiter) {
+                    showError({ message: '거래소 모듈을 로딩 중입니다. 잠시 후 다시 시도해주세요.' });
+                    return;
+                }
+
+                swapModal.style.display = 'flex';
+                const jupiterContainer = document.getElementById('jupiter-terminal');
+                jupiterContainer.innerHTML = '<div class="flex justify-center items-center p-8"><div class="loader"></div><p class="ml-4 text-neutral-300">거래소 로딩 중...</p></div>'; 
+                
+                try {
+                    window.Jupiter.init({
+                        endpoint: 'https://api.devnet.solana.com',
+                        container: jupiterContainer,
+                        formProps: {
+                            initialInputMint: 'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr',
+                            initialOutputMint: subTokenMint,
+                        },
+                        passthroughWallet: wallet, 
+                        strictTokenList: false,
+                        onSuccess: ({ txid }) => {
+                            console.log('Swap successful:', txid);
+                            setTimeout(() => swapModal.style.display = 'none', 3000);
+                        }
+                    });
+                } catch (e) {
+                    showError(e);
+                }
+            }
+
+            // --- Wallet Management ---
+            async function connectWallet() {
+                // 기본 지갑 연결 시뮬레이션
+                if (window.solana && window.solana.isPhantom) {
+                    try {
+                        const response = await window.solana.connect();
+                        wallet = {
+                            connected: true,
+                            publicKey: response.publicKey,
+                            signTransaction: window.solana.signTransaction.bind(window.solana)
+                        };
+                        onConnect();
+                    } catch (error) {
+                        console.error('Phantom 연결 실패:', error);
+                        alert('지갑 연결에 실패했습니다.');
+                    }
+                } else if (window.solflare) {
+                    try {
+                        const response = await window.solflare.connect();
+                        wallet = {
+                            connected: true,
+                            publicKey: response.publicKey,
+                            signTransaction: window.solflare.signTransaction.bind(window.solflare)
+                        };
+                        onConnect();
+                    } catch (error) {
+                        console.error('Solflare 연결 실패:', error);
+                        alert('지갑 연결에 실패했습니다.');
+                    }
+                } else {
+                    alert('솔라나 지갑(Phantom 또는 Solflare)이 설치되어 있지 않습니다.');
+                }
+            }
+
+            function onConnect() {
+                const publicKey = wallet.publicKey;
+                connectWalletBtn.classList.add('hidden');
+                walletInfoDiv.classList.remove('hidden');
+                walletInfoDiv.classList.add('flex');
+                walletAddressP.textContent = `${publicKey.toBase58().substring(0, 4)}...${publicKey.toBase58().substring(publicKey.toBase58().length - 4)}`;
+                launchBtn.disabled = false;
+            }
+
+            async function disconnectWallet() {
+                if (wallet) {
+                    if (window.solana) {
+                        await window.solana.disconnect();
+                    } else if (window.solflare) {
+                        await window.solflare.disconnect();
+                    }
+                }
+            }
+
+            function onDisconnect() {
+                wallet = null;
+                connectWalletBtn.classList.remove('hidden');
+                walletInfoDiv.classList.add('hidden');
+                walletAddressP.textContent = '';
+                launchBtn.disabled = true;
+            }
+
+            // --- Modal UI ---
+            function showModal(title, message) {
+                statusTitle.textContent = title;
+                statusMessage.textContent = message;
+                statusModal.classList.remove('hidden');
+                loader.classList.remove('hidden');
+                txLink.classList.add('hidden');
+                closeModalBtn.classList.add('hidden');
+                successInfo.classList.add('hidden');
+            }
+
+            function updateModal(message) {
+                statusMessage.textContent += `\n${message}`;
+            }
+            
+            function showSuccess(signature, mintAddress) {
+                loader.classList.add('hidden');
+                statusTitle.textContent = '성공!';
+                statusMessage.textContent = '교단 창설이 완료되었습니다. 아래에서 토큰 주소를 확인하세요.';
+                
+                successInfo.classList.remove('hidden');
+                newMintAddressInput.value = mintAddress;
+
+                txLink.href = `https://solscan.io/tx/${signature}?cluster=devnet`;
+                txLink.classList.remove('hidden');
+                closeModalBtn.classList.remove('hidden');
+            }
+
+            function showError(error) {
+                statusTitle.textContent = '오류 발생';
+                statusMessage.textContent = error.message || '알 수 없는 오류가 발생했습니다.';
+                loader.classList.add('hidden');
+                successInfo.classList.add('hidden');
+                txLink.classList.add('hidden');
+                closeModalBtn.classList.remove('hidden');
+                statusModal.classList.remove('hidden');
+            }
+            
+            // --- Main Launch Logic ---
+            async function handleLaunch() {
+                if (!wallet || !wallet.connected) {
+                    showError({ message: '토큰을 생성하려면 먼저 지갑을 연결해주세요.' });
+                    return;
+                }
+
+                const tokenName = document.getElementById('token-name').value;
+                const tokenSymbol = document.getElementById('token-symbol').value;
+                const tokenUri = document.getElementById('token-uri').value;
+                const tokenSupply = parseFloat(document.getElementById('token-supply').value);
+                const tokenDecimals = parseInt(document.getElementById('token-decimals').value);
+
+                if (!tokenName || !tokenSymbol || !tokenUri || isNaN(tokenSupply) || isNaN(tokenDecimals)) {
+                    showError({ message: '토큰 정보를 모두 올바르게 입력해주세요.' });
+                    return;
+                }
+
+                showModal('엔진 가동 시작...', '토큰 생성 기능을 사용하려면 Solana 라이브러리가 필요합니다.\n\n현재는 데모 모드로 실행됩니다.');
+
+                // 데모 모드 - 실제 토큰 생성 대신 시뮬레이션
+                setTimeout(() => {
+                    updateModal('1/3: 토큰 정보 검증 중...');
+                    setTimeout(() => {
+                        updateModal('2/3: 메타데이터 생성 중...');
+                        setTimeout(() => {
+                            updateModal('3/3: 블록체인에 기록 중...');
+                            setTimeout(() => {
+                                // 데모용 가짜 주소 생성
+                                const fakeMintAddress = 'Demo' + Math.random().toString(36).substring(2, 15);
+                                const fakeSignature = 'Demo' + Math.random().toString(36).substring(2, 15);
+                                
+                                showSuccess(fakeSignature, fakeMintAddress);
+                            }, 2000);
+                        }, 2000);
+                    }, 2000);
+                }, 1000);
+            }
+            
+            // --- Render Kyodans ---
+            function renderKyodanList() {
+                const container = document.getElementById('kyodan-list');
+                container.innerHTML = '';
+                kyodansData.forEach(k => {
+                    const kyodanCard = document.createElement('div');
+                    kyodanCard.className = "glass-card rounded-xl p-6 flex flex-col justify-between transform hover:-translate-y-1 transition-transform duration-300";
+                    kyodanCard.innerHTML = `
+                        <div>
+                            <div class="flex items-center mb-3">
+                                <span class="text-5xl mr-4">${k.logo}</span>
+                                <div>
+                                    <h3 class="text-2xl font-bold text-purple-300">${k.name}</h3>
+                                    <p class="text-md font-bold text-indigo-400">${k.subToken}</p>
+                                </div>
+                            </div>
+                            <p class="text-gray-400 text-sm mb-4 h-16 overflow-hidden">${k.vision}</p>
+                        </div>
+                        <button class="w-full mt-4 btn-primary text-white font-bold py-2 px-4 rounded-md">
+                            $MARK로 거래하기
+                        </button>
+                    `;
+                    kyodanCard.querySelector('button').addEventListener('click', () => {
+                        if (!wallet || !wallet.connected) {
+                            alert('거래를 하려면 먼저 지갑을 연결해주세요.');
+                            return;
+                        }
+                        initializeJupiter(k.mint);
+                    });
+                    container.appendChild(kyodanCard);
+                });
+            }
+
+            // --- Event Listeners ---
+            connectWalletBtn.addEventListener('click', connectWallet);
+            disconnectWalletBtn.addEventListener('click', disconnectWallet);
+            launchBtn.addEventListener('click', handleLaunch);
+            closeModalBtn.addEventListener('click', () => statusModal.classList.add('hidden'));
+            closeSwapModalBtn.addEventListener('click', () => swapModal.style.display = 'none');
+            
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    showPage(e.target.dataset.page);
+                });
+            });
+            
+            document.getElementById('home-go-genesis').addEventListener('click', () => showPage('genesis'));
+            document.getElementById('home-go-kyodan').addEventListener('click', () => showPage('kyodan'));
+
+            copyMintBtn.addEventListener('click', () => {
+                newMintAddressInput.select();
+                document.execCommand('copy');
+                copyMintBtn.textContent = '복사됨!';
+                setTimeout(() => { copyMintBtn.textContent = '복사'; }, 2000);
+            });
+
+            goToSwapBtn.addEventListener('click', () => {
+                const newMint = newMintAddressInput.value;
+                closeModalBtn.click();
+                showPage('kyodan');
+                initializeJupiter(newMint);
+            });
+            
+            // --- Initial Load ---
+            showPage('home');
+            renderKyodanList();
+            
+            console.log('✅ 기본 애플리케이션 초기화 완료');
         }
 
         // 페이지 로드 완료 후 즉시 시작
