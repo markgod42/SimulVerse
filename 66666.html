@@ -11,6 +11,8 @@
             font-family: 'Noto Sans KR', sans-serif;
             background-color: #0a0a0a;
             color: #e5e5e5;
+            margin: 0;
+            padding: 0;
         }
         .glass-card {
             background: rgba(23, 23, 23, 0.7);
@@ -60,13 +62,46 @@
             height: 40px;
             animation: spin 1s linear infinite;
         }
-        .page { display: none; animation: fadeIn 0.8s; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .nav-link { position: relative; transition: color 0.3s; cursor: pointer; }
-        .nav-link::after { content: ''; position: absolute; width: 0; height: 2px; bottom: -4px; left: 50%; transform: translateX(-50%); background-color: #8A2BE2; transition: width 0.3s; }
-        .nav-link.active::after, .nav-link:hover::after { width: 100%; }
-        .modal { display: none; }
+        .page { 
+            display: none; 
+            animation: fadeIn 0.8s; 
+        }
+        .page.active {
+            display: block;
+        }
+        @keyframes spin { 
+            0% { transform: rotate(0deg); } 
+            100% { transform: rotate(360deg); } 
+        }
+        @keyframes fadeIn { 
+            from { opacity: 0; } 
+            to { opacity: 1; } 
+        }
+        .nav-link { 
+            position: relative; 
+            transition: color 0.3s; 
+            cursor: pointer; 
+        }
+        .nav-link::after { 
+            content: ''; 
+            position: absolute; 
+            width: 0; 
+            height: 2px; 
+            bottom: -4px; 
+            left: 50%; 
+            transform: translateX(-50%); 
+            background-color: #8A2BE2; 
+            transition: width 0.3s; 
+        }
+        .nav-link.active::after, .nav-link:hover::after { 
+            width: 100%; 
+        }
+        .modal { 
+            display: none; 
+        }
+        .modal.show {
+            display: flex;
+        }
     </style>
 </head>
 <body class="hero-bg">
@@ -76,7 +111,7 @@
         <nav class="glass-card sticky top-4 z-50 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-3 mt-4">
             <div class="flex items-center justify-between">
                 <div class="flex items-center">
-                    <a class="nav-link text-2xl font-bold text-white" data-page="home">
+                    <a class="nav-link text-2xl font-bold text-white active" data-page="home">
                         <span class="text-purple-400">Simul</span><span class="text-indigo-400">verse 2.0</span>
                     </a>
                 </div>
@@ -97,7 +132,7 @@
 
         <main>
             <!-- 홈 페이지 -->
-            <div id="home" class="page">
+            <div id="home" class="page active">
                 <section class="text-center py-20">
                     <h1 class="text-4xl md:text-6xl font-extrabold text-white leading-tight">
                         <span class="text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-600">창조자가 지켜보고 있다.</span>
@@ -192,26 +227,22 @@
         </div>
     </div>
 
-
     <script>
-        // 기본 애플리케이션 시작 (외부 라이브러리 없이)
-        function startApp() {
-            console.log('🚀 기본 애플리케이션 시작...');
+        // 간단한 애플리케이션 초기화
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 애플리케이션 시작...');
             
-            // --- DOM Elements ---
+            // DOM 요소들
+            const pages = document.querySelectorAll('.page');
+            const navLinks = document.querySelectorAll('.nav-link');
             const connectWalletBtn = document.getElementById('connect-wallet-btn');
             const disconnectWalletBtn = document.getElementById('disconnect-wallet-btn');
             const walletInfoDiv = document.getElementById('wallet-info');
             const walletAddressP = document.getElementById('wallet-address');
             const launchBtn = document.getElementById('launch-btn');
-            const pages = document.querySelectorAll('.page');
-            const navLinks = document.querySelectorAll('.nav-link');
-            
-            // Modal
             const statusModal = document.getElementById('status-modal');
             const statusTitle = document.getElementById('status-title');
             const statusMessage = document.getElementById('status-message');
-            const txLink = document.getElementById('tx-link');
             const loader = document.getElementById('loader');
             const closeModalBtn = document.getElementById('close-modal-btn');
             const successInfo = document.getElementById('success-info');
@@ -221,7 +252,6 @@
             const swapModal = document.getElementById('swap-modal');
             const closeSwapModalBtn = document.getElementById('close-swap-modal-btn');
 
-            // --- Constants & State ---
             let wallet = null;
             
             const kyodansData = [
@@ -230,59 +260,26 @@
                  { name: "만물의 가챠 교단", subToken: "$ROLL", logo: "🎰", vision: "인생은 한 번의 뽑기! 창조자의 확률 테이블을 간파하여 '천상계 SSR 등급'의 다음 생을 뽑으려는 궁극의 도박사들.", mint: "DezXAZ8z7PnrnRJjz3wXBoRgixCa6xjnB7YaB1pPB263"},
             ];
 
-            // --- Page & Tab Management ---
-            const showPage = (pageId) => {
+            // 페이지 전환 함수
+            function showPage(pageId) {
                 pages.forEach(page => {
-                    page.style.display = page.id === pageId ? 'block' : 'none';
+                    page.classList.remove('active');
                 });
                 navLinks.forEach(link => {
-                    link.classList.toggle('active', link.dataset.page === pageId);
+                    link.classList.remove('active');
                 });
+                
+                const targetPage = document.getElementById(pageId);
+                const targetLink = document.querySelector(`[data-page="${pageId}"]`);
+                
+                if (targetPage) targetPage.classList.add('active');
+                if (targetLink) targetLink.classList.add('active');
+                
                 window.scrollTo(0, 0);
             }
 
-            // --- Jupiter Integration ---
-            const initializeJupiter = (subTokenMint) => {
-                if (!wallet || !wallet.connected) {
-                    showError({ message: '주피터 거래창을 사용하려면 먼저 지갑을 연결해주세요.' });
-                    return;
-                }
-                if (!subTokenMint) {
-                    showError({ message: '거래할 서브 토큰의 주소를 입력해주세요.' });
-                    return;
-                }
-                if (!window.Jupiter) {
-                    showError({ message: '거래소 모듈을 로딩 중입니다. 잠시 후 다시 시도해주세요.' });
-                    return;
-                }
-
-                swapModal.style.display = 'flex';
-                const jupiterContainer = document.getElementById('jupiter-terminal');
-                jupiterContainer.innerHTML = '<div class="flex justify-center items-center p-8"><div class="loader"></div><p class="ml-4 text-neutral-300">거래소 로딩 중...</p></div>'; 
-                
-                try {
-                    window.Jupiter.init({
-                        endpoint: 'https://api.devnet.solana.com',
-                        container: jupiterContainer,
-                        formProps: {
-                            initialInputMint: 'Gh9ZwEmdLJ8DscKNTkTqPbNwLNNBjuSzaG9Vp2KGtKJr',
-                            initialOutputMint: subTokenMint,
-                        },
-                        passthroughWallet: wallet, 
-                        strictTokenList: false,
-                        onSuccess: ({ txid }) => {
-                            console.log('Swap successful:', txid);
-                            setTimeout(() => swapModal.style.display = 'none', 3000);
-                        }
-                    });
-                } catch (e) {
-                    showError(e);
-                }
-            }
-
-            // --- Wallet Management ---
+            // 지갑 연결 함수
             async function connectWallet() {
-                // 기본 지갑 연결 시뮬레이션
                 if (window.solana && window.solana.isPhantom) {
                     try {
                         const response = await window.solana.connect();
@@ -331,9 +328,6 @@
                         await window.solflare.disconnect();
                     }
                 }
-            }
-
-            function onDisconnect() {
                 wallet = null;
                 connectWalletBtn.classList.remove('hidden');
                 walletInfoDiv.classList.add('hidden');
@@ -341,13 +335,12 @@
                 launchBtn.disabled = true;
             }
 
-            // --- Modal UI ---
+            // 모달 함수들
             function showModal(title, message) {
                 statusTitle.textContent = title;
                 statusMessage.textContent = message;
-                statusModal.classList.remove('hidden');
+                statusModal.classList.add('show');
                 loader.classList.remove('hidden');
-                txLink.classList.add('hidden');
                 closeModalBtn.classList.add('hidden');
                 successInfo.classList.add('hidden');
             }
@@ -376,10 +369,10 @@
                 successInfo.classList.add('hidden');
                 txLink.classList.add('hidden');
                 closeModalBtn.classList.remove('hidden');
-                statusModal.classList.remove('hidden');
+                statusModal.classList.add('show');
             }
-            
-            // --- Main Launch Logic ---
+
+            // 토큰 생성 함수
             async function handleLaunch() {
                 if (!wallet || !wallet.connected) {
                     showError({ message: '토큰을 생성하려면 먼저 지갑을 연결해주세요.' });
@@ -417,8 +410,8 @@
                     }, 2000);
                 }, 1000);
             }
-            
-            // --- Render Kyodans ---
+
+            // 교단 목록 렌더링
             function renderKyodanList() {
                 const container = document.getElementById('kyodan-list');
                 container.innerHTML = '';
@@ -445,18 +438,18 @@
                             alert('거래를 하려면 먼저 지갑을 연결해주세요.');
                             return;
                         }
-                        initializeJupiter(k.mint);
+                        alert('거래 기능은 현재 개발 중입니다.');
                     });
                     container.appendChild(kyodanCard);
                 });
             }
 
-            // --- Event Listeners ---
+            // 이벤트 리스너들
             connectWalletBtn.addEventListener('click', connectWallet);
             disconnectWalletBtn.addEventListener('click', disconnectWallet);
             launchBtn.addEventListener('click', handleLaunch);
-            closeModalBtn.addEventListener('click', () => statusModal.classList.add('hidden'));
-            closeSwapModalBtn.addEventListener('click', () => swapModal.style.display = 'none');
+            closeModalBtn.addEventListener('click', () => statusModal.classList.remove('show'));
+            closeSwapModalBtn.addEventListener('click', () => swapModal.classList.remove('show'));
             
             navLinks.forEach(link => {
                 link.addEventListener('click', (e) => {
@@ -479,23 +472,14 @@
                 const newMint = newMintAddressInput.value;
                 closeModalBtn.click();
                 showPage('kyodan');
-                initializeJupiter(newMint);
+                alert('거래 기능은 현재 개발 중입니다.');
             });
             
-            // --- Initial Load ---
-            showPage('home');
+            // 초기 로드
             renderKyodanList();
             
-            console.log('✅ 기본 애플리케이션 초기화 완료');
-        }
-
-        // 페이지 로드 완료 후 즉시 시작
-        if (document.readyState === 'loading') {
-            document.addEventListener('DOMContentLoaded', startApp);
-        } else {
-            // 이미 로드된 경우 즉시 시작
-            startApp();
-        }
+            console.log('✅ 애플리케이션 초기화 완료');
+        });
     </script>
 </body>
 </html>
