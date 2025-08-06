@@ -251,6 +251,7 @@
             const goToSwapBtn = document.getElementById('go-to-swap-btn');
             const swapModal = document.getElementById('swap-modal');
             const closeSwapModalBtn = document.getElementById('close-swap-modal-btn');
+            const txLink = document.getElementById('tx-link');
 
             let wallet = null;
             
@@ -369,7 +370,6 @@
                 successInfo.classList.add('hidden');
                 txLink.classList.add('hidden');
                 closeModalBtn.classList.remove('hidden');
-                statusModal.classList.add('show');
             }
 
             // 토큰 생성 함수
